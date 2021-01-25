@@ -35,6 +35,6 @@ RUN /install/install.11202.sh "FULL"
 USER oracle
 WORKDIR ${ORACLE_BASE}
 
-HEALTHCHECK CMD-SHELL "${ORACLE_BASE}"/healthcheck.sh >/dev/null || exit 1
+HEALTHCHECK CMD "${ORACLE_BASE}"/healthcheck.sh >/dev/null || exit 1
 
 CMD exec ${ORACLE_BASE}/runDB.sh
