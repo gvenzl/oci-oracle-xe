@@ -151,11 +151,7 @@ EOF
 # Set Oracle password if it is passed on (mandatory for first database startup)
 if [ -n "${ORACLE_PASSWORD:-}" ]; then
   echo "CONTAINER: Resetting SYS and SYSTEM passwords."
-  sqlplus -s / as sysdba << EOF
-     ALTER USER SYS    IDENTIFIED BY "${ORACLE_PASSWORD}";
-     ALTER USER SYSTEM IDENTIFIED BY "${ORACLE_PASSWORD}";
-     exit;
-EOF
+  resetPassword ${ORACLE_PASSWORD}
 fi;
 
 echo ""

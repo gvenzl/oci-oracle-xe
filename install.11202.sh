@@ -248,12 +248,18 @@ chown oracle:dba "${ORACLE_BASE}/.bash_profile"
 ### Install run file ###
 ########################
 
-echo "BUILDER: install run file"
+echo "BUILDER: install run files"
 
 # Move run file to ${ORACLE_BASE}
-mv /install/runDB.sh "${ORACLE_BASE}/"
-chown oracle:dba "${ORACLE_BASE}/runDB.sh"
-chmod u+x "${ORACLE_BASE}/runDB.sh"
+mv /install/runDB.sh "${ORACLE_BASE}"/
+mv /install/resetPassword "${ORACLE_BASE}"/
+
+chown oracle:dba "${ORACLE_BASE}"/*.sh \
+                 "${ORACLE_BASE}"/resetPassword
+
+chmod u+x "${ORACLE_BASE}"/*.sh \
+          "${ORACLE_BASE}"/resetPassword
+
 
 #########################
 ####### Cleanup #########
