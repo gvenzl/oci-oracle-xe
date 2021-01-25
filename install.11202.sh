@@ -86,7 +86,7 @@ echo "BUILDER: configuring database"
 echo "BUILDER: post config database steps"
 
 # Perform further Database setup operations
-su -p oracle -c "sqlplus -s / as sysdba << EOF
+su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Enable remote HTTP access
    EXEC DBMS_XDB.SETLISTENERLOCALACCESS(FALSE);
       
@@ -107,15 +107,16 @@ su -p oracle -c "sqlplus -s / as sysdba << EOF
    ALTER DATABASE DROP LOGFILE GROUP 4;
   
    -- Set fast recovery area inside oradata folder
-   HOST mkdir '${ORACLE_BASE}'/oradata/'${ORACLE_SID}'/fast_recovery_area
+   HOST mkdir "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/fast_recovery_area
    ALTER SYSTEM SET DB_RECOVERY_FILE_DEST = '${ORACLE_BASE}/oradata/${ORACLE_SID}/fast_recovery_area';
-   HOST rm -r ${ORACLE_BASE}/fast_recovery_area
+   HOST rm -r "${ORACLE_BASE}"/fast_recovery_area
    
-   -- Enable shared server
-   --TODO
+   -- Setup healthcheck user
+   CREATE USER OPS\$ORACLE IDENTIFIED EXTERNALLY;
+   GRANT CONNECT, SELECT_CATALOG_ROLE TO OPS\$ORACLE;
 
    exit;
-EOF"
+EOF
 
 # Manual redo logs aren't deleted automatically (REDO GROUP 3 and 4 above)
 # Need to be deleted manually
@@ -125,12 +126,12 @@ rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo04.log
 
 # If not building the FULL image, remove and shrink additional components
 if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
-  su -p oracle -c "sqlplus -s / as sysdba << EOF
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
      -- Remove APEX
      @${ORACLE_HOME}/apex/apxremov.sql
      
      exit;
-EOF"
+EOF
 
   #TODO
   # Uninstall components
@@ -144,7 +145,7 @@ EOF"
   UNDO_SIZE=155
   USERS_SIZE=$([[ "${BUILD_MODE}" == "SLIM" ]] && echo "1" || echo "10")
  
-  su -p oracle -c "sqlplus -s / as sysdba << EOF
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/XE/sysaux.dbf' RESIZE ${SYSAUX_SIZE}M;
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/XE/sysaux.dbf'
      AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
@@ -160,19 +161,20 @@ EOF"
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/XE/users.dbf' RESIZE ${USERS_SIZE}M;
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/XE/users.dbf'
      AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+     
      exit;
-EOF"
+EOF
 
 fi;
 
 echo "BUILDER: graceful database shutdown"
 
 # Shutdown database gracefully (listener is not yet running)
-su -p oracle -c "sqlplus -s / as sysdba << EOF
+su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Shutdown database gracefully
    shutdown immediate;
    exit;
-EOF"
+EOF
 
 # create or replace directory XMLDIR as '${ORACLE_HOME}/rdbms/xml';
 
@@ -238,9 +240,9 @@ echo "BUILDER: creating .bash_profile"
 # Create .bash_profile for oracle user
 echo \
 "export ORACLE_BASE=${ORACLE_BASE}
-export ORACLE_HOME=/\${ORACLE_BASE}/product/11.2.0/xe
+export ORACLE_HOME=\${ORACLE_BASE}/product/11.2.0/xe
 export ORACLE_SID=XE
-export PATH=\${PATH}:\${ORACLE_HOME}/bin
+export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
 " >> "${ORACLE_BASE}/.bash_profile"
 chown oracle:dba "${ORACLE_BASE}/.bash_profile"
 
@@ -248,10 +250,10 @@ chown oracle:dba "${ORACLE_BASE}/.bash_profile"
 ### Install run file ###
 ########################
 
-echo "BUILDER: install run files"
+echo "BUILDER: install operational files"
 
-# Move run file to ${ORACLE_BASE}
-mv /install/runDB.sh "${ORACLE_BASE}"/
+# Move operational files to ${ORACLE_BASE}
+mv /install/*.sh "${ORACLE_BASE}"/
 mv /install/resetPassword "${ORACLE_BASE}"/
 
 chown oracle:dba "${ORACLE_BASE}"/*.sh \
