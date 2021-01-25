@@ -28,11 +28,12 @@ set -Eeuo pipefail
 function stop_database() {
    echo "CONTAINER: shutdown request received."
    echo "CONTAINER: shutting down database!"
+
+   lsnrctl stop
    sqlplus -s / as sysdba <<EOF
       shutdown immediate;
       exit;
 EOF
-   lsnrctl stop
    echo "CONTAINER: stopping container."
 }
 
@@ -47,7 +48,7 @@ function setup_env_vars() {
     # Password is mandatory for first container start
     if [ -z "${ORACLE_PASSWORD:-}" ]; then
       echo "Oracle Database password has to be specified at first database startup."
-      echo "Please specify a database password via the \$ORACLE_PASSWORD environment variable, for example, via '-e ORACLE_PASSWORD=password'."
+      echo "Please specify a database password via the \$ORACLE_PASSWORD environment variable, for example, via '-e ORACLE_PASSWORD=<password>'."
       exit 1;
     fi;
   fi;
