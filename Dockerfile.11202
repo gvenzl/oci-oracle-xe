@@ -1,11 +1,24 @@
 #
 # Since: January, 2021
 # Author: gvenzl
-# Name: Dockerfile.11202.full
-# Description: Dockerfile to build the full Oracle DB XE 11.2.0.2 as it comes.
-#              No functionality is removed, just log files, etc. cleaned up.
-#              Additional required packages, such as gcc and make are installed
+# Name: Dockerfile.11202
+# Description: Dockerfile to build Oracle DB XE 11.2.0.2.
+#              The Dockerfile supports building different flavors of images.
+#              These flavors can be controlled via the build argument "BUILD_MODE" which
+#              supports three modes, as follows:
+#
+#    FULL:     No database functionality is removed, just log and trace files from the
+#              database installation  itself.
+#              Additional required packages, such as 'gcc' and 'make' are installed
 #              (needed for native PL/SQL execution, etc.)
+#
+#    NORMAL:   Following functionalities have been removed:
+#              * gcc & make (needed for native PL/SQL execution, etc.)
+#              * APEX
+#
+#    SLIM:     Following functionalities have been removed:
+#              * Everything that has been removed in the NORMAL image, plus:
+#              * Oracle Text
 #
 # Copyright 2021 Gerald Venzl
 #
@@ -23,6 +36,8 @@
 
 FROM centos:centos8
 
+ARG BUILD_MODE
+
 ENV ORACLE_BASE=/u01/app/oracle \
     ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe \
     ORACLE_SID=XE \
@@ -30,7 +45,7 @@ ENV ORACLE_BASE=/u01/app/oracle \
     
 COPY oracle-xe-11.2.0-1.0.x86_64.rpm xe.11202.rsp install.11202.sh runDB.sh resetPassword healthcheck.sh /install/
 
-RUN /install/install.11202.sh "FULL"
+RUN /install/install.11202.sh "${BUILD_MODE}"
     
 USER oracle
 WORKDIR ${ORACLE_BASE}
