@@ -11,6 +11,8 @@
 #              database installation  itself.
 #              Additional required packages, such as 'gcc' and 'make' are installed
 #              (needed for native PL/SQL execution, etc.)
+#              Database configuration is as per default installation, except for the
+#              location of the fast_recovery_area and redo logs.
 #
 #    NORMAL:   Following functionalities have been removed:
 #              * gcc & make (needed for native PL/SQL execution, etc.)
