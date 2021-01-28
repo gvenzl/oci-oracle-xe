@@ -45,12 +45,15 @@ fi;
 
 echo "BUILDER: installing additional packages"
 
+# Required for install procedures
+microdnf -y install bc procps-ng util-linux
+
 # Install required system packages
-dnf -y install libaio libnsl bc
+microdnf -y install libaio libnsl
 
 # Install GCC and other packages for full installation
 if [ "${BUILD_MODE}" == "FULL" ]; then
-   dnf -y install glibc make binutils gcc
+   microdnf -y install glibc make binutils gcc
 fi;
 
 # Fake 2 GB swap configuration
@@ -327,11 +330,11 @@ if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   
   # Remove components from ORACLE_HOME
   if [ "${BUILD_MODE}" == "SLIM" ]; then
-    dnf -y remove bc
+    microdnf -y remove bc procps-ng util-linux
     #TODO
   fi;
 
 fi;
 
 # Remove dnf cache
-dnf clean all
+microdnf clean all
