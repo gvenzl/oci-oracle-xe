@@ -30,12 +30,17 @@ BUILD_MODE=${1:-"NORMAL"}
 echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 
 # Set data file sizes
+SYSAUX_SIZE=610
+TEMP_SIZE=2
+UNDO_SIZE=155
 if [ "${BUILD_MODE}" == "FULL" ]; then
    REDO_SIZE=50
 elif [ "${BUILD_MODE}" == "NORMAL" ]; then
    REDO_SIZE=20
+   USERS_SIZE=10
 elif [ "${BUILD_MODE}" == "SLIM" ]; then
    REDO_SIZE=10
+   USERS_SIZE=1
 fi;
 
 echo "BUILDER: installing additional packages"
@@ -118,18 +123,26 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    exit;
 EOF
 
-# Manual redo logs aren't deleted automatically (REDO GROUP 3 and 4 above)
+# Non-managed (OMF) redo logs aren't deleted automatically (REDO GROUP 3 and 4 above)
 # Need to be deleted manually
 
 rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo03.log
 rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo04.log
 
+###################################
+######## FULL INSTALL DONE ########
+###################################
+
 # If not building the FULL image, remove and shrink additional components
 if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Disable password profile checks
+     ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED PASSWORD_LIFE_TIME UNLIMITED;
+
      -- Remove APEX
      @${ORACLE_HOME}/apex/apxremov.sql
-     
+
      exit;
 EOF
 
@@ -140,10 +153,6 @@ EOF
 
   #TODO!!!
   # Shrink datafiles
-  SYSAUX_SIZE=610
-  TEMP_SIZE=2
-  UNDO_SIZE=155
-  USERS_SIZE=$([[ "${BUILD_MODE}" == "SLIM" ]] && echo "1" || echo "10")
  
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/XE/sysaux.dbf' RESIZE ${SYSAUX_SIZE}M;
