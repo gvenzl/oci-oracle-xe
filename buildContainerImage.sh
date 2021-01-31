@@ -85,8 +85,7 @@ done;
 # Checking SHASUM
 
 SHASUM_RET=$(shasum -a 256 oracle-xe*.rpm)
-if [ "${VERSION}" == "11.2.0.2" ] && [ "${SHASUM_RET%% *}" != "6629c8f014402fbc9db844421a6a0d2c71580838f4ac0e8df6659b62bb905268" ] ||
-   [ "${VERSION}" == "18.4.0" ] && [ "${SHASUM_RET%% *}" != ""  ]; then
+if [ "${VERSION}" == "11.2.0.2" ] && [ "${SHASUM_RET%% *}" != "6629c8f014402fbc9db844421a6a0d2c71580838f4ac0e8df6659b62bb905268" ]; then
   echo "BUILDER: WARNING! SHA sum of RPM does not match with what's expected!"
   echo "BUILDER: WARNING! Verify that the .rpm file is not corrupt!"
 fi;

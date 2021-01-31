@@ -30,18 +30,8 @@ BUILD_MODE=${1:-"NORMAL"}
 echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 
 # Set data file sizes
-SYSTEM_SIZE=353
-SYSAUX_SIZE=610
-TEMP_SIZE=2
-UNDO_SIZE=155
 if [ "${BUILD_MODE}" == "FULL" ]; then
    REDO_SIZE=50
-elif [ "${BUILD_MODE}" == "NORMAL" ]; then
-   REDO_SIZE=20
-   USERS_SIZE=10
-elif [ "${BUILD_MODE}" == "SLIM" ]; then
-   REDO_SIZE=10
-   USERS_SIZE=2
 fi;
 
 echo "BUILDER: installing additional packages"
@@ -72,23 +62,6 @@ rpm -iv /install/oracle-xe-11.2.0-1.0.x86_64.rpm
 
 # Remove fake 2 GB swap configuration
 unset -f cat free
-
-# Change installation directory to /opt/oracle
-# Move $ORACLE_BASE under the new $ORACLE_BASE parent directory (i.e. /opt/ for /opt/oracle)
-#mv /u01/app/oracle "${ORACLE_BASE%%/oracle}"
-#chown -R oracle:dba /u01
-# Symlink /u01/app/oracle --> /opt/oracle
-# This is so that the hard coded shared libraries paths in the binaries (sqlplus, etc.) can be resolved (check 'ldd sqlplus')
-#ln -s "${ORACLE_BASE}" /u01/app/
-# Replace absolute path with $ORACLE_BASE variable for /etc/init.d/oracle-xe (used to configure DB later on)
-#sed -i "s|/u01/app/oracle|\${ORACLE_BASE}|g" /etc/init.d/oracle-xe
-# SQL*Plus and other files (.ora, etc) don't do variable expansion, replace absolute path /u01/app/oracle with value of $ORACLE_BASE
-#for file in $(grep -rIl "/u01/app/oracle" "${ORACLE_HOME}"); do
-#  sed -i "s|/u01/app/oracle|${ORACLE_BASE}|g" "${file}"
-#done;
-# Oracle DB directories need to be recreated:
-#DATA_PUMP_DIR	/u01/app/oracle/admin/XE/dpdump/
-#XMLDIR	/u01/app/oracle/product/11.2.0/xe/rdbms/xml
 
 # Remove memory_target parameter (not supported by default in containers)
 sed -i "/memory_target/d" "${ORACLE_HOME}"/config/scripts/init.ora
@@ -154,90 +127,6 @@ rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo04.log
 ######## FULL INSTALL DONE ########
 ###################################
 
-# If not building the FULL image, remove and shrink additional components
-if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
-  su -p oracle -c "sqlplus -s / as sysdba" << EOF
-
-     -- Disable password profile checks
-     ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED PASSWORD_LIFE_TIME UNLIMITED;
-
-     -- Remove APEX
-     @${ORACLE_HOME}/apex/apxremov.sql
-     DROP PUBLIC SYNONYM HTMLDB_SYSTEM;
-     DROP PACKAGE HTMLDB_SYSTEM;
-
-     -- Remove HR schema
-     DROP USER HR cascade;
-
-     exit;
-EOF
-
-  #TODO
-  # Uninstall components
-  if [ "${BUILD_MODE}" == "SLIM" ]; then
-    su -p oracle -c "sqlplus -s / as sysdba" << EOF
-
-    -- Remove XDB
-    SELECT '#TODO' FROM DUAL;
-EOF
-    # Spatial
-    # Text
-    # XDB
-  fi;
-
-  # Shrink datafiles
- 
-  su -p oracle -c "sqlplus -s / as sysdba" << EOF
-
-     ---------------------------
-     -- Shrink SYSAUX tablespace
-     ---------------------------
-
-     -- Create new temporary SYSAUX tablespace
-     --CREATE TABLESPACE SYSAUX_TEMP DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux_temp.dbf'
-     --SIZE 250M AUTOEXTEND ON NEXT 1M MAXSIZE UNLIMITED;
-
-     -- Move tables to temporary SYSAUX tablespace
-     --#TODO
-     --BEGIN
-     --   FOR cur IN (SELECT  owner || '.' || table_name AS name FROM all_tables WHERE tablespace_name = 'SYSAUX') LOOP
-     --      EXECUTE IMMEDIATE 'ALTER TABLE ' || cur.name || ' MOVE TABLESPACE SYSAUX_TEMP';
-     --   END LOOP;
-     --END;
-     --/
-
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux.dbf' RESIZE ${SYSAUX_SIZE}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-     -- Shrink SYSTEM tablespace
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system.dbf' RESIZE ${SYSTEM_SIZE}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-     -- Shrink TEMP tablespace
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp.dbf' RESIZE ${TEMP_SIZE}M;
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-     -- Shrink USERS tablespace
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/users.dbf' RESIZE ${USERS_SIZE}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/users.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-     -- Shrink UNDO tablespace
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs1.dbf' RESIZE ${UNDO_SIZE}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs1.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-
-     exit;
-EOF
-
-# create or replace directory XMLDIR as '${ORACLE_HOME}/rdbms/xml';
-
-fi;
-
 echo "BUILDER: graceful database shutdown"
 
 # Shutdown database gracefully (listener is not yet running)
@@ -272,7 +161,7 @@ LISTENER =
     )
   )
 
-DEFAULT_SERVICE_LISTENER = (${ORACLE_SID})" > "${ORACLE_HOME}/network/admin/listener.ora"
+DEFAULT_SERVICE_LISTENER = (${ORACLE_SID})" > "${ORACLE_HOME}"/network/admin/listener.ora
 
 # tnsnames.ora
 echo \
@@ -298,9 +187,9 @@ EXTPROC_CONNECTION_DATA =
 " > "${ORACLE_HOME}/network/admin/tnsnames.ora"
 
 # sqlnet.ora
-echo "NAME.DIRECTORY_PATH= (EZCONNECT, TNSNAMES)" > "${ORACLE_HOME}/network/admin/sqlnet.ora"
+echo "NAME.DIRECTORY_PATH= (EZCONNECT, TNSNAMES)" > "${ORACLE_HOME}"/network/admin/sqlnet.ora
 
-chown -R oracle:dba "${ORACLE_HOME}/network/admin"
+chown -R oracle:dba "${ORACLE_HOME}"/network/admin
 
 ####################
 ### bash_profile ###
@@ -315,7 +204,7 @@ export ORACLE_HOME=\${ORACLE_BASE}/product/11.2.0/xe
 export ORACLE_SID=XE
 export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
 " >> "${ORACLE_BASE}/.bash_profile"
-chown oracle:dba "${ORACLE_BASE}/.bash_profile"
+chown oracle:dba "${ORACLE_BASE}"/.bash_profile
 
 ########################
 ### Install run file ###
@@ -367,34 +256,6 @@ rm -r "${ORACLE_BASE}"/oradiag_oracle/*
 
 # Remove Oracle DB install logs
 rm "${ORACLE_HOME}"/config/log/*
-
-if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
-
-  # Remove APEX directory
-  rm -r "${ORACLE_HOME}"/apex
-
-  # Remove JDBC drivers
-  rm -r "${ORACLE_HOME}"/jdbc
-  rm -r "${ORACLE_HOME}"/jlib
-
-  # Remove ODBC samples
-  rm -r "${ORACLE_HOME}"/odbc
-
-  # Remove components from ORACLE_HOME
-  if [ "${BUILD_MODE}" == "SLIM" ]; then
-
-    # Remove demo directory
-    rm -r "${ORACLE_HOME}"/demo
-
-    # Remove TNS samples
-    rm -r "${ORACLE_HOME}"/network/admin/samples
-
-    # Remove NLS demo
-    rm -r "${ORACLE_HOME}"/nls/demo
-
-  fi;
-
-fi;
 
 # Remove build packages
 # Unfortunately microdnf does not automatically uninstall dependencies that have been

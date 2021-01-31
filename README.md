@@ -2,12 +2,13 @@
 Oracle Database Express Edition Container / Docker images.
 
 The images are compatible with `podman` and `docker`.
+You can use `podman` or `docker` interchangeably.
 
 ## Image flavors
 
 | Flavor        | Description                                                                                 | Use cases                                                                                                    |
 | ------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| 11.2.0.2-slim | An image focussed on smallest possible image size sacrificing on additional functionality.   | Best for where small images sizes are important but advanced functionality of Oracle Database is not needed. |
+| 11.2.0.2-slim | An image focussed on smallest possible image size sacrificing on additional functionality.  | Best for where small images sizes are important but advanced functionality of Oracle Database is not needed. |
 | 11.2.0.2      | A well-balanced image between image size and functionality. Recommended for most use cases. | Recommended for most use cases.                                                                              |
 | 11.2.0.2-full | An image containing all functionality as provided by the Oracle Database installation.      | Best for extensions or customizations.                                                                       |
 
