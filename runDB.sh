@@ -149,20 +149,28 @@ sqlplus -s / as sysdba << EOF
   exit;
 EOF
 
-# Set Oracle password if it is passed on (mandatory for first database startup)
-if [ -n "${ORACLE_PASSWORD:-}" ]; then
-  echo "CONTAINER: Resetting SYS and SYSTEM passwords."
-  resetPassword ${ORACLE_PASSWORD}
+# Check whether database did come up successfully
+if healthcheck.sh; then
+  # Set Oracle password if it is passed on (mandatory for first database startup)
+  if [ -n "${ORACLE_PASSWORD:-}" ]; then
+    echo "CONTAINER: Resetting SYS and SYSTEM passwords."
+    resetPassword "${ORACLE_PASSWORD}"
+  fi;
+  echo ""
+  echo "#########################"
+  echo "DATABASE IS READY TO USE!"
+  echo "#########################"
+  echo ""
+  echo "##################################################################"
+  echo "CONTAINER: The following output is now from the alert_${ORACLE_SID}.log file:"
+  echo "##################################################################"
+else
+  echo "############################################"
+  echo "DATABASE STARTUP FAILED!"
+  echo "CHECK LOG OUTPUT ABOVE FOR MORE INFORMATION!"
+  echo "############################################"
+  exit 1;
 fi;
-
-echo ""
-echo "#########################"
-echo "DATABASE IS READY TO USE!"
-echo "#########################"
-echo ""
-echo "##################################################################"
-echo "CONTAINER: The following output is now from the alert_${ORACLE_SID}.log file:"
-echo "##################################################################"
 
 tail -f "${ORACLE_BASE}"/diag/rdbms/*/"${ORACLE_SID}"/trace/alert_"${ORACLE_SID}".log &
 childPID=$!
