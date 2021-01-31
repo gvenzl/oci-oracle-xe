@@ -272,7 +272,7 @@ LISTENER =
     )
   )
 
-DEFAULT_SERVICE_LISTENER = (${ORACLE_SID})" > "${ORACLE_HOME}/network/admin/listener.ora"
+DEFAULT_SERVICE_LISTENER = (${ORACLE_SID})" > "${ORACLE_HOME}"/network/admin/listener.ora
 
 # tnsnames.ora
 echo \
@@ -298,9 +298,9 @@ EXTPROC_CONNECTION_DATA =
 " > "${ORACLE_HOME}/network/admin/tnsnames.ora"
 
 # sqlnet.ora
-echo "NAME.DIRECTORY_PATH= (EZCONNECT, TNSNAMES)" > "${ORACLE_HOME}/network/admin/sqlnet.ora"
+echo "NAME.DIRECTORY_PATH= (EZCONNECT, TNSNAMES)" > "${ORACLE_HOME}"/network/admin/sqlnet.ora
 
-chown -R oracle:dba "${ORACLE_HOME}/network/admin"
+chown -R oracle:dba "${ORACLE_HOME}"/network/admin
 
 ####################
 ### bash_profile ###
@@ -314,8 +314,8 @@ echo \
 export ORACLE_HOME=\${ORACLE_BASE}/product/11.2.0/xe
 export ORACLE_SID=XE
 export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
-" >> "${ORACLE_BASE}/.bash_profile"
-chown oracle:dba "${ORACLE_BASE}/.bash_profile"
+" >> "${ORACLE_BASE}"/.bash_profile
+chown oracle:dba "${ORACLE_BASE}"/.bash_profile
 
 ########################
 ### Install run file ###
