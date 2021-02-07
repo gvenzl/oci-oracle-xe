@@ -22,7 +22,7 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-VERSION="11.2.0.2"
+VERSION="18.4.0"
 FLAVOR="NORMAL"
 IMAGE_NAME="gvenzl/oracle-xe"
 
@@ -83,13 +83,17 @@ while getopts "hfnsv:o:" optname; do
 done;
 
 # Checking SHASUM
+echo "BUILDER: verifying checksum of rpm file - please wait..."
 
-SHASUM_RET=$(shasum -a 256 oracle-xe*.rpm)
-if [ "${VERSION}" == "11.2.0.2" ] && [ "${SHASUM_RET%% *}" != "6629c8f014402fbc9db844421a6a0d2c71580838f4ac0e8df6659b62bb905268" ] ||
-   [ "${VERSION}" == "18.4.0" ] && [ "${SHASUM_RET%% *}" != ""  ]; then
+SHASUM_RET=$(shasum -a 256 oracle*xe*"${VERSION%%.*}"*.rpm)
+
+if [[ ( "${VERSION}" == "11.2.0.2"  &&  "${SHASUM_RET%% *}" != "6629c8f014402fbc9db844421a6a0d2c71580838f4ac0e8df6659b62bb905268" ) ||
+      ( "${VERSION}" == "18.4.0"    &&  "${SHASUM_RET%% *}" != "4df0318d72a0b97f5468b36919a23ec07533f5897b324843108e0376566d50c8" ) ]]; then
   echo "BUILDER: WARNING! SHA sum of RPM does not match with what's expected!"
   echo "BUILDER: WARNING! Verify that the .rpm file is not corrupt!"
 fi;
+
+echo "BUILDER: checksum verification done"
 
 IMAGE_NAME="${IMAGE_NAME}:${VERSION}"
 
