@@ -23,11 +23,11 @@ FROM oraclelinux:8-slim
 ARG BUILD_MODE
 
 ENV ORACLE_BASE=/opt/oracle \
-    ORACLE_HOME=/opt/oracle/product/18.4.0/xe \
+    ORACLE_HOME=/opt/oracle/product/18c/dbhomeXE \
     ORACLE_SID=XE \
-    PATH=${PATH}:/opt/oracle/product/18.4.0/xe/bin:/opt/oracle
-    
-COPY oracle-database-xe-18c-1.0-1.x86_64.rpm xe.1840.rsp install.1840.sh runDB.sh resetPassword healthcheck.sh /install/
+    PATH=${PATH}:/opt/oracle/product/18c/dbhomeXE/bin:/opt/oracle
+
+COPY oracle-database-xe-18c-1.0-1.x86_64.rpm install.1840.sh runDB.sh resetPassword healthcheck.sh /install/
 
 RUN /install/install.1840.sh "${BUILD_MODE}"
     
