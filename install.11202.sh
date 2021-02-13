@@ -132,9 +132,9 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    ALTER DATABASE DROP LOGFILE GROUP 3;
    ALTER DATABASE DROP LOGFILE GROUP 4;
 
-   -- Set fast recovery area inside oradata folder
-   HOST mkdir "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/fast_recovery_area
-   ALTER SYSTEM SET DB_RECOVERY_FILE_DEST = '${ORACLE_BASE}/oradata/${ORACLE_SID}/fast_recovery_area';
+   -- Remove fast recovery area
+   ALTER SYSTEM SET DB_RECOVERY_FILE_DEST='';
+   ALTER SYSTEM SET DB_RECOVERY_FILE_DEST_SIZE=1;
    HOST rm -r "${ORACLE_BASE}"/fast_recovery_area
 
    -- Setup healthcheck user
