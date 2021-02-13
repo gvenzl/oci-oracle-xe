@@ -61,14 +61,30 @@ echo "BUILDER: configuring database"
 
 # Set random password
 ORACLE_PASSWORD=$(date +%s | base64 | head -c 8)
-/etc/init.d/oracle-xe-18c configure <<EOF
-${ORACLE_PASSWORD}
-${ORACLE_PASSWORD}
-EOF
+(echo "${ORACLE_PASSWORD}"; echo "${ORACLE_PASSWORD}";) | /etc/init.d/oracle-xe-18c configure 
 
 echo "BUILDER: post config database steps"
 
-# TODO
+# Perform further Database setup operations
+su -p oracle -c "sqlplus -s / as sysdba" << EOF
+   -- Enable remote HTTP access
+   EXEC DBMS_XDB.SETLISTENERLOCALACCESS(FALSE);
+
+   -- Disable common_user_prefix (needed for OS authenticated user)
+   ALTER SYSTEM SET COMMON_USER_PREFIX='' SCOPE=SPFILE;
+
+   -- Disable controlfile splitbrain check
+   -- Like with every underscore parameter, DO NOT SET THIS PARAMETER EVER UNLESS YOU KNOW WHAT THE HECK YOU ARE DOING!
+   ALTER SYSTEM SET "_CONTROLFILE_SPLIT_BRAIN_CHECK"=FALSE;
+
+   SHUTDOWN IMMEDIATE;
+   STARTUP;
+
+   CREATE USER OPS\$ORACLE IDENTIFIED EXTERNALLY;
+   GRANT CONNECT, SELECT_CATALOG_ROLE TO OPS\$ORACLE;
+
+   exit;
+EOF
 
 ###################################
 ######## FULL INSTALL DONE ########
@@ -85,6 +101,37 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    exit;
 EOF
 
+####################
+### bash_profile ###
+####################
+
+echo "BUILDER: creating .bash_profile"
+
+# Create .bash_profile for oracle user
+echo \
+"export ORACLE_BASE=${ORACLE_BASE}
+export ORACLE_HOME=\${ORACLE_BASE}/product/11.2.0/xe
+export ORACLE_SID=XE
+export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
+" >> "${ORACLE_BASE}"/.bash_profile
+chown oracle:dba "${ORACLE_BASE}"/.bash_profile
+
+########################
+### Install run file ###
+########################
+
+echo "BUILDER: install operational files"
+
+# Move operational files to ${ORACLE_BASE}
+mv /install/*.sh "${ORACLE_BASE}"/
+mv /install/resetPassword "${ORACLE_BASE}"/
+
+chown oracle:dba "${ORACLE_BASE}"/*.sh \
+                 "${ORACLE_BASE}"/resetPassword
+
+chmod u+x "${ORACLE_BASE}"/*.sh \
+          "${ORACLE_BASE}"/resetPassword
+
 #########################
 ####### Cleanup #########
 #########################
@@ -93,6 +140,14 @@ echo "BUILDER: cleanup"
 
 # Remove install directory
 rm -r /install
+
+# Remove installation dependencies
+#microdnf -y remove dbus-libs libtirpc diffutils libnsl2 dbus-tools dbus-common dbus-daemon \
+#                   libpcap iptables-libs libseccomp libfdisk xz lm_sensors-libs libutempter \
+#                   kmod-libs gzip cracklib libpwquality pam util-linux findutils acl \
+#                   device-mapper device-mapper-libs cryptsetup-libs elfutils-default-yama-scope \
+#                   elfutils-libs systemd-pam systemd dbus smartmontools ksh sysstat procps-ng \
+#                   binutils file make bc net-tools hostname
 
 # Remove dnf cache
 microdnf clean all
