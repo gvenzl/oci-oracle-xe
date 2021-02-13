@@ -141,6 +141,36 @@ echo "BUILDER: cleanup"
 # Remove install directory
 rm -r /install
 
+# Cleanup XE files not needed for being in a container but were installed by the rpm
+/sbin/chkconfig --del oracle-xe-18c
+rm /etc/init.d/oracle-xe-18c
+rm -r /var/log/oracle-database-xe-18c
+rm -r /tmp/*
+
+# Remove SYS audit directories and files created during install
+rm -r "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/adump/*
+
+# Remove Data Pump log file
+rm "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/dpdump/dp.log
+
+# Remove Oracle DB install logs
+rm    "${ORACLE_BASE}"/cfgtoollogs/dbca/XE/*
+rm    "${ORACLE_BASE}"/cfgtoollogs/netca/*
+rm -r "${ORACLE_BASE}"/cfgtoollogs/sqlpatch/*
+rm    "${ORACLE_BASE}"/oraInventory/logs/*
+rm    "${ORACLE_HOME}"/cfgtoollogs/oui/*
+
+# Remove diag files
+rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/lck/*
+rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/metadata/*
+rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/trace/"${ORACLE_SID}"_*
+rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/trace/drc"${ORACLE_SID}".log
+rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/lck/*
+rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/metadata/*
+
+# Remove systemd removal protection file
+rm /etc/dnf/protected.d/systemd.conf
+
 # Remove installation dependencies
 #microdnf -y remove dbus-libs libtirpc diffutils libnsl2 dbus-tools dbus-common dbus-daemon \
 #                   libpcap iptables-libs libseccomp libfdisk xz lm_sensors-libs libutempter \
