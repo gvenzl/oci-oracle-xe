@@ -77,9 +77,11 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Like with every underscore parameter, DO NOT SET THIS PARAMETER EVER UNLESS YOU KNOW WHAT THE HECK YOU ARE DOING!
    ALTER SYSTEM SET "_CONTROLFILE_SPLIT_BRAIN_CHECK"=FALSE;
 
+   -- Reboot of DB
    SHUTDOWN IMMEDIATE;
    STARTUP;
 
+   -- Setup healthcheck user
    CREATE USER OPS\$ORACLE IDENTIFIED EXTERNALLY;
    GRANT CONNECT, SELECT_CATALOG_ROLE TO OPS\$ORACLE;
 
@@ -110,7 +112,7 @@ echo "BUILDER: creating .bash_profile"
 # Create .bash_profile for oracle user
 echo \
 "export ORACLE_BASE=${ORACLE_BASE}
-export ORACLE_HOME=\${ORACLE_BASE}/product/11.2.0/xe
+export ORACLE_HOME=\${ORACLE_BASE}/product/18c/dbhomeXE
 export ORACLE_SID=XE
 export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
 " >> "${ORACLE_BASE}"/.bash_profile
