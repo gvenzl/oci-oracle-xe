@@ -102,6 +102,9 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Like with every underscore parameter, DO NOT SET THIS PARAMETER EVER UNLESS YOU KNOW WHAT THE HECK YOU ARE DOING!
    ALTER SYSTEM SET "_CONTROLFILE_SPLIT_BRAIN_CHECK"=FALSE;
 
+   -- Remove local_listener entry (using default 1521)
+   ALTER SYSTEM SET LOCAL_LISTENER='';
+
    -- Reboot of DB
    SHUTDOWN IMMEDIATE;
    STARTUP;
@@ -127,6 +130,49 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    shutdown immediate;
    exit;
 EOF
+
+############################
+### Create network files ###
+############################
+
+echo "BUILDER: creating network files"
+
+# listener.ora
+echo \
+"LISTENER =
+  (DESCRIPTION_LIST =
+    (DESCRIPTION =
+      (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+      (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC1521))
+    )
+  )
+
+DEFAULT_SERVICE_LISTENER = ${ORACLE_SID}" > "${ORACLE_HOME}"/network/admin/listener.ora
+
+# tnsnames.ora
+echo \
+"${ORACLE_SID} =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = ${ORACLE_SID})
+    )
+  )
+
+${ORACLE_SID}PDB1 =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = ${ORACLE_SID}PDB1)
+    )
+  )" > "${ORACLE_HOME}"/network/admin/tnsnames.ora
+
+# sqlnet.ora
+echo "NAME.DIRECTORY_PATH= (EZCONNECT, TNSNAMES)" > "${ORACLE_HOME}"/network/admin/sqlnet.ora
+
+chown -R oracle:dba "${ORACLE_HOME}"/network/admin
 
 ####################
 ### bash_profile ###
