@@ -47,8 +47,8 @@ function setup_env_vars() {
   else
     # Password is mandatory for first container start
     if [ -z "${ORACLE_PASSWORD:-}" ]; then
-      echo "Oracle Database password has to be specified at first database startup."
-      echo "Please specify a database password via the \$ORACLE_PASSWORD environment variable, for example, via '-e ORACLE_PASSWORD=<password>'."
+      echo "Oracle Database SYS and SYSTEM passwords have to be specified at first database startup."
+      echo "Please specify a password via the \$ORACLE_PASSWORD environment variable, for example, via '-e ORACLE_PASSWORD=<password>'."
       exit 1;
     fi;
   fi;
@@ -148,13 +148,20 @@ sqlplus -s / as sysdba << EOF
   startup;
   exit;
 EOF
+echo ""
 
 # Check whether database did come up successfully
 if healthcheck.sh; then
-  # Set Oracle password if it is passed on (mandatory for first database startup)
-  if [ -n "${ORACLE_PASSWORD:-}" ]; then
+  # Set Oracle password if it's the first DB startup
+  if [ -z "${DATABASE_ALREADY_EXISTS:-}" ]; then
     echo "CONTAINER: Resetting SYS and SYSTEM passwords."
     resetPassword "${ORACLE_PASSWORD}"
+  else
+    # Password was passed on for container start but DB is already initialized, ignoring.
+    if [ -n "${ORACLE_PASSWORD:-}" ]; then
+      echo "CONTAINER: WARNING: \$ORACLE_PASSWORD has been specified but the database is already initialized. The password will be ignored.";
+      echo "CONTAINER: WARNING: If you want to reset the password, please run the resetPassword command, e.g. 'docker|podman exec <container name|id> resetPassword <your password>'."
+    fi;
   fi;
   echo ""
   echo "#########################"
