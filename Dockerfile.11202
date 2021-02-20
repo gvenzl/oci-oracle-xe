@@ -54,4 +54,4 @@ WORKDIR ${ORACLE_BASE}
 
 HEALTHCHECK CMD "${ORACLE_BASE}"/healthcheck.sh >/dev/null || exit 1
 
-CMD exec ${ORACLE_BASE}/runDB.sh
+ENTRYPOINT ["runDB.sh"]
