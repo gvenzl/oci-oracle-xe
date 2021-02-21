@@ -113,4 +113,11 @@ fi;
 
 echo "BUILDER: building image $IMAGE_NAME"
 
+BUILD_START_TMS=$(date '+%s')
+
 buildah bud -f Dockerfile."${VERSION//./}" -t "${IMAGE_NAME}" --build-arg BUILD_MODE="${FLAVOR}"
+
+BUILD_END_TMS=$(date '+%s')
+BUILD_DURATION=$(( BUILD_END_TMS - BUILD_START_TMS ))
+
+echo "Build of container image ${IMAGE_NAME} completed in ${BUILD_DURATION} seconds."
