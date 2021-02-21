@@ -61,7 +61,7 @@ sed -i "s/SKIP_VALIDATIONS=false/SKIP_VALIDATIONS=true/g" /etc/sysconfig/oracle-
 echo "BUILDER: configuring database"
 
 # Set random password
-ORACLE_PASSWORD=$(date +%s | base64 | head -c 8)
+ORACLE_PASSWORD=$(date '+%s' | sha256sum | base64 | head -c 8)
 (echo "${ORACLE_PASSWORD}"; echo "${ORACLE_PASSWORD}";) | /etc/init.d/oracle-xe-18c configure 
 
 echo "BUILDER: post config database steps"

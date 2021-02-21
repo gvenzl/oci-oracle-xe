@@ -101,7 +101,7 @@ sed -i "$ a pga_aggregate_target=256m" "${ORACLE_HOME}"/config/scripts/init.ora
 sed -i "$ a pga_aggregate_target=256m" "${ORACLE_HOME}"/config/scripts/init"${ORACLE_SID}"Temp.ora
 
 # Set random password
-ORACLE_PASSWORD=$(date +%s | base64 | head -c 8)
+ORACLE_PASSWORD=$(date '+%s' | sha256sum | base64 | head -c 8)
 sed -i "s/###ORACLE_PASSWORD###/${ORACLE_PASSWORD}/g" /install/xe.11202.rsp
 
 echo "BUILDER: configuring database"

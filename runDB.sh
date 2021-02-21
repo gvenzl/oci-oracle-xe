@@ -46,9 +46,15 @@ function setup_env_vars() {
     DATABASE_ALREADY_EXISTS="true";
   else
     # Password is mandatory for first container start
-    if [ -z "${ORACLE_PASSWORD:-}" ]; then
+    if [ -z "${ORACLE_PASSWORD:-}" ] && [ -z "${ORACLE_RANDOM_PASSWORD:-}" ]; then
       echo "Oracle Database SYS and SYSTEM passwords have to be specified at first database startup."
-      echo "Please specify a password via the \$ORACLE_PASSWORD environment variable, for example, via '-e ORACLE_PASSWORD=<password>'."
+      echo "Please specify a password either via the \$ORACLE_PASSWORD variable, e.g. '-e ORACLE_PASSWORD=<password>'"
+      echo "or set the \$ORACLE_RANDOM_PASSWORD environment variable to any value, e.g. '-e ORACLE_RANDOM_PASSWORD=yes'."
+      exit 1;
+    # ORACLE_PASSWORD and ORACLE_RANDOM_PASSWORD are mutually exclusive
+    elif [ -n "${ORACLE_PASSWORD:-}" ] && [ -n "${ORACLE_RANDOM_PASSWORD:-}" ]; then
+      echo "Both \$ORACLE_PASSWORD and \$ORACLE_RANDOM_PASSWORD are specified but are mutually exclusive."
+      echo "Please specify only one of these variables."
       exit 1;
     fi;
   fi;
@@ -58,6 +64,7 @@ function setup_env_vars() {
 function create_dbconfig() {
 
   if [ -f "${ORACLE_BASE}"/oradata/"${ORACLE_SID}".zip ]; then
+     echo "CONTAINER: uncompressing database data files, please wait..."
      unzip "${ORACLE_BASE}"/oradata/"${ORACLE_SID}".zip -d "${ORACLE_BASE}"/oradata/ 1> /dev/null
      rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}".zip
   fi;
@@ -160,11 +167,26 @@ if healthcheck.sh; then
   # Set Oracle password if it's the first DB startup
   if [ -z "${DATABASE_ALREADY_EXISTS:-}" ]; then
     echo "CONTAINER: Resetting SYS and SYSTEM passwords."
-    resetPassword "${ORACLE_PASSWORD}"
+    # If password is specified
+    if [ -n "${ORACLE_PASSWORD:-}" ]; then
+      resetPassword "${ORACLE_PASSWORD}"
+    # Generate random password
+    elif [ -n "${ORACLE_RANDOM_PASSWORD:-}" ]; then
+      RANDOM_PASSWORD=$(date +%s | sha256sum | base64 | head -c 8)
+      resetPassword "${RANDOM_PASSWORD}"
+      echo "############################################"
+      echo "ORACLE PASSWORD FOR SYS AND SYSTEM: ${RANDOM_PASSWORD}"
+      echo "############################################"
+    # Should not happen unless script logic changes
+    else
+      echo "SCRIPT ERROR: Unspecified password!"
+      echo "Please report a bug at https://github.com/gvenzl/oci-oracle-xe/issues with your environment details."
+      exit 1;
+    fi;
   else
     # Password was passed on for container start but DB is already initialized, ignoring.
     if [ -n "${ORACLE_PASSWORD:-}" ]; then
-      echo "CONTAINER: WARNING: \$ORACLE_PASSWORD has been specified but the database is already initialized. The password will be ignored.";
+      echo "CONTAINER: WARNING: \$ORACLE_PASSWORD has been specified but the database is already initialized. The password will be ignored."
       echo "CONTAINER: WARNING: If you want to reset the password, please run the resetPassword command, e.g. 'docker|podman exec <container name|id> resetPassword <your password>'."
     fi;
   fi;
