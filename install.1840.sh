@@ -36,11 +36,11 @@ fi;
 
 echo "BUILDER: Installing dependencies"
 
-# Installation dependencies
+# Install installation dependencies
 microdnf -y install bc binutils file elfutils-libelf ksh sysstat procps-ng smartmontools make net-tools hostname
 
-# Runtime dependencies
-microdnf -y install libnsl glibc libaio libgcc libstdc++ 
+# Install runtime dependencies
+microdnf -y install libnsl glibc libaio libgcc libstdc++ unzip
 
 ################################
 ###### Install Database ########
@@ -122,6 +122,10 @@ EOF
 
 # TODO
 
+###################################
+########### DB SHUTDOWN ###########
+###################################
+
 echo "BUILDER: graceful database shutdown"
 
 # Shutdown database gracefully (listener is not yet running)
@@ -130,6 +134,16 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    shutdown immediate;
    exit;
 EOF
+
+###############################
+### Compress Database files ###
+###############################
+
+echo "BUILDER: compressing database data files"
+cd "${ORACLE_BASE}"/oradata
+zip -r "${ORACLE_SID}".zip "${ORACLE_SID}"
+rm  -r "${ORACLE_SID}"
+cd - 1> /dev/null
 
 ############################
 ### Create network files ###

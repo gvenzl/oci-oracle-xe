@@ -57,6 +57,11 @@ function setup_env_vars() {
 # Create dbconfig directory structure
 function create_dbconfig() {
 
+  if [ -f "${ORACLE_BASE}"/oradata/"${ORACLE_SID}".zip ]; then
+     unzip "${ORACLE_BASE}"/oradata/"${ORACLE_SID}".zip -d "${ORACLE_BASE}"/oradata/ 1> /dev/null
+     rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}".zip
+  fi;
+
   mkdir -p "${ORACLE_BASE}/oradata/dbconfig/${ORACLE_SID}"
 
   mv "${ORACLE_HOME}"/dbs/spfile"${ORACLE_SID}".ora "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/

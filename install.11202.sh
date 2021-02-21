@@ -46,11 +46,11 @@ fi;
 
 echo "BUILDER: installing additional packages"
 
-# Required for install procedures
+# Install installation dependencies
 microdnf -y install bc procps-ng util-linux net-tools
 
-# Install required system packages
-microdnf -y install libaio libnsl
+# Install runtime dependencies
+microdnf -y install libaio libnsl unzip
 
 # Install GCC and other packages for full installation
 if [ "${BUILD_MODE}" == "FULL" ]; then
@@ -238,6 +238,10 @@ EOF
 
 fi;
 
+###################################
+########### DB SHUTDOWN ###########
+###################################
+
 echo "BUILDER: graceful database shutdown"
 
 # Shutdown database gracefully (listener is not yet running)
@@ -246,6 +250,16 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    shutdown immediate;
    exit;
 EOF
+
+###############################
+### Compress Database files ###
+###############################
+
+echo "BUILDER: compressing database data files"
+cd "${ORACLE_BASE}"/oradata
+zip -r "${ORACLE_SID}".zip "${ORACLE_SID}"
+rm  -r "${ORACLE_SID}"
+cd - 1> /dev/null
 
 ############################
 ### Create network files ###
@@ -350,6 +364,7 @@ rm -r /usr/share/gnome/vfolders/oraclexe*
 rm -r /usr/share/pixmaps/oraclexe*
 /sbin/chkconfig --del oracle-xe
 rm /etc/init.d/oracle-xe
+rm -r /var/tmp/oradiag_oracle
 
 # Remove SYS audit files created during install
 rm "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/adump/*.aud
