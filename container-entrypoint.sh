@@ -2,8 +2,8 @@
 #
 # Since: January, 2021
 # Author: gvenzl
-# Name: run.sh
-# Description: Run the Oracle Database
+# Name: container-entrypoint.sh
+# Description: The entrypoint script for the container
 #
 # Copyright 2021 Gerald Venzl
 #
@@ -37,6 +37,39 @@ EOF
    echo "CONTAINER: stopping container."
 }
 
+# Retrieve value from ENV[_FILE] variable
+# usage: file_env VARIABLE NAME [DEFAULT VALUE]
+#    ie: file_env 'ORACLE_PASSWORD' 'example'
+# (will allow for "$ORACLE_PASSWORD_FILE" to fill in the value of
+#  "$ORACLE_PASSWORD" from a file, especially for container secrets feature)
+file_env() {
+
+  # Get name of variable
+  local variable="${1}"
+  # Get name of variable_FILE
+  local file_variable="${variable}_FILE"
+
+  # If both variable and file_variable are specified, throw error and abort
+  if [ -n "${!variable:-}" ] && [ -n "${!file_variable:-}" ]; then
+    echo "Both \$${variable} and \$${file_variable} are specified but are mutually exclusive."
+    echo "Please specify only one of these variables."
+    exit 1;
+  fi;
+
+  # Set value to default value, if any
+  local value="${2:-}"
+
+  # Read value of variable, if any
+  if [ -n "${!variable:-}" ]; then
+    value="${!variable}"
+  # Read value of variable_FILE, if any
+  elif [ -n "${!file_variable:-}" ]; then
+    value="$(< "${!file_variable}")"
+  fi
+
+  export "${variable}"="${value}"
+}
+
 # Setup environment variables
 function setup_env_vars() {
 
@@ -45,6 +78,9 @@ function setup_env_vars() {
   if [ -d "${ORACLE_BASE}/oradata/dbconfig/${ORACLE_SID}" ]; then
     DATABASE_ALREADY_EXISTS="true";
   else
+    # Allow for ORACLE_PASSWORD and or ORACLE_PASSWORD_FILE
+    file_env "ORACLE_PASSWORD"
+
     # Password is mandatory for first container start
     if [ -z "${ORACLE_PASSWORD:-}" ] && [ -z "${ORACLE_RANDOM_PASSWORD:-}" ]; then
       echo "Oracle Database SYS and SYSTEM passwords have to be specified at first database startup."
@@ -53,7 +89,7 @@ function setup_env_vars() {
       exit 1;
     # ORACLE_PASSWORD and ORACLE_RANDOM_PASSWORD are mutually exclusive
     elif [ -n "${ORACLE_PASSWORD:-}" ] && [ -n "${ORACLE_RANDOM_PASSWORD:-}" ]; then
-      echo "Both \$ORACLE_PASSWORD and \$ORACLE_RANDOM_PASSWORD are specified but are mutually exclusive."
+      echo "Both \$ORACLE_RANDOM_PASSWORD and \$ORACLE_PASSWORD[_FILE] are specified but are mutually exclusive."
       echo "Please specify only one of these variables."
       exit 1;
     fi;
