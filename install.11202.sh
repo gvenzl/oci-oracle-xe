@@ -50,7 +50,11 @@ echo "BUILDER: installing additional packages"
 microdnf -y install bc procps-ng util-linux net-tools
 
 # Install runtime dependencies
-microdnf -y install libaio libnsl unzip
+microdnf -y install libaio libnsl
+
+# Install container runtime specific packages
+# (used by the entrypoint script, not the database itself)
+microdnf -y install unzip gzip
 
 # Install GCC and other packages for full installation
 if [ "${BUILD_MODE}" == "FULL" ]; then
@@ -415,7 +419,7 @@ fi;
 # Unfortunately microdnf does not automatically uninstall dependencies that have been
 # installed with a package, so if you were to uninstall just util-linux, for example,
 # it does not automatically also remove gzip and cracklib again.
-microdnf -y remove bc libtirpc libnsl2 libfdisk libutempter gzip cracklib libpwquality \
+microdnf -y remove bc libtirpc libnsl2 libfdisk libutempter cracklib libpwquality \
                    pam util-linux dbus-libs dbus-tools pam libpwquality dbus-common \
                    dbus-daemon libpcap iptables-libs libseccomp kmod-libs acl \
                    device-mapper device-mapper-libs cryptsetup-libs \

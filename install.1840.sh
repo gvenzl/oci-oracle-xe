@@ -40,7 +40,11 @@ echo "BUILDER: Installing dependencies"
 microdnf -y install bc binutils file elfutils-libelf ksh sysstat procps-ng smartmontools make net-tools hostname
 
 # Install runtime dependencies
-microdnf -y install libnsl glibc libaio libgcc libstdc++ unzip
+microdnf -y install libnsl glibc libaio libgcc libstdc++
+
+# Install container runtime specific packages
+# (used by the entrypoint script, not the database itself)
+microdnf -y install unzip gzip
 
 ################################
 ###### Install Database ########
@@ -259,7 +263,7 @@ rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/metadata/*
 # Use rpm instead of microdnf to allow removing packages regardless of dependencies specified by the Oracle XE RPM
 rpm -e --nodeps dbus-libs libtirpc diffutils libnsl2 dbus-tools dbus-common dbus-daemon \
                 libpcap iptables-libs libseccomp libfdisk xz lm_sensors-libs libutempter \
-                kmod-libs gzip cracklib libpwquality pam util-linux findutils acl \
+                kmod-libs cracklib libpwquality pam util-linux findutils acl \
                 device-mapper device-mapper-libs cryptsetup-libs elfutils-default-yama-scope \
                 elfutils-libs systemd-pam systemd dbus smartmontools ksh sysstat procps-ng \
                 binutils file make bc net-tools hostname
