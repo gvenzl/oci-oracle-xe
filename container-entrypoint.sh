@@ -165,6 +165,58 @@ function sym_link_dbconfig() {
 
 }
 
+# Run custom scripts provided by the user
+# usage: run_custom_scripts PATH
+#    ie: run_custom_scripts /docker-entrypoint-initdb.d
+# This runs *.sh, *.sql, *.sql.zip, *.sql.gz files
+function run_custom_scripts {
+
+  SCRIPTS_ROOT="${1}";
+
+  # Check whether parameter has been passed on
+  if [ -z "${SCRIPTS_ROOT}" ]; then
+    echo "No SCRIPTS_ROOT passed on, no scripts will be run";
+    return;
+  fi;
+
+  # Execute custom provided files (only if directory exists and has files in it)
+  if [ -d "${SCRIPTS_ROOT}" ] && [ -n "$(ls -A "${SCRIPTS_ROOT}")" ]; then
+
+    echo "";
+    echo "CONTAINER: Executing user defined scripts..."
+
+    for f in "${SCRIPTS_ROOT}"/*; do
+      case "${f}" in
+        *.sh)
+          if [ -x "${f}" ]; then
+                      echo "CONTAINER: running ${f} ...";    "${f}";    echo "CONTAINER: DONE: running ${f}"
+          else
+                      echo "CONTAINER: sourcing ${f} ...";    . "${f}"    echo "CONTAINER: DONE: sourcing ${f}"
+          fi;
+          ;;
+
+        *.sql)        echo "CONTAINER: running ${f} ..."; echo "exit" | sqlplus -s / as sysdba @"${f}"; echo "CONTAINER: DONE: running ${f}"
+          ;;
+
+        *.sql.zip)    echo "CONTAINER: running ${f} ..."; echo "exit" | unzip -p "${f}" | sqlplus -s / as sysdba; echo "CONTAINER: DONE: running ${f}"
+          ;;
+
+        *.sql.gz)     echo "CONTAINER: running ${f} ..."; echo "exit" | zcat "${f}" | sqlplus -s / as sysdba; echo "CONTAINER: DONE: running ${f}"
+          ;;
+
+        *)            echo "CONTAINER: ignoring ${f}"
+          ;;
+      esac
+      echo "";
+    done
+
+    echo "CONTAINER: DONE: Executing user defined scripts."
+    echo "";
+
+  fi;
+
+}
+
 ###########################
 ###########################
 ######### M A I N #########
@@ -200,12 +252,17 @@ echo ""
 
 # Check whether database did come up successfully
 if healthcheck.sh; then
-  # Set Oracle password if it's the first DB startup
+
+  # First database startup / initialization
   if [ -z "${DATABASE_ALREADY_EXISTS:-}" ]; then
+
+    # Set Oracle password if it's the first DB startup
     echo "CONTAINER: Resetting SYS and SYSTEM passwords."
+
     # If password is specified
     if [ -n "${ORACLE_PASSWORD:-}" ]; then
       resetPassword "${ORACLE_PASSWORD}"
+
     # Generate random password
     elif [ -n "${ORACLE_RANDOM_PASSWORD:-}" ]; then
       RANDOM_PASSWORD=$(date +%s | sha256sum | base64 | head -c 8)
@@ -213,19 +270,33 @@ if healthcheck.sh; then
       echo "############################################"
       echo "ORACLE PASSWORD FOR SYS AND SYSTEM: ${RANDOM_PASSWORD}"
       echo "############################################"
+
     # Should not happen unless script logic changes
     else
       echo "SCRIPT ERROR: Unspecified password!"
       echo "Please report a bug at https://github.com/gvenzl/oci-oracle-xe/issues with your environment details."
       exit 1;
     fi;
+
+    # Running custom database initialization scripts
+    run_custom_scripts /container-entrypoint-initdb.d
+    # For backwards compatibility
+    run_custom_scripts /docker-entrypoint-initdb.d
+
   else
+
     # Password was passed on for container start but DB is already initialized, ignoring.
     if [ -n "${ORACLE_PASSWORD:-}" ]; then
       echo "CONTAINER: WARNING: \$ORACLE_PASSWORD has been specified but the database is already initialized. The password will be ignored."
       echo "CONTAINER: WARNING: If you want to reset the password, please run the resetPassword command, e.g. 'docker|podman exec <container name|id> resetPassword <your password>'."
     fi;
   fi;
+
+  # Run custom database startup scripts
+  run_custom_scripts /container-entrypoint-startdb.d
+  # For backwards compatibility
+  run_custom_scripts /docker-entrypoint-startdb.d
+
   echo ""
   echo "#########################"
   echo "DATABASE IS READY TO USE!"
@@ -234,6 +305,7 @@ if healthcheck.sh; then
   echo "##################################################################"
   echo "CONTAINER: The following output is now from the alert_${ORACLE_SID}.log file:"
   echo "##################################################################"
+
 else
   echo "############################################"
   echo "DATABASE STARTUP FAILED!"
