@@ -35,13 +35,13 @@ SYSAUX_SIZE=610
 TEMP_SIZE=2
 UNDO_SIZE=155
 if [ "${BUILD_MODE}" == "FULL" ]; then
-   REDO_SIZE=50
+  REDO_SIZE=50
 elif [ "${BUILD_MODE}" == "NORMAL" ]; then
-   REDO_SIZE=20
-   USERS_SIZE=10
+  REDO_SIZE=20
+  USERS_SIZE=10
 elif [ "${BUILD_MODE}" == "SLIM" ]; then
-   REDO_SIZE=10
-   USERS_SIZE=2
+  REDO_SIZE=10
+  USERS_SIZE=2
 fi;
 
 echo "BUILDER: installing additional packages"
@@ -58,7 +58,7 @@ microdnf -y install unzip gzip
 
 # Install GCC and other packages for full installation
 if [ "${BUILD_MODE}" == "FULL" ]; then
-   microdnf -y install glibc make binutils gcc
+  microdnf -y install glibc make binutils gcc
 fi;
 
 # Fake 2 GB swap configuration

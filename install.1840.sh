@@ -31,7 +31,7 @@ echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 
 # Set data file sizes
 if [ "${BUILD_MODE}" == "FULL" ]; then
-   REDO_SIZE=50
+  REDO_SIZE=50
 fi;
 
 echo "BUILDER: Installing dependencies"
