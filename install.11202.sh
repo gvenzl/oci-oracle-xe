@@ -190,7 +190,6 @@ EOF
   fi;
 
   # Shrink datafiles
- 
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
      ---------------------------
@@ -214,26 +213,37 @@ EOF
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux.dbf'
      AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
+     ---------------------------
      -- Shrink SYSTEM tablespace
+     ---------------------------
+
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system.dbf' RESIZE ${SYSTEM_SIZE}M;
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
+     -------------------------
      -- Shrink TEMP tablespace
+     -------------------------
+
      ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp.dbf' RESIZE ${TEMP_SIZE}M;
      ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
+     --------------------------
      -- Shrink USERS tablespace
+     --------------------------
+
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/users.dbf' RESIZE ${USERS_SIZE}M;
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/users.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
+     -------------------------
      -- Shrink UNDO tablespace
+     -------------------------
+
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs1.dbf' RESIZE ${UNDO_SIZE}M;
      ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs1.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
      exit;
 EOF
@@ -376,6 +386,9 @@ rm "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/adump/*.aud
 # Remove Data Pump log file
 rm "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/dpdump/dp.log
 
+# Remove Oracle DB install logs
+rm "${ORACLE_HOME}"/config/log/*
+
 # Remove diag files
 rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/lck/*
 rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/metadata/*
@@ -384,9 +397,7 @@ rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/lck/*
 rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/metadata/*
 rm -r "${ORACLE_BASE}"/oradiag_oracle/*
 
-# Remove Oracle DB install logs
-rm "${ORACLE_HOME}"/config/log/*
-
+# Remove additional files for NOMRAL and SLIM builds
 if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
   # Remove APEX directory
