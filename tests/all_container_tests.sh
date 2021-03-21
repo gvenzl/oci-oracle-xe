@@ -1,8 +1,8 @@
 #!/bin/bash
-# Since: January, 2021
+# Since: March, 2021
 # Author: gvenzl
-# Name: all_build_tests.sh
-# Description: Script for all build tests for Oracle DB XE
+# Name: all_container_tests.sh
+# Description: Script for all run tests for Oracle DB XE
 #
 # Copyright 2021 Gerald Venzl
 #
@@ -22,5 +22,5 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-./build_Dockerfile_11202.sh
-./build_Dockerfile_1840.sh
+./run_container_11202.sh
+./run_container_1840.sh
