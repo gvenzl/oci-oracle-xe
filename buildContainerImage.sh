@@ -22,14 +22,15 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-VERSION="11.2.0.2"
+VERSION="18.4.0"
 FLAVOR="NORMAL"
 IMAGE_NAME="gvenzl/oracle-xe"
+SKIP_CHECKSUM="false"
 
 function usage() {
     cat << EOF
 
-Usage: buildContainerImage.sh [-f | -n | -s] [-v version] [-o] [container build option]
+Usage: buildContainerImage.sh [-f | -n | -s] [-v version] [-i] [-o] [container build option]
 Builds a container image for Oracle Database XE.
 
 Parameters:
@@ -38,6 +39,7 @@ Parameters:
    -s: creates a 'slim' image
    -v: version of Oracle Database XE to build
        Choose one of: 11.2.0.2, 18.4.0
+   -i: ignores checksum test
    -o: passes on container build option
 
 * select only one flavor: -f, -n, or -s
@@ -50,7 +52,7 @@ EOF
 
 }
 
-while getopts "hfnsv:o:" optname; do
+while getopts "hfnsv:io:" optname; do
   case "${optname}" in
     "h")
       usage
@@ -68,6 +70,9 @@ while getopts "hfnsv:o:" optname; do
     "s")
       FLAVOR="SLIM"
       ;;
+    "i")
+      SKIP_CHECKSUM="true"
+      ;;
     "o")
       eval "BUILD_OPTS=(${OPTARG})"
       ;;
@@ -83,11 +88,21 @@ while getopts "hfnsv:o:" optname; do
 done;
 
 # Checking SHASUM
+if [ "${SKIP_CHECKSUM}" == "false" ]; then
 
-SHASUM_RET=$(shasum -a 256 oracle-xe*.rpm)
-if [ "${VERSION}" == "11.2.0.2" ] && [ "${SHASUM_RET%% *}" != "6629c8f014402fbc9db844421a6a0d2c71580838f4ac0e8df6659b62bb905268" ]; then
-  echo "BUILDER: WARNING! SHA sum of RPM does not match with what's expected!"
-  echo "BUILDER: WARNING! Verify that the .rpm file is not corrupt!"
+  echo "BUILDER: verifying checksum of rpm file - please wait..."
+
+  SHASUM_RET=$(shasum -a 256 oracle*xe*"${VERSION%%.*}"*.rpm)
+
+  if [[ ( "${VERSION}" == "11.2.0.2"  &&  "${SHASUM_RET%% *}" != "6629c8f014402fbc9db844421a6a0d2c71580838f4ac0e8df6659b62bb905268" ) ||
+        ( "${VERSION}" == "18.4.0"    &&  "${SHASUM_RET%% *}" != "4df0318d72a0b97f5468b36919a23ec07533f5897b324843108e0376566d50c8" ) ]]; then
+    echo "BUILDER: WARNING! SHA sum of RPM does not match with what's expected!"
+    echo "BUILDER: WARNING! Verify that the .rpm file is not corrupt!"
+  fi;
+
+  echo "BUILDER: checksum verification done"
+else
+  echo "BUILDER: checksum verification ignored"
 fi;
 
 IMAGE_NAME="${IMAGE_NAME}:${VERSION}"
@@ -98,4 +113,11 @@ fi;
 
 echo "BUILDER: building image $IMAGE_NAME"
 
+BUILD_START_TMS=$(date '+%s')
+
 buildah bud -f Dockerfile."${VERSION//./}" -t "${IMAGE_NAME}" --build-arg BUILD_MODE="${FLAVOR}"
+
+BUILD_END_TMS=$(date '+%s')
+BUILD_DURATION=$(( BUILD_END_TMS - BUILD_START_TMS ))
+
+echo "Build of container image ${IMAGE_NAME} completed in ${BUILD_DURATION} seconds."

@@ -3,6 +3,24 @@
 # Author: gvenzl
 # Name: Dockerfile.11202
 # Description: Dockerfile to build Oracle DB XE 11.2.0.2.
+#              The Dockerfile supports building different flavors of images.
+#              These flavors can be controlled via the build argument "BUILD_MODE" which
+#              supports three modes, as follows:
+#
+#    FULL:     No database functionality is removed, just log and trace files from the
+#              database installation  itself.
+#              Additional required packages, such as 'gcc' and 'make' are installed
+#              (needed for native PL/SQL execution, etc.)
+#              Database configuration is as per default installation, except for the
+#              location of the fast_recovery_area and redo logs.
+#
+#    NORMAL:   Following functionalities have been removed:
+#              * gcc & make (needed for native PL/SQL execution, etc.)
+#              * APEX
+#
+#    SLIM:     Following functionalities have been removed:
+#              * Everything that has been removed in the NORMAL image, plus:
+#              * Oracle Text
 #
 # Copyright 2021 Gerald Venzl
 #
@@ -27,7 +45,7 @@ ENV ORACLE_BASE=/u01/app/oracle \
     ORACLE_SID=XE \
     PATH=${PATH}:/u01/app/oracle/product/11.2.0/xe/bin:/u01/app/oracle
     
-COPY oracle-xe-11.2.0-1.0.x86_64.rpm xe.11202.rsp install.11202.sh runDB.sh resetPassword healthcheck.sh /install/
+COPY oracle-xe-11.2.0-1.0.x86_64.rpm xe.11202.rsp install.11202.sh container-entrypoint.sh resetPassword healthcheck.sh /install/
 
 RUN /install/install.11202.sh "${BUILD_MODE}"
     
@@ -36,4 +54,4 @@ WORKDIR ${ORACLE_BASE}
 
 HEALTHCHECK CMD "${ORACLE_BASE}"/healthcheck.sh >/dev/null || exit 1
 
-CMD exec ${ORACLE_BASE}/runDB.sh
+ENTRYPOINT ["container-entrypoint.sh"]

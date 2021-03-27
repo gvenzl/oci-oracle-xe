@@ -1,8 +1,8 @@
 #!/bin/bash
-# Since: January, 2021
+# Since: March, 2021
 # Author: gvenzl
-# Name: all_build_tests.sh
-# Description: Script for all build tests for Oracle DB XE
+# Name: run_container_1840.sh
+# Description: Run container test scripts for Oracle DB XE 18.4.0
 #
 # Copyright 2021 Gerald Venzl
 #
@@ -18,9 +18,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Exit on errors
-# Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
-set -Eeuo pipefail
+source ./functions.sh
 
-./build_Dockerfile_11202.sh
-./build_Dockerfile_1840.sh
+#######################
+####### 18c TEST ######
+#######################
+
+runContainerTest "18.4.0 FULL image" "1840-full" "gvenzl/oracle-xe:18.4.0-full"
+runContainerTest "18.4.0 NORMAL image" "1840" "gvenzl/oracle-xe:18.4.0"
+#runContainerTest "18.4.0 SLIM image" "1840-slim" "gvenzl/oracle-xe:18.4.0-slim"

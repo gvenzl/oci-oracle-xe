@@ -30,21 +30,35 @@ BUILD_MODE=${1:-"NORMAL"}
 echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 
 # Set data file sizes
+SYSTEM_SIZE=353
+SYSAUX_SIZE=610
+TEMP_SIZE=2
+UNDO_SIZE=155
 if [ "${BUILD_MODE}" == "FULL" ]; then
-   REDO_SIZE=50
+  REDO_SIZE=50
+elif [ "${BUILD_MODE}" == "NORMAL" ]; then
+  REDO_SIZE=20
+  USERS_SIZE=10
+elif [ "${BUILD_MODE}" == "SLIM" ]; then
+  REDO_SIZE=10
+  USERS_SIZE=2
 fi;
 
 echo "BUILDER: installing additional packages"
 
-# Required for install procedures
+# Install installation dependencies
 microdnf -y install bc procps-ng util-linux net-tools
 
-# Install required system packages
+# Install runtime dependencies
 microdnf -y install libaio libnsl
+
+# Install container runtime specific packages
+# (used by the entrypoint script, not the database itself)
+microdnf -y install unzip gzip
 
 # Install GCC and other packages for full installation
 if [ "${BUILD_MODE}" == "FULL" ]; then
-   microdnf -y install glibc make binutils gcc
+  microdnf -y install glibc make binutils gcc
 fi;
 
 # Fake 2 GB swap configuration
@@ -63,6 +77,23 @@ rpm -iv /install/oracle-xe-11.2.0-1.0.x86_64.rpm
 # Remove fake 2 GB swap configuration
 unset -f cat free
 
+# Change installation directory to /opt/oracle
+# Move $ORACLE_BASE under the new $ORACLE_BASE parent directory (i.e. /opt/ for /opt/oracle)
+#mv /u01/app/oracle "${ORACLE_BASE%%/oracle}"
+#chown -R oracle:dba /u01
+# Symlink /u01/app/oracle --> /opt/oracle
+# This is so that the hard coded shared libraries paths in the binaries (sqlplus, etc.) can be resolved (check 'ldd sqlplus')
+#ln -s "${ORACLE_BASE}" /u01/app/
+# Replace absolute path with $ORACLE_BASE variable for /etc/init.d/oracle-xe (used to configure DB later on)
+#sed -i "s|/u01/app/oracle|\${ORACLE_BASE}|g" /etc/init.d/oracle-xe
+# SQL*Plus and other files (.ora, etc) don't do variable expansion, replace absolute path /u01/app/oracle with value of $ORACLE_BASE
+#for file in $(grep -rIl "/u01/app/oracle" "${ORACLE_HOME}"); do
+#  sed -i "s|/u01/app/oracle|${ORACLE_BASE}|g" "${file}"
+#done;
+# Oracle DB directories need to be recreated:
+#DATA_PUMP_DIR	/u01/app/oracle/admin/XE/dpdump/
+#XMLDIR	/u01/app/oracle/product/11.2.0/xe/rdbms/xml
+
 # Remove memory_target parameter (not supported by default in containers)
 sed -i "/memory_target/d" "${ORACLE_HOME}"/config/scripts/init.ora
 sed -i "/memory_target/d" "${ORACLE_HOME}"/config/scripts/init"${ORACLE_SID}"Temp.ora
@@ -74,7 +105,7 @@ sed -i "$ a pga_aggregate_target=256m" "${ORACLE_HOME}"/config/scripts/init.ora
 sed -i "$ a pga_aggregate_target=256m" "${ORACLE_HOME}"/config/scripts/init"${ORACLE_SID}"Temp.ora
 
 # Set random password
-ORACLE_PASSWORD=$(date +%s | base64 | head -c 8)
+ORACLE_PASSWORD=$(date '+%s' | sha256sum | base64 | head -c 8)
 sed -i "s/###ORACLE_PASSWORD###/${ORACLE_PASSWORD}/g" /install/xe.11202.rsp
 
 echo "BUILDER: configuring database"
@@ -105,9 +136,9 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    ALTER DATABASE DROP LOGFILE GROUP 3;
    ALTER DATABASE DROP LOGFILE GROUP 4;
 
-   -- Set fast recovery area inside oradata folder
-   HOST mkdir "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/fast_recovery_area
-   ALTER SYSTEM SET DB_RECOVERY_FILE_DEST = '${ORACLE_BASE}/oradata/${ORACLE_SID}/fast_recovery_area';
+   -- Remove fast recovery area
+   ALTER SYSTEM SET DB_RECOVERY_FILE_DEST='';
+   ALTER SYSTEM SET DB_RECOVERY_FILE_DEST_SIZE=1;
    HOST rm -r "${ORACLE_BASE}"/fast_recovery_area
 
    -- Setup healthcheck user
@@ -127,6 +158,104 @@ rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo04.log
 ######## FULL INSTALL DONE ########
 ###################################
 
+# If not building the FULL image, remove and shrink additional components
+if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Disable password profile checks
+     ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED PASSWORD_LIFE_TIME UNLIMITED;
+
+     -- Remove APEX
+     @${ORACLE_HOME}/apex/apxremov.sql
+     DROP PUBLIC SYNONYM HTMLDB_SYSTEM;
+     DROP PACKAGE HTMLDB_SYSTEM;
+
+     -- Remove HR schema
+     DROP USER HR cascade;
+
+     exit;
+EOF
+
+  #TODO
+  # Uninstall components
+  if [ "${BUILD_MODE}" == "SLIM" ]; then
+    su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+    -- Remove XDB
+    SELECT '#TODO' FROM DUAL;
+EOF
+    # Spatial
+    # Text
+    # XDB
+  fi;
+
+  # Shrink datafiles
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     ---------------------------
+     -- Shrink SYSAUX tablespace
+     ---------------------------
+
+     -- Create new temporary SYSAUX tablespace
+     --CREATE TABLESPACE SYSAUX_TEMP DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux_temp.dbf'
+     --SIZE 250M AUTOEXTEND ON NEXT 1M MAXSIZE UNLIMITED;
+
+     -- Move tables to temporary SYSAUX tablespace
+     --#TODO
+     --BEGIN
+     --   FOR cur IN (SELECT  owner || '.' || table_name AS name FROM all_tables WHERE tablespace_name = 'SYSAUX') LOOP
+     --      EXECUTE IMMEDIATE 'ALTER TABLE ' || cur.name || ' MOVE TABLESPACE SYSAUX_TEMP';
+     --   END LOOP;
+     --END;
+     --/
+
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux.dbf' RESIZE ${SYSAUX_SIZE}M;
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux.dbf'
+     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     ---------------------------
+     -- Shrink SYSTEM tablespace
+     ---------------------------
+
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system.dbf' RESIZE ${SYSTEM_SIZE}M;
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     -------------------------
+     -- Shrink TEMP tablespace
+     -------------------------
+
+     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp.dbf' RESIZE ${TEMP_SIZE}M;
+     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     --------------------------
+     -- Shrink USERS tablespace
+     --------------------------
+
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/users.dbf' RESIZE ${USERS_SIZE}M;
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/users.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     -------------------------
+     -- Shrink UNDO tablespace
+     -------------------------
+
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs1.dbf' RESIZE ${UNDO_SIZE}M;
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs1.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     exit;
+EOF
+
+# create or replace directory XMLDIR as '${ORACLE_HOME}/rdbms/xml';
+
+fi;
+
+###################################
+########### DB SHUTDOWN ###########
+###################################
+
 echo "BUILDER: graceful database shutdown"
 
 # Shutdown database gracefully (listener is not yet running)
@@ -135,6 +264,16 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    shutdown immediate;
    exit;
 EOF
+
+###############################
+### Compress Database files ###
+###############################
+
+echo "BUILDER: compressing database data files"
+cd "${ORACLE_BASE}"/oradata
+zip -r "${ORACLE_SID}".zip "${ORACLE_SID}"
+rm  -r "${ORACLE_SID}"
+cd - 1> /dev/null
 
 ############################
 ### Create network files ###
@@ -203,7 +342,7 @@ echo \
 export ORACLE_HOME=\${ORACLE_BASE}/product/11.2.0/xe
 export ORACLE_SID=XE
 export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
-" >> "${ORACLE_BASE}/.bash_profile"
+" >> "${ORACLE_BASE}"/.bash_profile
 chown oracle:dba "${ORACLE_BASE}"/.bash_profile
 
 ########################
@@ -239,12 +378,16 @@ rm -r /usr/share/gnome/vfolders/oraclexe*
 rm -r /usr/share/pixmaps/oraclexe*
 /sbin/chkconfig --del oracle-xe
 rm /etc/init.d/oracle-xe
+rm -r /var/tmp/oradiag_oracle
 
 # Remove SYS audit files created during install
 rm "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/adump/*.aud
 
 # Remove Data Pump log file
 rm "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/dpdump/dp.log
+
+# Remove Oracle DB install logs
+rm "${ORACLE_HOME}"/config/log/*
 
 # Remove diag files
 rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/lck/*
@@ -254,14 +397,40 @@ rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/lck/*
 rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/metadata/*
 rm -r "${ORACLE_BASE}"/oradiag_oracle/*
 
-# Remove Oracle DB install logs
-rm "${ORACLE_HOME}"/config/log/*
+# Remove additional files for NOMRAL and SLIM builds
+if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+
+  # Remove APEX directory
+  rm -r "${ORACLE_HOME}"/apex
+
+  # Remove JDBC drivers
+  rm -r "${ORACLE_HOME}"/jdbc
+  rm -r "${ORACLE_HOME}"/jlib
+
+  # Remove ODBC samples
+  rm -r "${ORACLE_HOME}"/odbc
+
+  # Remove components from ORACLE_HOME
+  if [ "${BUILD_MODE}" == "SLIM" ]; then
+
+    # Remove demo directory
+    rm -r "${ORACLE_HOME}"/demo
+
+    # Remove TNS samples
+    rm -r "${ORACLE_HOME}"/network/admin/samples
+
+    # Remove NLS demo
+    rm -r "${ORACLE_HOME}"/nls/demo
+
+  fi;
+
+fi;
 
 # Remove build packages
 # Unfortunately microdnf does not automatically uninstall dependencies that have been
 # installed with a package, so if you were to uninstall just util-linux, for example,
 # it does not automatically also remove gzip and cracklib again.
-microdnf -y remove bc libtirpc libnsl2 libfdisk libutempter gzip cracklib libpwquality \
+microdnf -y remove bc libtirpc libnsl2 libfdisk libutempter cracklib libpwquality \
                    pam util-linux dbus-libs dbus-tools pam libpwquality dbus-common \
                    dbus-daemon libpcap iptables-libs libseccomp kmod-libs acl \
                    device-mapper device-mapper-libs cryptsetup-libs \
