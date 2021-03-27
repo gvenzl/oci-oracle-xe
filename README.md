@@ -19,13 +19,19 @@ Run a new database container:
 docker run -d -p 1521:1521 -e ORACLE_PASSWORD=<your password> gvenzl/oracle-xe
 ```
 
-Run a new persistent database container:
+Run a new persistent **18c** database container:
 
 ```shell
 docker run -d -p 1521:1521 -e ORACLE_PASSWORD=<your password> -v oracle-volume:/opt/oracle/oradata gvenzl/oracle-xe
 ```
 
-Run a new database container with OEM Express expose:
+Run a new persistent **11g R2** database container:
+
+```shell
+docker run -d -p 1521:1521 -e ORACLE_PASSWORD=<your password> -v oracle-volume:/u01/app/oracle/oradata gvenzl/oracle-xe
+```
+
+Run a new database container with OEM Express exposed:
 
 ```shell
 docker run -d -p 1521:1521 -e ORACLE_PASSWORD=<your password> -p 5500:5500 gvenzl/oracle-xe
