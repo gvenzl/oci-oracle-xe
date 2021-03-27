@@ -34,9 +34,9 @@ echo "TEST: Building 11.2.0.2 NORMAL image"
 ./buildContainerImage.sh -v 11.2.0.2
 echo "DONE: Building 11.2.0.2 NORMAL image"
 
-# Not done yet
-#echo "TEST: Building 11.2.0.2 SLIM image"
-#./buildContainerImage.sh -v 11.2.0.2 -s
-#echo "TEST: Building 11.2.0.2 SLIM image"
+Not done yet
+echo "TEST: Building 11.2.0.2 SLIM image"
+./buildContainerImage.sh -v 11.2.0.2 -s
+echo "TEST: Building 11.2.0.2 SLIM image"
 
 cd "${CURRENT_DIR}"
