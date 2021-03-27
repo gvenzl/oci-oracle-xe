@@ -209,47 +209,50 @@ The execution order and implications are the same as with the [Initialization sc
 | Normal | [None]    | A well-balanced image between image size and functionality. Recommended for most use cases. | Recommended for most use cases.                                                                        |
 | Full   | `-full`   | An image containing all functionality as provided by the Oracle Database installation.      | Best for extensions and/or customizations.                                                             |
 
-## Image flavor details
-
-There are three flavors of the image:
- * FULL (`-full` tag appended)
- * NORMAL (no tag appended)
- * SLIM (`-slim` tag appended)
-
-### Full image flavor
+## Full image flavor
 
 The full image provides an Oracle Database XE installation "as is", meaning as provided by the RPM install file.
 A couple of modifications have been performed to make the installation more suitable for running inside a container:
 
 * `DBMS_XDB.SETLISTENERLOCALACCESS()` has been set to `FALSE`
 * An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
-* The `REDO` logs have been located into `$ORACLE_BASE/oradata/$ORACLE_SID/` (11gR2 images) and resized
+
+### 18c specific
+
+* `LOCAL_LISTENER` is set to `NULL` (18c)
+* `COMMON_USER_PREFIX` is set to `NULL` (18c)
+
+### 11g R2 specific
+
+* The `REDO` logs have been located into `$ORACLE_BASE/oradata/$ORACLE_SID/` (11gR2 image)
 * The fast recovery area has been removed (11gR2 images)
 
-### Normal image flavor
+## Normal image flavor
 
 The normal image has all customizations that the full image has.
 Additionally, it also includes the following changes:
 
-#### Database components
-* Oracle APEX has been removed (you can download and install the latest and greatest from [apex.oracle.com](https://apex.oracle.com))
+### Database components
+* Oracle APEX has been removed (you can download and install the latest and greatest from [apex.oracle.com](https://apex.oracle.com), 11gR2 image)
 * The `HR` schema and folder have been removed
-* The jdbc drivers have been removed
 
-#### Operating system
+### Operating system
 
-* The following Linux packages are not installed: `binutils`, `gcc`, `glibc`, `make`
+* The following Linux packages are not installed: `binutils`, `gcc`, `glibc`, `make` (11g R2)
+* The jdbc drivers have been removed (`$ORACLE_HOME/jdbc`, `$ORACLE_HOME/jlib`)
 
-#### Data files
+### Data files
 
-| Tablespace | Size   | Autoextend | Max size    |
-| ---------- | -----: | ---------: | ----------- |
-| `REDO`     | 20 MB  |      `N/A` | `N/A`       |
-| `TEMP`     |  2 MB  |      10 MB | `UNLIMITED` |
-| `UNDO`     | 10 MB  |      10 MB | `UNLIMITED` |
-| `USERS`    | 10 MB  |      10 MB | `UNLIMITED` |
+| Tablespace | 18c Size | 11g Size | Autoextend | Max size    |
+| ---------- | --------:| -------: | ---------: | ----------- |
+| `REDO`     | 20 MB    | 20 MB    |      `N/A` | `N/A`       |
+| `SYSAUX`   | 480 MB (CDB) <br> 342 MB (PDB) | 610 MB | 10 MB | `UNLIMITED` |
+| `SYSTEM`   | 353 MB (CDB) <br> 255 MB (PDB) | 353 MB | 10 MB | `UNLIMITED` |
+| `TEMP`     | 2 MB (CDB) <br> 2 MB (PDB)     |  2 MB    |      10 MB | `UNLIMITED` |
+| `UNDO`     | 70 MB (CDB) <br> 40 MB (PDB)        | 10 MB    |      10 MB | `UNLIMITED` |
+| `USERS`    |  10 MB        | 10 MB    |      10 MB | `UNLIMITED` |
 
-#### Others
+### Others
 
 * The `DEFAULT` profile has the following set:
   * `FAILED_LOGIN_ATTEMPTS=UNLIMITED`
