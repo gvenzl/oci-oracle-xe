@@ -52,6 +52,11 @@ microdnf -y install bc binutils file elfutils-libelf ksh sysstat procps-ng smart
 # Install runtime dependencies
 microdnf -y install libnsl glibc libaio libgcc libstdc++
 
+# Install fortran runtime for libora_netlib.so (so that the Intel Math Kernel libraries are no longer needed)
+if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+  microdnf -y install compat-libgfortran-48
+fi;
+
 # Install container runtime specific packages
 # (used by the entrypoint script, not the database itself)
 microdnf -y install unzip gzip
@@ -140,6 +145,9 @@ EOF
 if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
+     -- Deactivate Intel's Math Kernel Libraries
+     ALTER SYSTEM SET "_dmm_blas_library"='libora_netlib.so' SCOPE=SPFILE;
+
      ---------
      -- CDB --
      ---------
@@ -170,6 +178,15 @@ if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
      -- Remove HR schema
      DROP user HR cascade;
+
+     -------------------------------------
+     -- Bounce DB to free up UNDO, etc. --
+     -------------------------------------
+     -- Go back to CDB level
+
+     ALTER SESSION SET CONTAINER=CDB\$ROOT;
+     shutdown immediate;
+     startup;
 
      exit;
 EOF
@@ -468,6 +485,9 @@ if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove JDBC drivers
   rm -r "${ORACLE_HOME}"/jdbc
   rm -r "${ORACLE_HOME}"/jlib
+
+  # Remove Intel's Math kernel libraries
+  rm "${ORACLE_HOME}"/lib/libmkl_*
 
 fi;
 
