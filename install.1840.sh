@@ -438,6 +438,7 @@ rm -r /install
 # Cleanup XE files not needed for being in a container but were installed by the rpm
 /sbin/chkconfig --del oracle-xe-18c
 rm /etc/init.d/oracle-xe-18c
+rm /etc/sysconfig/oracle-xe-18c.conf
 rm -r /var/log/oracle-database-xe-18c
 rm -r /tmp/*
 
