@@ -25,5 +25,10 @@ source ./functions.sh
 #######################
 
 runContainerTest "11.2.0.2 FULL image" "11202-full" "gvenzl/oracle-xe:11.2.0.2-full"
-runContainerTest "11.2.0.2 NORMAL image" "11202" "gvenzl/oracle-xe:11.2.0.2"
-#runContainerTest "11.2.0.2 SLIM image" "11202-slim" "gvenzl/oracle-xe:11.2.0.2-slim"
+runContainerTest "11 FULL image" "11-full" "gvenzl/oracle-xe:11-full"
+
+runContainerTest "11.2.0.2 REGULAR image" "11202" "gvenzl/oracle-xe:11.2.0.2"
+runContainerTest "11 REGULAR image" "11" "gvenzl/oracle-xe:11"
+
+runContainerTest "11.2.0.2 SLIM image" "11202-slim" "gvenzl/oracle-xe:11.2.0.2-slim"
+runContainerTest "11 SLIM image" "11-slim" "gvenzl/oracle-xe:11-slim"
