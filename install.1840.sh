@@ -444,6 +444,7 @@ rm -r /tmp/*
 
 # Remove SYS audit directories and files created during install
 rm -r "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/adump/*
+rm -r "${ORACLE_BASE}"/audit/"${ORACLE_SID}"/*
 
 # Remove Data Pump log file
 rm "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/dpdump/dp.log
@@ -466,9 +467,20 @@ rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/metadata/*
 # Remove additional files for NOMRAL and SLIM builds
 if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
+  # Remove OPatch and QOpatch
+  rm -r "${ORACLE_HOME}"/OPatch
+  rm -r "${ORACLE_HOME}"/QOpatch
+
+  # Remove assistants
+  rm -r "${ORACLE_HOME}"/assistants
+
+  # Remove Oracle Database Migration Assistant for Unicode (dmu)
+  rm -r "${ORACLE_HOME}"/dmu
+
   # Remove JDBC drivers
   rm -r "${ORACLE_HOME}"/jdbc
   rm -r "${ORACLE_HOME}"/jlib
+  rm -r "${ORACLE_HOME}"/ucp
 
 fi;
 
