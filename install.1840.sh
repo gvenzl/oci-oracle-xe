@@ -24,8 +24,8 @@ set -Eeuo pipefail
 
 echo "BUILDER: started"
 
-# Build mode ("SLIM", "NORMAL", "FULL")
-BUILD_MODE=${1:-"NORMAL"}
+# Build mode ("SLIM", "REGULAR", "FULL")
+BUILD_MODE=${1:-"REGULAR"}
 
 echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 
@@ -39,7 +39,7 @@ CDB_UNDO_SIZE=70
 PDB_UNDO_SIZE=48
 if [ "${BUILD_MODE}" == "FULL" ]; then
   REDO_SIZE=50
-elif [ "${BUILD_MODE}" == "NORMAL" ]; then
+elif [ "${BUILD_MODE}" == "REGULAR" ]; then
   REDO_SIZE=20
   USERS_SIZE=10
 fi;
@@ -53,7 +53,7 @@ microdnf -y install bc binutils file elfutils-libelf ksh sysstat procps-ng smart
 microdnf -y install libnsl glibc libaio libgcc libstdc++
 
 # Install fortran runtime for libora_netlib.so (so that the Intel Math Kernel libraries are no longer needed)
-if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   microdnf -y install compat-libgfortran-48
 fi;
 
@@ -142,7 +142,7 @@ EOF
 ###################################
 
 # If not building the FULL image, remove and shrink additional components
-if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
      -- Deactivate Intel's Math Kernel Libraries
@@ -482,7 +482,7 @@ rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/lck/*
 rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/metadata/*
 
 # Remove additional files for NOMRAL and SLIM builds
-if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
   # Remove OPatch and QOpatch
   rm -r "${ORACLE_HOME}"/OPatch

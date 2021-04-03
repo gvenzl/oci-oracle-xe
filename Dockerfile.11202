@@ -14,12 +14,12 @@
 #              Database configuration is as per default installation, except for the
 #              location of the fast_recovery_area and redo logs.
 #
-#    NORMAL:   Following functionalities have been removed:
+#    REGULAR:  Following functionalities have been removed:
 #              * gcc & make (needed for native PL/SQL execution, etc.)
 #              * APEX
 #
 #    SLIM:     Following functionalities have been removed:
-#              * Everything that has been removed in the NORMAL image, plus:
+#              * Everything that has been removed in the REGULAR image, plus:
 #              * Oracle Text
 #
 # Copyright 2021 Gerald Venzl

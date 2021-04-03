@@ -30,9 +30,9 @@ echo "TEST: Building 11.2.0.2 FULL image"
 ./buildContainerImage.sh -v 11.2.0.2 -f
 echo "DONE: Building 11.2.0.2 FULL image"
 
-echo "TEST: Building 11.2.0.2 NORMAL image"
+echo "TEST: Building 11.2.0.2 REGULAR image"
 ./buildContainerImage.sh -v 11.2.0.2
-echo "DONE: Building 11.2.0.2 NORMAL image"
+echo "DONE: Building 11.2.0.2 REGULAR image"
 
 echo "TEST: Building 11.2.0.2 SLIM image"
 ./buildContainerImage.sh -v 11.2.0.2 -s

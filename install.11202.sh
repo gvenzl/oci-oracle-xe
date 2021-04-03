@@ -24,8 +24,8 @@ set -Eeuo pipefail
 
 echo "BUILDER: started"
 
-# Build mode ("SLIM", "NORMAL", "FULL")
-BUILD_MODE=${1:-"NORMAL"}
+# Build mode ("SLIM", "REGULAR", "FULL")
+BUILD_MODE=${1:-"REGULAR"}
 
 echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 
@@ -36,7 +36,7 @@ TEMP_SIZE=2
 UNDO_SIZE=155
 if [ "${BUILD_MODE}" == "FULL" ]; then
   REDO_SIZE=50
-elif [ "${BUILD_MODE}" == "NORMAL" ]; then
+elif [ "${BUILD_MODE}" == "REGULAR" ]; then
   REDO_SIZE=20
   USERS_SIZE=10
 elif [ "${BUILD_MODE}" == "SLIM" ]; then
@@ -159,7 +159,7 @@ rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo04.log
 ###################################
 
 # If not building the FULL image, remove and shrink additional components
-if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
      -- Disable password profile checks
@@ -398,7 +398,7 @@ rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/metadata/*
 rm -r "${ORACLE_BASE}"/oradiag_oracle/*
 
 # Remove additional files for NOMRAL and SLIM builds
-if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
   # Remove APEX directory
   rm -r "${ORACLE_HOME}"/apex

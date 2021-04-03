@@ -212,11 +212,11 @@ The execution order and implications are the same as with the [Initialization sc
 
 # Image flavors
 
-| Flavor | Extension | Description                                                                                 | Use cases                                                                                              |
-| -------| --------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------|
-| Slim   | `-slim`   | An image focussed on smallest possible image size instead of additional functionality.      | Wherever small images sizes are important but advanced functionality of Oracle Database is not needed. |
-| Normal | [None]    | A well-balanced image between image size and functionality. Recommended for most use cases. | Recommended for most use cases.                                                                        |
-| Full   | `-full`   | An image containing all functionality as provided by the Oracle Database installation.      | Best for extensions and/or customizations.                                                             |
+| Flavor  | Extension | Description                                                                                 | Use cases                                                                                              |
+| --------| --------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------|
+| Slim    | `-slim`   | An image focussed on smallest possible image size instead of additional functionality.      | Wherever small images sizes are important but advanced functionality of Oracle Database is not needed. |
+| Regular | [None]    | A well-balanced image between image size and functionality. Recommended for most use cases. | Recommended for most use cases.                                                                        |
+| Full    | `-full`   | An image containing all functionality as provided by the Oracle Database installation.      | Best for extensions and/or customizations.                                                             |
 
 ## Full image flavor
 
@@ -236,19 +236,24 @@ A couple of modifications have been performed to make the installation more suit
 * The `REDO` logs have been located into `$ORACLE_BASE/oradata/$ORACLE_SID/` (11gR2 image)
 * The fast recovery area has been removed (11gR2 images)
 
-## Normal image flavor
+## Regular image flavor
 
-The normal image has all customizations that the full image has.
+The regular image has all customizations that the full image has.
 Additionally, it also includes the following changes:
 
 ### Database components
 * Oracle APEX has been removed (you can download and install the latest and greatest from [apex.oracle.com](https://apex.oracle.com), 11gR2 image)
 * The `HR` schema and folder have been removed
+* The JDBC drivers have been removed (`$ORACLE_HOME/jdbc`, `$ORACLE_HOME/jlib`, `$ORACLE_HOME/ucp`)
+* The Oracle Database Assistants have been removed (`$ORACLE_HOME/assistants`)
+* The Oracle Database Migration Assistant for Unicode has been removed (`$ORACLE_HOME/dmu`)
+* The OPatch utility has been removed (`$ORACLE_HOME/OPatch`)
+* The QOpatch utility has been removed (`$ORACLE_HOME/QOpatch`)
 
 ### Operating system
 
 * The following Linux packages are not installed: `binutils`, `gcc`, `glibc`, `make` (11g R2)
-* The jdbc drivers have been removed (`$ORACLE_HOME/jdbc`, `$ORACLE_HOME/jlib`)
+
 
 ### Data files
 
@@ -266,3 +271,4 @@ Additionally, it also includes the following changes:
 * The `DEFAULT` profile has the following set:
   * `FAILED_LOGIN_ATTEMPTS=UNLIMITED`
   * `PASSWORD_LIFE_TIME=UNLIMITED`
+* The Intel Math kernel libraries have been removed

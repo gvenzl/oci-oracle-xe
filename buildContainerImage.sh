@@ -23,7 +23,7 @@
 set -Eeuo pipefail
 
 VERSION="18.4.0"
-FLAVOR="NORMAL"
+FLAVOR="REGULAR"
 IMAGE_NAME="gvenzl/oracle-xe"
 SKIP_CHECKSUM="false"
 
@@ -35,7 +35,7 @@ Builds a container image for Oracle Database XE.
 
 Parameters:
    -f: creates a 'full' image
-   -n: creates a normal image (default)
+   -n: creates a regular image (default)
    -s: creates a 'slim' image
    -v: version of Oracle Database XE to build
        Choose one of: 11.2.0.2, 18.4.0
@@ -65,7 +65,7 @@ while getopts "hfnsv:io:" optname; do
       FLAVOR="FULL"
       ;;
     "n")
-      FLAVOR="NORMAL"
+      FLAVOR="REGULAR"
       ;;
     "s")
       FLAVOR="SLIM"
@@ -107,7 +107,7 @@ fi;
 
 IMAGE_NAME="${IMAGE_NAME}:${VERSION}"
 
-if [ "${FLAVOR}" != "NORMAL" ]; then
+if [ "${FLAVOR}" != "REGULAR" ]; then
   IMAGE_NAME="${IMAGE_NAME}-${FLAVOR,,}"
 fi;
 
