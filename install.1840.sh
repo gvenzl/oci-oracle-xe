@@ -502,6 +502,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove Intel's Math kernel libraries
   rm "${ORACLE_HOME}"/lib/libmkl_*
 
+  # Remove zip artifacts in $ORACLE_HOME/lib
+  rm "${ORACLE_HOME}"/lib/*.zip
+
 fi;
 
 # Remove installation dependencies
