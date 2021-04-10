@@ -32,7 +32,6 @@ echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 # Set data file sizes
 SYSTEM_SIZE=353
 SYSAUX_SIZE=610
-TEMP_SIZE=2
 UNDO_SIZE=155
 if [ "${BUILD_MODE}" == "FULL" ]; then
   REDO_SIZE=50
@@ -225,7 +224,7 @@ EOF
      -- Shrink TEMP tablespace
      -------------------------
 
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp.dbf' RESIZE ${TEMP_SIZE}M;
+     ALTER TABLESPACE TEMP SHRINK SPACE;
      ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp.dbf'
         AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 

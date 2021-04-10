@@ -34,7 +34,6 @@ CDB_SYSAUX_SIZE=480
 PDB_SYSAUX_SIZE=342
 CDB_SYSTEM_SIZE=840
 PDB_SYSTEM_SIZE=255
-TEMP_SIZE=2
 CDB_UNDO_SIZE=70
 PDB_UNDO_SIZE=48
 if [ "${BUILD_MODE}" == "FULL" ]; then
@@ -255,19 +254,18 @@ EOF
      -- Shrink TEMP tablespaces
      --------------------------
 
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp01.dbf' RESIZE ${TEMP_SIZE}M;
+     ALTER TABLESPACE TEMP SHRINK SPACE;
      ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp01.dbf'
      AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
      ALTER SESSION SET CONTAINER=PDB\$SEED;
-     -- Find and drop old TEMP file
+
+     ALTER TABLESPACE TEMP SHRINK SPACE;
+
      DECLARE
         v_tmp_file_name   VARCHAR2(200);
      BEGIN
         SELECT name INTO v_tmp_file_name FROM v\$tempfile WHERE name LIKE '%/temp012%';
-        -- TODO: shrink temp file to 2MB for PDB\$SEED
-        EXECUTE IMMEDIATE
-           'ALTER DATABASE TEMPFILE ''' || v_tmp_file_name || ''' RESIZE 32M';
         EXECUTE IMMEDIATE
            'ALTER DATABASE TEMPFILE ''' || v_tmp_file_name || ''' AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED';
         --TODO: rename ugly TEMP file and resize
@@ -276,7 +274,8 @@ EOF
      /
 
      ALTER SESSION SET CONTAINER=XEPDB1;
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/XEPDB1/temp01.dbf' RESIZE ${TEMP_SIZE}M;
+
+     ALTER TABLESPACE TEMP SHRINK SPACE;
      ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/XEPDB1/temp01.dbf'
         AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
