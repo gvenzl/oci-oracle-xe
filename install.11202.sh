@@ -116,6 +116,10 @@ echo "BUILDER: post config database steps"
 
 # Perform further Database setup operations
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
    -- Enable remote HTTP access
    EXEC DBMS_XDB.SETLISTENERLOCALACCESS(FALSE);
 
@@ -161,6 +165,9 @@ rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo04.log
 if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
+
      -- Disable password profile checks
      ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED PASSWORD_LIFE_TIME UNLIMITED;
 
@@ -180,8 +187,11 @@ EOF
   if [ "${BUILD_MODE}" == "SLIM" ]; then
     su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
-    -- Remove XDB
-    SELECT '#TODO' FROM DUAL;
+       -- Exit on any errors
+       WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       -- Remove XDB
+       SELECT '#TODO' FROM DUAL;
 EOF
     # Spatial
     # Text
@@ -190,6 +200,9 @@ EOF
 
   # Shrink datafiles
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
 
      ---------------------------
      -- Shrink SYSAUX tablespace
@@ -259,6 +272,10 @@ echo "BUILDER: graceful database shutdown"
 
 # Shutdown database gracefully (listener is not yet running)
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
    -- Shutdown database gracefully
    shutdown immediate;
    exit;

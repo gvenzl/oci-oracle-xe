@@ -86,6 +86,10 @@ echo "BUILDER: post config database steps"
 
 # Perform further Database setup operations
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
    -- Enable remote HTTP access
    EXEC DBMS_XDB.SETLISTENERLOCALACCESS(FALSE);
 
@@ -144,6 +148,9 @@ EOF
 if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
+
      -- Deactivate Intel's Math Kernel Libraries
      ALTER SYSTEM SET "_dmm_blas_library"='libora_netlib.so' SCOPE=SPFILE;
 
@@ -192,6 +199,9 @@ EOF
 
   # Shrink datafiles
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
 
      -- Open PDB\$SEED in READ/WRITE mode
      ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
@@ -341,6 +351,10 @@ echo "BUILDER: graceful database shutdown"
 
 # Shutdown database gracefully (listener is not yet running)
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
    -- Shutdown database gracefully
    shutdown immediate;
    exit;
