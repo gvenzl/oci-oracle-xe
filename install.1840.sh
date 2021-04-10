@@ -494,6 +494,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove Oracle Database Migration Assistant for Unicode (dmu)
   rm -r "${ORACLE_HOME}"/dmu
 
+  # Remove inventory directory
+  rm -r "${ORACLE_HOME}"/inventory
+
   # Remove JDBC drivers
   rm -r "${ORACLE_HOME}"/jdbc
   rm -r "${ORACLE_HOME}"/jlib
