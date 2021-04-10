@@ -99,10 +99,14 @@ function setup_env_vars() {
 # Create dbconfig directory structure
 function create_dbconfig() {
 
-  if [ -f "${ORACLE_BASE}"/oradata/"${ORACLE_SID}".zip ]; then
+  if [ -f "${ORACLE_BASE}"/"${ORACLE_SID}".zip ]; then
      echo "CONTAINER: uncompressing database data files, please wait..."
-     unzip "${ORACLE_BASE}"/oradata/"${ORACLE_SID}".zip -d "${ORACLE_BASE}"/oradata/ 1> /dev/null
-     rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}".zip
+     EXTRACT_START_TMS=$(date '+%s')
+     unzip "${ORACLE_BASE}"/"${ORACLE_SID}".zip -d "${ORACLE_BASE}"/oradata/ 1> /dev/null
+     EXTRACT_END_TMS=$(date '+%s')
+     EXTRACT_DURATION=$(( EXTRACT_END_TMS - EXTRACT_START_TMS ))
+     echo "CONTAINER: done uncompressing database data files, duration: ${EXTRACT_DURATION} seconds."
+     rm "${ORACLE_BASE}"/"${ORACLE_SID}".zip
   fi;
 
   mkdir -p "${ORACLE_BASE}/oradata/dbconfig/${ORACLE_SID}"

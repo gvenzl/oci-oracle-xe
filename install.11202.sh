@@ -272,6 +272,8 @@ EOF
 echo "BUILDER: compressing database data files"
 cd "${ORACLE_BASE}"/oradata
 zip -r "${ORACLE_SID}".zip "${ORACLE_SID}"
+chown oracle:dba "${ORACLE_SID}".zip
+mv "${ORACLE_SID}".zip "${ORACLE_BASE}"/
 rm  -r "${ORACLE_SID}"
 cd - 1> /dev/null
 
