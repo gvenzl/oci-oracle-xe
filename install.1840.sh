@@ -505,6 +505,11 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove zip artifacts in $ORACLE_HOME/lib
   rm "${ORACLE_HOME}"/lib/*.zip
 
+  # Remove not needed packages
+  # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
+  rpm -e --nodeps glibc-devel glibc-headers kernel-headers libpkgconf libxcrypt-devel \
+                  pkgconf pkgconf-m4 pkgconf-pkg-config
+
 fi;
 
 # Remove installation dependencies
