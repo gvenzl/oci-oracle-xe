@@ -24,19 +24,18 @@ set -Eeuo pipefail
 
 echo "BUILDER: started"
 
-# Build mode ("SLIM", "NORMAL", "FULL")
-BUILD_MODE=${1:-"NORMAL"}
+# Build mode ("SLIM", "REGULAR", "FULL")
+BUILD_MODE=${1:-"REGULAR"}
 
 echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 
 # Set data file sizes
 SYSTEM_SIZE=353
 SYSAUX_SIZE=610
-TEMP_SIZE=2
 UNDO_SIZE=155
 if [ "${BUILD_MODE}" == "FULL" ]; then
   REDO_SIZE=50
-elif [ "${BUILD_MODE}" == "NORMAL" ]; then
+elif [ "${BUILD_MODE}" == "REGULAR" ]; then
   REDO_SIZE=20
   USERS_SIZE=10
 elif [ "${BUILD_MODE}" == "SLIM" ]; then
@@ -117,6 +116,10 @@ echo "BUILDER: post config database steps"
 
 # Perform further Database setup operations
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
    -- Enable remote HTTP access
    EXEC DBMS_XDB.SETLISTENERLOCALACCESS(FALSE);
 
@@ -159,8 +162,11 @@ rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo04.log
 ###################################
 
 # If not building the FULL image, remove and shrink additional components
-if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
 
      -- Disable password profile checks
      ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED PASSWORD_LIFE_TIME UNLIMITED;
@@ -181,8 +187,11 @@ EOF
   if [ "${BUILD_MODE}" == "SLIM" ]; then
     su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
-    -- Remove XDB
-    SELECT '#TODO' FROM DUAL;
+       -- Exit on any errors
+       WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       -- Remove XDB
+       SELECT '#TODO' FROM DUAL;
 EOF
     # Spatial
     # Text
@@ -191,6 +200,9 @@ EOF
 
   # Shrink datafiles
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
 
      ---------------------------
      -- Shrink SYSAUX tablespace
@@ -225,7 +237,7 @@ EOF
      -- Shrink TEMP tablespace
      -------------------------
 
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp.dbf' RESIZE ${TEMP_SIZE}M;
+     ALTER TABLESPACE TEMP SHRINK SPACE;
      ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp.dbf'
         AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
@@ -260,6 +272,10 @@ echo "BUILDER: graceful database shutdown"
 
 # Shutdown database gracefully (listener is not yet running)
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
    -- Shutdown database gracefully
    shutdown immediate;
    exit;
@@ -272,6 +288,8 @@ EOF
 echo "BUILDER: compressing database data files"
 cd "${ORACLE_BASE}"/oradata
 zip -r "${ORACLE_SID}".zip "${ORACLE_SID}"
+chown oracle:dba "${ORACLE_SID}".zip
+mv "${ORACLE_SID}".zip "${ORACLE_BASE}"/
 rm  -r "${ORACLE_SID}"
 cd - 1> /dev/null
 
@@ -398,7 +416,7 @@ rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/metadata/*
 rm -r "${ORACLE_BASE}"/oradiag_oracle/*
 
 # Remove additional files for NOMRAL and SLIM builds
-if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
   # Remove APEX directory
   rm -r "${ORACLE_HOME}"/apex

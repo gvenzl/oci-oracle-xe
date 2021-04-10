@@ -1,8 +1,8 @@
 #!/bin/bash
-# Since: January, 2021
+# Since: April, 2021
 # Author: gvenzl
-# Name: build_Dockerfile_11202.sh
-# Description: Build test scripts for Oracle DB XE 11.2.0.2
+# Name: upload_images.sh
+# Description: Upload images to registry
 #
 # Copyright 2021 Gerald Venzl
 #
@@ -22,20 +22,28 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-CURRENT_DIR=${PWD}
+# Ensure all tags are in place
+./all_tag_images.sh
 
-cd ../
+# Upload images
+echo "Login to Docker Hub:"
+podman login
 
-echo "TEST: Building 11.2.0.2 FULL image"
-./buildContainerImage.sh -v 11.2.0.2 -f
-echo "DONE: Building 11.2.0.2 FULL image"
+# Upload latest
+podman push gvenzl/oracle-xe:latest
 
-echo "TEST: Building 11.2.0.2 REGULAR image"
-./buildContainerImage.sh -v 11.2.0.2
-echo "DONE: Building 11.2.0.2 REGULAR image"
+# Upload 18c images
+podman push gvenzl/oracle-xe:18.4.0-full
+podman push gvenzl/oracle-xe:18-full
+podman push gvenzl/oracle-xe:full
 
-echo "TEST: Building 11.2.0.2 SLIM image"
-./buildContainerImage.sh -v 11.2.0.2 -s
-echo "TEST: Building 11.2.0.2 SLIM image"
+podman push gvenzl/oracle-xe:18.4.0
+podman push gvenzl/oracle-xe:18
 
-cd "${CURRENT_DIR}"
+# Upload 11g images
+podman push gvenzl/oracle-xe:11.2.0.2-full
+podman push gvenzl/oracle-xe:11-full
+podman push gvenzl/oracle-xe:11.2.0.2
+podman push gvenzl/oracle-xe:11
+podman push gvenzl/oracle-xe:11.2.0.2-slim
+podman push gvenzl/oracle-xe:11-slim

@@ -1,8 +1,8 @@
 #!/bin/bash
-# Since: January, 2021
+# Since: March, 2021
 # Author: gvenzl
-# Name: build_Dockerfile_11202.sh
-# Description: Build test scripts for Oracle DB XE 11.2.0.2
+# Name: all_tag_images.sh
+# Description: Tag all images
 #
 # Copyright 2021 Gerald Venzl
 #
@@ -22,20 +22,6 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-CURRENT_DIR=${PWD}
-
-cd ../
-
-echo "TEST: Building 11.2.0.2 FULL image"
-./buildContainerImage.sh -v 11.2.0.2 -f
-echo "DONE: Building 11.2.0.2 FULL image"
-
-echo "TEST: Building 11.2.0.2 REGULAR image"
-./buildContainerImage.sh -v 11.2.0.2
-echo "DONE: Building 11.2.0.2 REGULAR image"
-
-echo "TEST: Building 11.2.0.2 SLIM image"
-./buildContainerImage.sh -v 11.2.0.2 -s
-echo "TEST: Building 11.2.0.2 SLIM image"
-
-cd "${CURRENT_DIR}"
+./tag_image_latest.sh
+./tag_images_1840.sh
+./tag_images_11202.sh

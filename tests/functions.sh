@@ -29,12 +29,13 @@ function checkDB {
   CONTAINER_NAME="${1}"
   
   tries=0
-  max_tries=10
+  max_tries=12
+  sleep_time_secs=10
   
   # Wait until container is ready
   while [ ${tries} -lt ${max_tries} ]; do
     # Sleep until DB is up and running
-    sleep 5;
+    sleep ${sleep_time_secs};
     
     # Is the database ready for use?
     podman logs ${CONTAINER_NAME} | grep 'DATABASE IS READY TO USE' >/dev/null;
@@ -45,7 +46,7 @@ function checkDB {
     ((tries++))
 
   done;
-  
+
   return 1;
 }
 

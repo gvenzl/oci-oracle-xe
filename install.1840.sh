@@ -24,8 +24,8 @@ set -Eeuo pipefail
 
 echo "BUILDER: started"
 
-# Build mode ("SLIM", "NORMAL", "FULL")
-BUILD_MODE=${1:-"NORMAL"}
+# Build mode ("SLIM", "REGULAR", "FULL")
+BUILD_MODE=${1:-"REGULAR"}
 
 echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 
@@ -34,12 +34,11 @@ CDB_SYSAUX_SIZE=480
 PDB_SYSAUX_SIZE=342
 CDB_SYSTEM_SIZE=840
 PDB_SYSTEM_SIZE=255
-TEMP_SIZE=2
 CDB_UNDO_SIZE=70
 PDB_UNDO_SIZE=48
 if [ "${BUILD_MODE}" == "FULL" ]; then
   REDO_SIZE=50
-elif [ "${BUILD_MODE}" == "NORMAL" ]; then
+elif [ "${BUILD_MODE}" == "REGULAR" ]; then
   REDO_SIZE=20
   USERS_SIZE=10
 fi;
@@ -51,6 +50,11 @@ microdnf -y install bc binutils file elfutils-libelf ksh sysstat procps-ng smart
 
 # Install runtime dependencies
 microdnf -y install libnsl glibc libaio libgcc libstdc++
+
+# Install fortran runtime for libora_netlib.so (so that the Intel Math Kernel libraries are no longer needed)
+if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+  microdnf -y install compat-libgfortran-48
+fi;
 
 # Install container runtime specific packages
 # (used by the entrypoint script, not the database itself)
@@ -82,6 +86,10 @@ echo "BUILDER: post config database steps"
 
 # Perform further Database setup operations
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
    -- Enable remote HTTP access
    EXEC DBMS_XDB.SETLISTENERLOCALACCESS(FALSE);
 
@@ -137,8 +145,14 @@ EOF
 ###################################
 
 # If not building the FULL image, remove and shrink additional components
-if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+     -- Deactivate Intel's Math Kernel Libraries
+     ALTER SYSTEM SET "_dmm_blas_library"='libora_netlib.so' SCOPE=SPFILE;
 
      ---------
      -- CDB --
@@ -171,11 +185,23 @@ if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
      -- Remove HR schema
      DROP user HR cascade;
 
+     -------------------------------------
+     -- Bounce DB to free up UNDO, etc. --
+     -------------------------------------
+     -- Go back to CDB level
+
+     ALTER SESSION SET CONTAINER=CDB\$ROOT;
+     shutdown immediate;
+     startup;
+
      exit;
 EOF
 
   # Shrink datafiles
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
 
      -- Open PDB\$SEED in READ/WRITE mode
      ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
@@ -238,19 +264,18 @@ EOF
      -- Shrink TEMP tablespaces
      --------------------------
 
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp01.dbf' RESIZE ${TEMP_SIZE}M;
+     ALTER TABLESPACE TEMP SHRINK SPACE;
      ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp01.dbf'
      AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
      ALTER SESSION SET CONTAINER=PDB\$SEED;
-     -- Find and drop old TEMP file
+
+     ALTER TABLESPACE TEMP SHRINK SPACE;
+
      DECLARE
         v_tmp_file_name   VARCHAR2(200);
      BEGIN
         SELECT name INTO v_tmp_file_name FROM v\$tempfile WHERE name LIKE '%/temp012%';
-        -- TODO: shrink temp file to 2MB for PDB\$SEED
-        EXECUTE IMMEDIATE
-           'ALTER DATABASE TEMPFILE ''' || v_tmp_file_name || ''' RESIZE 32M';
         EXECUTE IMMEDIATE
            'ALTER DATABASE TEMPFILE ''' || v_tmp_file_name || ''' AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED';
         --TODO: rename ugly TEMP file and resize
@@ -259,7 +284,8 @@ EOF
      /
 
      ALTER SESSION SET CONTAINER=XEPDB1;
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/XEPDB1/temp01.dbf' RESIZE ${TEMP_SIZE}M;
+
+     ALTER TABLESPACE TEMP SHRINK SPACE;
      ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/XEPDB1/temp01.dbf'
         AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
@@ -325,6 +351,10 @@ echo "BUILDER: graceful database shutdown"
 
 # Shutdown database gracefully (listener is not yet running)
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
    -- Shutdown database gracefully
    shutdown immediate;
    exit;
@@ -337,6 +367,8 @@ EOF
 echo "BUILDER: compressing database data files"
 cd "${ORACLE_BASE}"/oradata
 zip -r "${ORACLE_SID}".zip "${ORACLE_SID}"
+chown oracle:dba "${ORACLE_SID}".zip
+mv "${ORACLE_SID}".zip "${ORACLE_BASE}"/
 rm  -r "${ORACLE_SID}"
 cd - 1> /dev/null
 
@@ -438,11 +470,13 @@ rm -r /install
 # Cleanup XE files not needed for being in a container but were installed by the rpm
 /sbin/chkconfig --del oracle-xe-18c
 rm /etc/init.d/oracle-xe-18c
+rm /etc/sysconfig/oracle-xe-18c.conf
 rm -r /var/log/oracle-database-xe-18c
 rm -r /tmp/*
 
 # Remove SYS audit directories and files created during install
 rm -r "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/adump/*
+rm -r "${ORACLE_BASE}"/audit/"${ORACLE_SID}"/*
 
 # Remove Data Pump log file
 rm "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/dpdump/dp.log
@@ -463,11 +497,36 @@ rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/lck/*
 rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/metadata/*
 
 # Remove additional files for NOMRAL and SLIM builds
-if [ "${BUILD_MODE}" == "NORMAL" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+
+  # Remove OPatch and QOpatch
+  rm -r "${ORACLE_HOME}"/OPatch
+  rm -r "${ORACLE_HOME}"/QOpatch
+
+  # Remove assistants
+  rm -r "${ORACLE_HOME}"/assistants
+
+  # Remove Oracle Database Migration Assistant for Unicode (dmu)
+  rm -r "${ORACLE_HOME}"/dmu
+
+  # Remove inventory directory
+  rm -r "${ORACLE_HOME}"/inventory
 
   # Remove JDBC drivers
   rm -r "${ORACLE_HOME}"/jdbc
   rm -r "${ORACLE_HOME}"/jlib
+  rm -r "${ORACLE_HOME}"/ucp
+
+  # Remove Intel's Math kernel libraries
+  rm "${ORACLE_HOME}"/lib/libmkl_*
+
+  # Remove zip artifacts in $ORACLE_HOME/lib
+  rm "${ORACLE_HOME}"/lib/*.zip
+
+  # Remove not needed packages
+  # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
+  rpm -e --nodeps glibc-devel glibc-headers kernel-headers libpkgconf libxcrypt-devel \
+                  pkgconf pkgconf-m4 pkgconf-pkg-config
 
 fi;
 
