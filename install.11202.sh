@@ -204,8 +204,8 @@ EOF
        -- Remove XS components manually
        drop index xdb.sc_xidx;
        drop index xdb.prin_xidx;
-       drop public synonym XS$CACHE_DELETE;
-       drop public synonym XS$CACHE_ACTIONS;
+       drop public synonym XS\$CACHE_DELETE;
+       drop public synonym XS\$CACHE_ACTIONS;
        drop public synonym DBA_NETWORK_ACLS;
        drop public synonym DBA_NETWORK_ACL_PRIVILEGES;
        drop public synonym DBA_WALLET_ACLS;
@@ -225,9 +225,9 @@ EOF
        drop public synonym ALL_XSC_PRIVILEGE;
        drop public synonym ALL_XSC_AGGREGATE_PRIVILEGE;
        drop public synonym XS_SESSION_ROLES;
-       drop public synonym V$XS_SESSION;
-       drop public synonym V$XS_SESSION_ROLE;
-       drop public synonym V$XS_SESSION_ATTRIBUTE;
+       drop public synonym V\$XS_SESSION;
+       drop public synonym V\$XS_SESSION_ROLE;
+       drop public synonym V\$XS_SESSION_ATTRIBUTE;
        drop public synonym USER_NETWORK_ACL_PRIVILEGES;
        drop public synonym dbms_network_acl_utility;
        drop public synonym dbms_network_acl_admin;
@@ -251,15 +251,15 @@ EOF
        drop view ALL_XSC_SECURITY_CLASS_DEP;
        drop view ALL_XSC_PRIVILEGE;
        drop view ALL_XSC_AGGREGATE_PRIVILEGE;
-       drop view V$XS_SESSION;
-       drop view V$XS_SESSION_ROLE;
-       drop view V$XS_SESSION_ATTRIBUTE;
+       drop view V\$XS_SESSION;
+       drop view V\$XS_SESSION_ROLE;
+       drop view V\$XS_SESSION_ATTRIBUTE;
        drop view USER_NETWORK_ACL_PRIVILEGES;
-       drop table XDB.XS$CACHE_ACTIONS;
-       drop table XDB.XS$CACHE_DELETE;
-       drop table NET$_ACL;
-       drop table WALLET$_ACL;
-       drop package XS$CATVIEW_UTIL;
+       drop table XDB.XS\$CACHE_ACTIONS;
+       drop table XDB.XS\$CACHE_DELETE;
+       drop table NET\$_ACL;
+       drop table WALLET\$_ACL;
+       drop package XS\$CATVIEW_UTIL;
        drop package DBMS_XS_PRINCIPALS;
        drop package DBMS_XS_PRINCIPALS_INT;
        drop package DBMS_XS_ROLESET_EVENTS_INT;
@@ -271,7 +271,7 @@ EOF
        drop package XS_UTIL;
        drop package dbms_network_acl_admin;
        drop package dbms_network_acl_utility;
-       drop user XS$NULL cascade;
+       drop user XS\$NULL cascade;
 
        @${ORACLE_HOME}/rdbms/admin/catnoqm.sql
 
@@ -570,6 +570,8 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
     # Remove NLS demo
     rm -r "${ORACLE_HOME}"/nls/demo
+
+    #TODO
 
   fi;
 
