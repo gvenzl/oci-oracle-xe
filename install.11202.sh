@@ -171,12 +171,16 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
      -- Disable password profile checks
      ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED PASSWORD_LIFE_TIME UNLIMITED;
 
-     -- Remove APEX
+     ---------------------------
+     ------- Remove APEX -------
+     ---------------------------
      @${ORACLE_HOME}/apex/apxremov.sql
      DROP PUBLIC SYNONYM HTMLDB_SYSTEM;
      DROP PACKAGE HTMLDB_SYSTEM;
 
-     -- Remove HR schema
+     ---------------------------
+     ---- Remove HR schema -----
+     ---------------------------
      DROP USER HR cascade;
 
      exit;
@@ -187,11 +191,112 @@ EOF
   if [ "${BUILD_MODE}" == "SLIM" ]; then
     su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
-       -- Exit on any errors
-       WHENEVER SQLERROR EXIT SQL.SQLCODE
+       -- Do not exit on error because of expected error in catmet2.sql
+       -- WHENEVER SQLERROR EXIT SQL.SQLCODE
 
-       -- Remove XDB
-       SELECT '#TODO' FROM DUAL;
+       shutdown immediate;
+       startup upgrade;
+
+       ---------------------------
+       ------- Remove XDB --------
+       ---------------------------
+
+
+       -- Remove XS components manually
+       drop index xdb.sc_xidx;
+       drop index xdb.prin_xidx;
+       drop public synonym XS$CACHE_DELETE;
+       drop public synonym XS$CACHE_ACTIONS;
+       drop public synonym DBA_NETWORK_ACLS;
+       drop public synonym DBA_NETWORK_ACL_PRIVILEGES;
+       drop public synonym DBA_WALLET_ACLS;
+       drop public synonym DBA_XDS_OBJECTS;
+       drop public synonym ALL_XDS_OBJECTS;
+       drop public synonym USER_XDS_OBJECTS;
+       drop public synonym DBA_XDS_INSTANCE_SETS;
+       drop public synonym ALL_XDS_INSTANCE_SETS;
+       drop public synonym USER_XDS_INSTANCE_SETS;
+       drop public synonym DBA_XDS_ATTRIBUTE_SECS;
+       drop public synonym ALL_XDS_ATTRIBUTE_SECS;
+       drop public synonym USER_XDS_ATTRIBUTE_SECS;
+       drop public synonym DOCUMENT_LINKS2;
+       drop public synonym ALL_XSC_SECURITY_CLASS;
+       drop public synonym ALL_XSC_SECURITY_CLASS_STATUS;
+       drop public synonym ALL_XSC_SECURITY_CLASS_DEP;
+       drop public synonym ALL_XSC_PRIVILEGE;
+       drop public synonym ALL_XSC_AGGREGATE_PRIVILEGE;
+       drop public synonym XS_SESSION_ROLES;
+       drop public synonym V$XS_SESSION;
+       drop public synonym V$XS_SESSION_ROLE;
+       drop public synonym V$XS_SESSION_ATTRIBUTE;
+       drop public synonym USER_NETWORK_ACL_PRIVILEGES;
+       drop public synonym dbms_network_acl_utility;
+       drop public synonym dbms_network_acl_admin;
+       drop public synonym DBMS_XS_MTCACHE;
+       drop public synonym DBMS_XS_UTIL;
+       drop view DBA_NETWORK_ACLS;
+       drop view DBA_NETWORK_ACL_PRIVILEGES;
+       drop view DBA_WALLET_ACLS;
+       drop view DBA_XDS_OBJECTS;
+       drop view ALL_XDS_OBJECTS;
+       drop view USER_XDS_OBJECTS;
+       drop view DBA_XDS_INSTANCE_SETS;
+       drop view ALL_XDS_INSTANCE_SETS;
+       drop view USER_XDS_INSTANCE_SETS;
+       drop view DBA_XDS_ATTRIBUTE_SECS;
+       drop view ALL_XDS_ATTRIBUTE_SECS;
+       drop view USER_XDS_ATTRIBUTE_SECS;
+       drop view XDB.DOCUMENT_LINKS2;
+       drop view ALL_XSC_SECURITY_CLASS;
+       drop view ALL_XSC_SECURITY_CLASS_STATUS;
+       drop view ALL_XSC_SECURITY_CLASS_DEP;
+       drop view ALL_XSC_PRIVILEGE;
+       drop view ALL_XSC_AGGREGATE_PRIVILEGE;
+       drop view V$XS_SESSION;
+       drop view V$XS_SESSION_ROLE;
+       drop view V$XS_SESSION_ATTRIBUTE;
+       drop view USER_NETWORK_ACL_PRIVILEGES;
+       drop table XDB.XS$CACHE_ACTIONS;
+       drop table XDB.XS$CACHE_DELETE;
+       drop table NET$_ACL;
+       drop table WALLET$_ACL;
+       drop package XS$CATVIEW_UTIL;
+       drop package DBMS_XS_PRINCIPALS;
+       drop package DBMS_XS_PRINCIPALS_INT;
+       drop package DBMS_XS_ROLESET_EVENTS_INT;
+       drop package DBMS_XS_PRINCIPAL_EVENTS_INT;
+       drop package DBMS_XS_DATA_SECURITY_EVENTS;
+       drop package DBMS_XS_SECCLASS_EVENTS;
+       drop package DBMS_XS_MTCACHE;
+       drop package DBMS_XS_MTCACHE_FFI;
+       drop package XS_UTIL;
+       drop package dbms_network_acl_admin;
+       drop package dbms_network_acl_utility;
+       drop user XS$NULL cascade;
+
+       @${ORACLE_HOME}/rdbms/admin/catnoqm.sql
+
+       -- Update Data Pump and related objects and KU$_ views
+       @${ORACLE_HOME}/rdbms/admin/catxdbdv.sql
+       @${ORACLE_HOME}/rdbms/admin/dbmsmeta.sql
+       @${ORACLE_HOME}/rdbms/admin/dbmsmeti.sql
+       @${ORACLE_HOME}/rdbms/admin/dbmsmetu.sql
+       @${ORACLE_HOME}/rdbms/admin/dbmsmetb.sql
+       @${ORACLE_HOME}/rdbms/admin/dbmsmetd.sql
+       @${ORACLE_HOME}/rdbms/admin/dbmsmet2.sql
+       @${ORACLE_HOME}/rdbms/admin/catmeta.sql
+       @${ORACLE_HOME}/rdbms/admin/prvtmeta.plb
+       @${ORACLE_HOME}/rdbms/admin/prvtmeti.plb
+       @${ORACLE_HOME}/rdbms/admin/prvtmetu.plb
+       @${ORACLE_HOME}/rdbms/admin/prvtmetb.plb
+       @${ORACLE_HOME}/rdbms/admin/prvtmetd.plb
+       @${ORACLE_HOME}/rdbms/admin/prvtmet2.plb
+       @${ORACLE_HOME}/rdbms/admin/catmet2.sql
+
+       -- Restart DB in normal mode
+       shutdown immediate;
+       startup;
+
 EOF
     # Spatial
     # Text
