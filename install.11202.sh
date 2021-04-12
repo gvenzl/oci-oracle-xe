@@ -201,7 +201,6 @@ EOF
        ------- Remove XDB --------
        ---------------------------
 
-
        -- Remove XS components manually
        drop index xdb.sc_xidx;
        drop index xdb.prin_xidx;
@@ -299,12 +298,32 @@ EOF
        @${ORACLE_HOME}/ctx/admin/catnoctx.sql
        drop procedure sys.validate_context;
 
+       ---------------------------
+       ----- Remove Spatial ------
+       ---------------------------
+       -- Drop Spatial user
+       DROP USER MDSYS CASCADE;
+
+       -- Drop all  public synonyms related to spatial
+       BEGIN
+          FOR cur IN (SELECT 'drop public synonym "' || synonym_name || '"' AS cmd
+                        FROM dba_synonyms WHERE table_owner = 'MDSYS')
+          LOOP
+             EXECUTE IMMEDIATE cur.cmd;
+          END LOOP;
+       END;
+       /
+
+       ---------------------------
+       --- Recompile database ----
+       ---------------------------
+       @${ORACLE_HOME}/rdbms/admin/utlrp.sql
+
        -- Restart DB in normal mode
        shutdown immediate;
        startup;
 
 EOF
-    # Spatial
   fi;
 
   # Shrink datafiles
