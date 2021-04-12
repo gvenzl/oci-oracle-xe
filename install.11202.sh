@@ -293,14 +293,18 @@ EOF
        @${ORACLE_HOME}/rdbms/admin/prvtmet2.plb
        @${ORACLE_HOME}/rdbms/admin/catmet2.sql
 
+       ---------------------------
+       ------- Remove Text -------
+       ---------------------------
+       @${ORACLE_HOME}/ctx/admin/catnoctx.sql
+       drop procedure sys.validate_context;
+
        -- Restart DB in normal mode
        shutdown immediate;
        startup;
 
 EOF
     # Spatial
-    # Text
-    # XDB
   fi;
 
   # Shrink datafiles
@@ -520,7 +524,7 @@ rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/lck/*
 rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/metadata/*
 rm -r "${ORACLE_BASE}"/oradiag_oracle/*
 
-# Remove additional files for NOMRAL and SLIM builds
+# Remove additional files for REGULAR and SLIM builds
 if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
   # Remove APEX directory
@@ -535,6 +539,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
   # Remove components from ORACLE_HOME
   if [ "${BUILD_MODE}" == "SLIM" ]; then
+
+    # Remove Oracle Text directory
+    rm -f "${ORACLE_HOME}"/ctx
 
     # Remove demo directory
     rm -r "${ORACLE_HOME}"/demo
