@@ -560,7 +560,7 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   if [ "${BUILD_MODE}" == "SLIM" ]; then
 
     # Remove Oracle Text directory
-    rm -f "${ORACLE_HOME}"/ctx
+    rm -r "${ORACLE_HOME}"/ctx
 
     # Remove demo directory
     rm -r "${ORACLE_HOME}"/demo
