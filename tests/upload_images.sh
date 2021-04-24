@@ -30,20 +30,32 @@ echo "Login to Docker Hub:"
 podman login
 
 # Upload latest
-podman push gvenzl/oracle-xe:latest
+echo "Upload latest"
+podman push gvenzl/oracle-xe:latest          docker.io/gvenzl/oracle-xe:latest
 
 # Upload 18c images
-podman push gvenzl/oracle-xe:18.4.0-full
-podman push gvenzl/oracle-xe:18-full
-podman push gvenzl/oracle-xe:full
+echo "Upload 18.4.0-full"
+podman push gvenzl/oracle-xe:18.4.0-full     docker.io/gvenzl/oracle-xe:18.4.0-full
+echo "Upload 18-full"
+podman push gvenzl/oracle-xe:18-full         docker.io/gvenzl/oracle-xe:18-full
+echo "Upload full"
+podman push gvenzl/oracle-xe:full            docker.io/gvenzl/oracle-xe:full
 
-podman push gvenzl/oracle-xe:18.4.0
-podman push gvenzl/oracle-xe:18
+echo "Upload 18.4.0"
+podman push gvenzl/oracle-xe:18.4.0          docker.io/gvenzl/oracle-xe:18.4.0
+echo "Upload 18"
+podman push gvenzl/oracle-xe:18              docker.io/gvenzl/oracle-xe:18
 
 # Upload 11g images
-podman push gvenzl/oracle-xe:11.2.0.2-full
-podman push gvenzl/oracle-xe:11-full
-podman push gvenzl/oracle-xe:11.2.0.2
-podman push gvenzl/oracle-xe:11
-podman push gvenzl/oracle-xe:11.2.0.2-slim
-podman push gvenzl/oracle-xe:11-slim
+echo "Upload 11.2.0.2-full"
+podman push gvenzl/oracle-xe:11.2.0.2-full   docker.io/gvenzl/oracle-xe:11.2.0.2-full
+echo "Upload 11-full"
+podman push gvenzl/oracle-xe:11-full         docker.io/gvenzl/oracle-xe:11-full
+echo "Upload 11.2.0.2"
+podman push gvenzl/oracle-xe:11.2.0.2        docker.io/gvenzl/oracle-xe:11.2.0.2
+echo "Upload 11"
+podman push gvenzl/oracle-xe:11              docker.io/gvenzl/oracle-xe:11
+echo "Upload 11.2.0.2-slim"
+podman push gvenzl/oracle-xe:11.2.0.2-slim   docker.io/gvenzl/oracle-xe:11.2.0.2-slim
+echo "Upload 11-slim"
+podman push gvenzl/oracle-xe:11-slim         docker.io/gvenzl/oracle-xe:11-slim
