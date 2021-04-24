@@ -34,8 +34,6 @@ CDB_SYSAUX_SIZE=480
 PDB_SYSAUX_SIZE=342
 CDB_SYSTEM_SIZE=840
 PDB_SYSTEM_SIZE=255
-CDB_UNDO_SIZE=70
-PDB_UNDO_SIZE=48
 if [ "${BUILD_MODE}" == "FULL" ]; then
   REDO_SIZE=50
 elif [ "${BUILD_MODE}" == "REGULAR" ]; then
@@ -315,23 +313,73 @@ EOF
      -- Shrink UNDO tablespaces
      ----------------------------
 
-     -- TODO: Try to further decrease UNDO sizes
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs01.dbf' RESIZE ${CDB_UNDO_SIZE}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs01.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+     -- Create new temporary UNDO tablespace
+     CREATE UNDO TABLESPACE UNDO_TMP DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs_tmp.dbf'
+        SIZE 1M AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
+     -- Use new temporary UNDO tablespace (so that old one can be deleted)
+     ALTER SYSTEM SET UNDO_TABLESPACE='UNDO_TMP';
+
+     -- Delete old UNDO tablespace
+     DROP TABLESPACE UNDOTBS1 INCLUDING CONTENTS AND DATAFILES;
+
+     -- Recreate old UNDO tablespace with 1M size and AUTOEXTEND
+     CREATE UNDO TABLESPACE UNDOTBS1 DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs01.dbf'
+        SIZE 1M AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     -- Use newly created UNDO tablespace
+     ALTER SYSTEM SET UNDO_TABLESPACE='UNDOTBS1';
+
+     -- Drop temporary UNDO tablespace
+     DROP TABLESPACE UNDO_TMP INCLUDING CONTENTS AND DATAFILES;
+
+     --------------------------------------
      ALTER SESSION SET CONTAINER=PDB\$SEED;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/undotbs01.dbf' RESIZE ${PDB_UNDO_SIZE}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/undotbs01.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+     --------------------------------------
 
+     -- Create new temporary UNDO tablespace
+     CREATE UNDO TABLESPACE UNDO_TMP DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/undotbs_tmp.dbf'
+        SIZE 1M AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     -- Use new temporary UNDO tablespace (so that old one can be deleted)
+     ALTER SYSTEM SET UNDO_TABLESPACE='UNDO_TMP';
+
+     -- Delete old UNDO tablespace
+     DROP TABLESPACE UNDOTBS1 INCLUDING CONTENTS AND DATAFILES;
+
+     -- Recreate old UNDO tablespace with 1M size and AUTOEXTEND
+     CREATE UNDO TABLESPACE UNDOTBS1 DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/pdbseed/undotbs01.dbf'
+        SIZE 1M AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     -- Use newly created UNDO tablespace
+     ALTER SYSTEM SET UNDO_TABLESPACE='UNDOTBS1';
+
+     -- Drop temporary UNDO tablespace
+     DROP TABLESPACE UNDO_TMP INCLUDING CONTENTS AND DATAFILES;
+
+     -----------------------------------
      ALTER SESSION SET CONTAINER=XEPDB1;
-     -- PDB UNDO cannot go smaller (not sure yet why, TODO)
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/XEPDB1/undotbs01.dbf' RESIZE ${CDB_UNDO_SIZE}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/XEPDB1/undotbs01.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+     -----------------------------------
 
-     ALTER SESSION SET CONTAINER=CDB\$ROOT;
+     -- Create new temporary UNDO tablespace
+     CREATE UNDO TABLESPACE UNDO_TMP DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/XEPDB1/undotbs_tmp.dbf'
+        SIZE 1M AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     -- Use new temporary UNDO tablespace (so that old one can be deleted)
+     ALTER SYSTEM SET UNDO_TABLESPACE='UNDO_TMP';
+
+     -- Delete old UNDO tablespace
+     DROP TABLESPACE UNDOTBS1 INCLUDING CONTENTS AND DATAFILES;
+
+     -- Recreate old UNDO tablespace with 1M size and AUTOEXTEND
+     CREATE UNDO TABLESPACE UNDOTBS1 DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/XEPDB1/undotbs01.dbf'
+        SIZE 1M AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     -- Use newly created UNDO tablespace
+     ALTER SYSTEM SET UNDO_TABLESPACE='UNDOTBS1';
+
+     -- Drop temporary UNDO tablespace
+     DROP TABLESPACE UNDO_TMP INCLUDING CONTENTS AND DATAFILES;
 
      ------------------------------
      -- Complete actions and finish

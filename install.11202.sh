@@ -32,7 +32,6 @@ echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 # Set data file sizes
 SYSTEM_SIZE=353
 SYSAUX_SIZE=610
-UNDO_SIZE=155
 if [ "${BUILD_MODE}" == "FULL" ]; then
   REDO_SIZE=50
 elif [ "${BUILD_MODE}" == "REGULAR" ]; then
@@ -381,9 +380,25 @@ EOF
      -- Shrink UNDO tablespace
      -------------------------
 
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs1.dbf' RESIZE ${UNDO_SIZE}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs1.dbf'
-        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+     -- Create new temporary UNDO tablespace
+     CREATE UNDO TABLESPACE UNDO_TMP DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs_tmp.dbf'
+        SIZE 1M AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     -- Use new temporary UNDO tablespace (so that old one can be deleted)
+     ALTER SYSTEM SET UNDO_TABLESPACE='UNDO_TMP';
+
+     -- Delete old UNDO tablespace
+     DROP TABLESPACE UNDOTBS1 INCLUDING CONTENTS AND DATAFILES;
+
+     -- Recreate old UNDO tablespace with 1M size and AUTOEXTEND
+     CREATE UNDO TABLESPACE UNDOTBS1 DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs1.dbf'
+        SIZE 1M AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     -- Use newly created UNDO tablespace
+     ALTER SYSTEM SET UNDO_TABLESPACE='UNDOTBS1';
+
+     -- Drop temporary UNDO tablespace
+     DROP TABLESPACE UNDO_TMP INCLUDING CONTENTS AND DATAFILES;
 
      exit;
 EOF
