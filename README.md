@@ -31,12 +31,6 @@ Run a new persistent **11g R2** database container:
 docker run -d -p 1521:1521 -e ORACLE_PASSWORD=<your password> -v oracle-volume:/u01/app/oracle/oradata gvenzl/oracle-xe:11
 ```
 
-Run a new database container with OEM Express exposed:
-
-```shell
-docker run -d -p 1521:1521 -e ORACLE_PASSWORD=<your password> -p 5500:5500 gvenzl/oracle-xe
-```
-
 Reset database `SYS` and `SYSTEM` passwords:
 
 ```shell
@@ -221,54 +215,80 @@ The execution order and implications are the same as with the [Initialization sc
 ## Full image flavor
 
 The full image provides an Oracle Database XE installation "as is", meaning as provided by the RPM install file.
-A couple of modifications have been performed to make the installation more suitable for running inside a container:
+A couple of modifications have been performed to make the installation more suitable for running inside a container.
+
+### `18-full`
 
 * `DBMS_XDB.SETLISTENERLOCALACCESS()` has been set to `FALSE`
 * An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
-
-### 18c specific
-
 * `LOCAL_LISTENER` is set to `NULL` (18c)
 * `COMMON_USER_PREFIX` is set to `NULL` (18c)
 
-### 11g R2 specific
+### `11-full`
 
+* `DBMS_XDB.SETLISTENERLOCALACCESS()` has been set to `FALSE`
+* An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
 * The `REDO` logs have been located into `$ORACLE_BASE/oradata/$ORACLE_SID/` (11gR2 image)
-* The fast recovery area has been removed (11gR2 images)
+* The fast recovery area has been removed
 
 ## Regular image flavor
 
 The regular image has all customizations that the full image has.
 Additionally, it also includes the following changes:
 
-### Database components
-* Oracle APEX has been removed (you can download and install the latest and greatest from [apex.oracle.com](https://apex.oracle.com), 11gR2 image)
-* The `HR` schema and folder have been removed
-* The JDBC drivers have been removed (`$ORACLE_HOME/jdbc`, `$ORACLE_HOME/jlib`, `$ORACLE_HOME/ucp`)
-* The Oracle Database Assistants have been removed (`$ORACLE_HOME/assistants`)
-* The Oracle Database Migration Assistant for Unicode has been removed (`$ORACLE_HOME/dmu`)
-* The OPatch utility has been removed (`$ORACLE_HOME/OPatch`)
-* The QOpatch utility has been removed (`$ORACLE_HOME/QOpatch`)
+### `18`
 
-### Operating system
+#### Database components
 
-* The following Linux packages are not installed: `binutils`, `gcc`, `glibc`, `make` (11g R2)
+* The `HR` schema has been removed
+* `OPatch` utility has been removed (`$ORACLE_HOME/OPatch`)
+* `QOpatch` utility has been removed (`$ORACLE_HOME/QOpatch`)
+* `Oracle Database Assistants` have been removed (`$ORACLE_HOME/assistants`)
+* `Oracle Database Migration Assistant for Unicode` has been removed (`$ORACLE_HOME/dmu`)
+* The `inventory` directory has been removed (`$ORACLE_HOME/inventory`)
+* `JDBC` drivers have been removed (`$ORACLE_HOME/jdbc`, `$ORACLE_HOME/jlib`)
+* `Universal Connection Pool` driver has been removed (`$ORACLE_HOME/ucp`)
+* Intel Math Kernel libraries have been removed (`${ORACLE_HOME}/lib/libmkl_*`)
+* Other utilities have been removed (`${ORACLE_HOME}/lib/*.zip`)
 
-
-### Data files
-
-| Tablespace | 18c Size | 11g Size | Autoextend | Max size    |
-| ---------- | --------:| -------: | ---------: | ----------- |
-| `REDO`     | 20 MB    | 20 MB    |      `N/A` | `N/A`       |
-| `SYSAUX`   | 480 MB (CDB) <br> 342 MB (PDB) | 610 MB | 10 MB | `UNLIMITED` |
-| `SYSTEM`   | 353 MB (CDB) <br> 255 MB (PDB) | 353 MB | 10 MB | `UNLIMITED` |
-| `TEMP`     | 2 MB (CDB) <br> 2 MB (PDB)     |  2 MB    |      10 MB | `UNLIMITED` |
-| `UNDO`     | 70 MB (CDB) <br> 40 MB (PDB)        | 10 MB    |      10 MB | `UNLIMITED` |
-| `USERS`    |  10 MB        | 10 MB    |      10 MB | `UNLIMITED` |
-
-### Others
+#### Database settings
 
 * The `DEFAULT` profile has the following set:
   * `FAILED_LOGIN_ATTEMPTS=UNLIMITED`
   * `PASSWORD_LIFE_TIME=UNLIMITED`
-* The Intel Math kernel libraries have been removed
+
+#### Operating system
+
+* The following Linux packages are not installed: 
+  * `glibc-devel`
+  * `glibc-headers`
+  * `kernel-headers`
+  * `libpkgconf`
+  * `libxcrypt-devel`
+  * `pkgconf`
+  * `pkgconf-m4`
+  * `pkgconf-pkg-config`
+
+### `11`
+
+#### Database components
+
+* Oracle APEX has been removed (you can download and install the latest and greatest from [apex.oracle.com](https://apex.oracle.com)
+* The `HR` schema has been removed
+* The JDBC drivers have been removed (`$ORACLE_HOME/jdbc`, `$ORACLE_HOME/jlib`)
+* The ODBC driver has been removed (`$ORACLE_HOME/odbc`)
+
+#### Database settings
+
+* The `DEFAULT` profile has the following set:
+  * `FAILED_LOGIN_ATTEMPTS=UNLIMITED`
+  * `PASSWORD_LIFE_TIME=UNLIMITED`
+
+#### Operating system
+
+* The following Linux packages are not installed:
+  * `binutils`
+  * `gcc`
+  * `glibc`
+  * `make`
+
