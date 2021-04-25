@@ -212,31 +212,23 @@ The execution order and implications are the same as with the [Initialization sc
 | Regular | [None]    | A well-balanced image between image size and functionality. Recommended for most use cases. | Recommended for most use cases.                                                                        |
 | Full    | `-full`   | An image containing all functionality as provided by the Oracle Database installation.      | Best for extensions and/or customizations.                                                             |
 
-## Full image flavor
+## 18c XE
+
+### Full image flavor (`18-full`)
 
 The full image provides an Oracle Database XE installation "as is", meaning as provided by the RPM install file.
 A couple of modifications have been performed to make the installation more suitable for running inside a container.
 
-### `18-full`
+#### Database settings
 
-* `DBMS_XDB.SETLISTENERLOCALACCESS()` has been set to `FALSE`
+* `DBMS_XDB.SETLISTENERLOCALACCESS(FALSE)`
 * An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
-* `LOCAL_LISTENER` is set to `NULL` (18c)
-* `COMMON_USER_PREFIX` is set to `NULL` (18c)
+* `LOCAL_LISTENER=''`
+* `COMMON_USER_PREFIX=''`
 
-### `11-full`
+### Regular image flavor (`18`)
 
-* `DBMS_XDB.SETLISTENERLOCALACCESS()` has been set to `FALSE`
-* An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
-* The `REDO` logs have been located into `$ORACLE_BASE/oradata/$ORACLE_SID/` (11gR2 image)
-* The fast recovery area has been removed
-
-## Regular image flavor
-
-The regular image has all customizations that the full image has.
-Additionally, it also includes the following changes:
-
-### `18`
+The regular image strives to balance between the functionality required by most users and image size. It has all customizations that the full image has and removes additional components to further decrease the image size:
 
 #### Database components
 
@@ -269,14 +261,30 @@ Additionally, it also includes the following changes:
   * `pkgconf-m4`
   * `pkgconf-pkg-config`
 
-### `11`
+## 11g XE
+
+### Full image flavor (`11-full`)
+
+The full image provides an Oracle Database XE installation "as is", meaning as provided by the RPM install file.
+A couple of modifications have been performed to make the installation more suitable for running inside a container.
+
+#### Database settings
+
+* Automatic Memory Management has been disables (`MEMORY_TARGET`)
+* `DBMS_XDB.SETLISTENERLOCALACCESS()` has been set to `FALSE`
+* An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
+* The `REDO` logs have been located into `$ORACLE_BASE/oradata/$ORACLE_SID/`
+* The fast recovery area has been removed (`DB_RECOVERY_FILE_DEST=''`)
+
+### Regular image flavor (`11`)
+
+The regular image strives to balance between the functionality required by most users and image size. It has all customizations that the full image has and removes additional components to further decrease the image size:
 
 #### Database components
 
 * Oracle APEX has been removed (you can download and install the latest and greatest from [apex.oracle.com](https://apex.oracle.com)
 * The `HR` schema has been removed
-* The JDBC drivers have been removed (`$ORACLE_HOME/jdbc`, `$ORACLE_HOME/jlib`)
-* The ODBC driver has been removed (`$ORACLE_HOME/odbc`)
+* `JDBC` drivers have been removed (`$ORACLE_HOME/jdbc`, `$ORACLE_HOME/jlib`)
 
 #### Database settings
 
@@ -292,3 +300,25 @@ Additionally, it also includes the following changes:
   * `glibc`
   * `make`
 
+### Slim image flavor (`11-slim`)
+
+The slim images aims for smallest possible image size with only the Oracle Database relational components. It has all customizations that the regular image has and removes all non-relational components (where possible) to further decrease the image size:
+
+#### Database components
+
+* `Oracle Text` has been uninstalled and removed (`$ORACLE_HOME/ctx`)
+* `XML DB` has been uninstalled
+* `XDK` has been removed (`$ORACLE_HOME/xdk`)
+* `Oracle Spatial` has been uninstalled and removed (`$ORACLE_HOME/md`)
+* The demo samples directory has been removed (`$ORACLE_HOME/demo`)
+* `ODBC` driver samples have been removed (`$ORACLE_HOME/odbc`)
+* `TNS` demo samples have been removed (`$ORACLE_HOME/network/admin/samples`)
+* `NLS` demo samples have been removed (`$ORACLE_HOME/nls/demo`)
+* The hs directory has been removed (`$ORACLE_HOME/hs`)
+* The ldap directory has been removed (`$ORACLE_HOME/ldap`)
+* The precomp directory has been removed (`$ORACLE_HOME/precomp`)
+* The slax directory has been removed (`$ORACLE_HOME/slax`)
+* The rdbms/demo directory has been removed (`$ORACLE_HOME/rdbms/demo`)
+* The rdbms/jlib directory has been removed (`$ORACLE_HOME/rdbms/jlib`)
+* The rdbms/public directory has been removed (`$ORACLE_HOME/rdbms/public`)
+* The rdbms/xml directory has been removed (`$ORACLE_HOME/rdbms/xml`)

@@ -272,6 +272,7 @@ EOF
        drop package dbms_network_acl_utility;
        drop user XS\$NULL cascade;
 
+       -- XDB removal script
        @${ORACLE_HOME}/rdbms/admin/catnoqm.sql
 
        -- Update Data Pump and related objects and KU$_ views
@@ -568,17 +569,23 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm -r "${ORACLE_HOME}"/jdbc
   rm -r "${ORACLE_HOME}"/jlib
 
-  # Remove ODBC samples
-  rm -r "${ORACLE_HOME}"/odbc
-
   # Remove components from ORACLE_HOME
   if [ "${BUILD_MODE}" == "SLIM" ]; then
 
     # Remove Oracle Text directory
     rm -r "${ORACLE_HOME}"/ctx
 
+    # Remove XDK
+    rm -r "${ORACLE_HOME}"/xdk
+
+    # Remove Oracle Spatial directory
+    rm -r "${ORACLE_HOME}"/md
+
     # Remove demo directory
     rm -r "${ORACLE_HOME}"/demo
+
+    # Remove ODBC samples
+    rm -r "${ORACLE_HOME}"/odbc
 
     # Remove TNS samples
     rm -r "${ORACLE_HOME}"/network/admin/samples
@@ -586,7 +593,31 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     # Remove NLS demo
     rm -r "${ORACLE_HOME}"/nls/demo
 
-    #TODO
+    # Remove hs directory
+    rm -r "${ORACLE_HOME}"/hs
+
+    # Remove ldap directory
+    rm -r "${ORACLE_HOME}"/ldap
+
+    # Remove precomp directory
+    rm -r "${ORACLE_HOME}"/precomp
+
+    # Remove slax directory
+    rm -r "${ORACLE_HOME}"/slax
+
+    # Remove rdbms/demo directory
+    rm -r "${ORACLE_HOME}"/rdbms/demo
+
+    # Remove rdbms/jlib directory
+    rm -r "${ORACLE_HOME}"/rdbms/jlib
+
+    # Remove rdbms/public directory
+    rm -r "${ORACLE_HOME}"/rdbms/public
+
+    # Remove rdbms/jlib directory
+    rm -r "${ORACLE_HOME}"/rdbms/xml
+
+    # TODO
 
   fi;
 
