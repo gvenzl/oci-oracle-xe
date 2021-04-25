@@ -125,8 +125,6 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Remove local_listener entry (using default 1521)
    ALTER SYSTEM SET LOCAL_LISTENER='';
    
-   --TODO; SET UNDO_RETENTION
-   
    -- Reboot of DB
    SHUTDOWN IMMEDIATE;
    STARTUP;
@@ -150,6 +148,7 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
      WHENEVER SQLERROR EXIT SQL.SQLCODE
 
      -- Deactivate Intel's Math Kernel Libraries
+     -- Like with every underscore parameter, DO NOT SET THIS PARAMETER EVER UNLESS YOU KNOW WHAT THE HECK YOU ARE DOING!
      ALTER SYSTEM SET "_dmm_blas_library"='libora_netlib.so' SCOPE=SPFILE;
 
      ---------
