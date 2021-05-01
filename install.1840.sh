@@ -182,15 +182,6 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
      -- Remove HR schema
      DROP user HR cascade;
 
-     -------------------------------------
-     -- Bounce DB to free up UNDO, etc. --
-     -------------------------------------
-     -- Go back to CDB level
-
-     ALTER SESSION SET CONTAINER=CDB\$ROOT;
-     shutdown immediate;
-     startup;
-
      exit;
 EOF
 
