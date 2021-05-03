@@ -32,7 +32,6 @@ echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 # Set data file sizes
 SYSTEM_SIZE=353
 SYSAUX_SIZE=610
-UNDO_SIZE=155
 if [ "${BUILD_MODE}" == "FULL" ]; then
   REDO_SIZE=50
 elif [ "${BUILD_MODE}" == "REGULAR" ]; then
@@ -43,7 +42,7 @@ elif [ "${BUILD_MODE}" == "SLIM" ]; then
   USERS_SIZE=2
 fi;
 
-echo "BUILDER: installing additional packages"
+echo "BUILDER: Installing OS dependencies"
 
 # Install installation dependencies
 microdnf -y install bc procps-ng util-linux net-tools
@@ -114,185 +113,6 @@ echo "BUILDER: configuring database"
 
 echo "BUILDER: post config database steps"
 
-# Perform further Database setup operations
-su -p oracle -c "sqlplus -s / as sysdba" << EOF
-
-   -- Exit on any errors
-   WHENEVER SQLERROR EXIT SQL.SQLCODE
-
-   -- Enable remote HTTP access
-   EXEC DBMS_XDB.SETLISTENERLOCALACCESS(FALSE);
-
-   -- Remove original redo logs from fast_recovery_area and create new ones
-   ALTER DATABASE ADD LOGFILE GROUP 3 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo03.log') SIZE ${REDO_SIZE}m;
-   ALTER DATABASE ADD LOGFILE GROUP 4 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo04.log') SIZE ${REDO_SIZE}m;
-   ALTER SYSTEM SWITCH LOGFILE;
-   ALTER SYSTEM SWITCH LOGFILE;
-   ALTER SYSTEM CHECKPOINT;
-   ALTER DATABASE DROP LOGFILE GROUP 1;
-   ALTER DATABASE DROP LOGFILE GROUP 2;
-   ALTER DATABASE ADD LOGFILE GROUP 1 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo01.log') SIZE ${REDO_SIZE}m;
-   ALTER DATABASE ADD LOGFILE GROUP 2 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo02.log') SIZE ${REDO_SIZE}m;
-   ALTER SYSTEM SWITCH LOGFILE;
-   ALTER SYSTEM SWITCH LOGFILE;
-   ALTER SYSTEM CHECKPOINT;
-   ALTER DATABASE DROP LOGFILE GROUP 3;
-   ALTER DATABASE DROP LOGFILE GROUP 4;
-
-   -- Remove fast recovery area
-   ALTER SYSTEM SET DB_RECOVERY_FILE_DEST='';
-   ALTER SYSTEM SET DB_RECOVERY_FILE_DEST_SIZE=1;
-   HOST rm -r "${ORACLE_BASE}"/fast_recovery_area
-
-   -- Setup healthcheck user
-   CREATE USER OPS\$ORACLE IDENTIFIED EXTERNALLY;
-   GRANT CONNECT, SELECT_CATALOG_ROLE TO OPS\$ORACLE;
-
-   exit;
-EOF
-
-# Non-managed (OMF) redo logs aren't deleted automatically (REDO GROUP 3 and 4 above)
-# Need to be deleted manually
-
-rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo03.log
-rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo04.log
-
-###################################
-######## FULL INSTALL DONE ########
-###################################
-
-# If not building the FULL image, remove and shrink additional components
-if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
-  su -p oracle -c "sqlplus -s / as sysdba" << EOF
-
-     -- Exit on any errors
-     WHENEVER SQLERROR EXIT SQL.SQLCODE
-
-     -- Disable password profile checks
-     ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED PASSWORD_LIFE_TIME UNLIMITED;
-
-     -- Remove APEX
-     @${ORACLE_HOME}/apex/apxremov.sql
-     DROP PUBLIC SYNONYM HTMLDB_SYSTEM;
-     DROP PACKAGE HTMLDB_SYSTEM;
-
-     -- Remove HR schema
-     DROP USER HR cascade;
-
-     exit;
-EOF
-
-  #TODO
-  # Uninstall components
-  if [ "${BUILD_MODE}" == "SLIM" ]; then
-    su -p oracle -c "sqlplus -s / as sysdba" << EOF
-
-       -- Exit on any errors
-       WHENEVER SQLERROR EXIT SQL.SQLCODE
-
-       -- Remove XDB
-       SELECT '#TODO' FROM DUAL;
-EOF
-    # Spatial
-    # Text
-    # XDB
-  fi;
-
-  # Shrink datafiles
-  su -p oracle -c "sqlplus -s / as sysdba" << EOF
-
-     -- Exit on any errors
-     WHENEVER SQLERROR EXIT SQL.SQLCODE
-
-     ---------------------------
-     -- Shrink SYSAUX tablespace
-     ---------------------------
-
-     -- Create new temporary SYSAUX tablespace
-     --CREATE TABLESPACE SYSAUX_TEMP DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux_temp.dbf'
-     --SIZE 250M AUTOEXTEND ON NEXT 1M MAXSIZE UNLIMITED;
-
-     -- Move tables to temporary SYSAUX tablespace
-     --#TODO
-     --BEGIN
-     --   FOR cur IN (SELECT  owner || '.' || table_name AS name FROM all_tables WHERE tablespace_name = 'SYSAUX') LOOP
-     --      EXECUTE IMMEDIATE 'ALTER TABLE ' || cur.name || ' MOVE TABLESPACE SYSAUX_TEMP';
-     --   END LOOP;
-     --END;
-     --/
-
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux.dbf' RESIZE ${SYSAUX_SIZE}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux.dbf'
-     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-     ---------------------------
-     -- Shrink SYSTEM tablespace
-     ---------------------------
-
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system.dbf' RESIZE ${SYSTEM_SIZE}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system.dbf'
-        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-     -------------------------
-     -- Shrink TEMP tablespace
-     -------------------------
-
-     ALTER TABLESPACE TEMP SHRINK SPACE;
-     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp.dbf'
-        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-     --------------------------
-     -- Shrink USERS tablespace
-     --------------------------
-
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/users.dbf' RESIZE ${USERS_SIZE}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/users.dbf'
-        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-     -------------------------
-     -- Shrink UNDO tablespace
-     -------------------------
-
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs1.dbf' RESIZE ${UNDO_SIZE}M;
-     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs1.dbf'
-        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
-
-     exit;
-EOF
-
-# create or replace directory XMLDIR as '${ORACLE_HOME}/rdbms/xml';
-
-fi;
-
-###################################
-########### DB SHUTDOWN ###########
-###################################
-
-echo "BUILDER: graceful database shutdown"
-
-# Shutdown database gracefully (listener is not yet running)
-su -p oracle -c "sqlplus -s / as sysdba" << EOF
-
-   -- Exit on any errors
-   WHENEVER SQLERROR EXIT SQL.SQLCODE
-
-   -- Shutdown database gracefully
-   shutdown immediate;
-   exit;
-EOF
-
-###############################
-### Compress Database files ###
-###############################
-
-echo "BUILDER: compressing database data files"
-cd "${ORACLE_BASE}"/oradata
-zip -r "${ORACLE_SID}".zip "${ORACLE_SID}"
-chown oracle:dba "${ORACLE_SID}".zip
-mv "${ORACLE_SID}".zip "${ORACLE_BASE}"/
-rm  -r "${ORACLE_SID}"
-cd - 1> /dev/null
-
 ############################
 ### Create network files ###
 ############################
@@ -352,9 +172,8 @@ chown -R oracle:dba "${ORACLE_HOME}"/network/admin
 ### bash_profile ###
 ####################
 
-echo "BUILDER: creating .bash_profile"
-
 # Create .bash_profile for oracle user
+echo "BUILDER: creating .bash_profile"
 echo \
 "export ORACLE_BASE=${ORACLE_BASE}
 export ORACLE_HOME=\${ORACLE_BASE}/product/11.2.0/xe
@@ -362,6 +181,336 @@ export ORACLE_SID=XE
 export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
 " >> "${ORACLE_BASE}"/.bash_profile
 chown oracle:dba "${ORACLE_BASE}"/.bash_profile
+
+# Perform further Database setup operations
+echo "BUILDER: changing database configuration and parameters for all images"
+su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+   -- Enable remote HTTP access
+   EXEC DBMS_XDB.SETLISTENERLOCALACCESS(FALSE);
+
+   -- Remove original redo logs from fast_recovery_area and create new ones
+   ALTER DATABASE ADD LOGFILE GROUP 3 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo03.log') SIZE ${REDO_SIZE}m;
+   ALTER DATABASE ADD LOGFILE GROUP 4 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo04.log') SIZE ${REDO_SIZE}m;
+   ALTER SYSTEM SWITCH LOGFILE;
+   ALTER SYSTEM SWITCH LOGFILE;
+   ALTER SYSTEM CHECKPOINT;
+   ALTER DATABASE DROP LOGFILE GROUP 1;
+   ALTER DATABASE DROP LOGFILE GROUP 2;
+   ALTER DATABASE ADD LOGFILE GROUP 1 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo01.log') SIZE ${REDO_SIZE}m;
+   ALTER DATABASE ADD LOGFILE GROUP 2 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo02.log') SIZE ${REDO_SIZE}m;
+   ALTER SYSTEM SWITCH LOGFILE;
+   ALTER SYSTEM SWITCH LOGFILE;
+   ALTER SYSTEM CHECKPOINT;
+   ALTER DATABASE DROP LOGFILE GROUP 3;
+   ALTER DATABASE DROP LOGFILE GROUP 4;
+
+   -- Remove fast recovery area
+   ALTER SYSTEM SET DB_RECOVERY_FILE_DEST='';
+   ALTER SYSTEM SET DB_RECOVERY_FILE_DEST_SIZE=1;
+   HOST rm -r "${ORACLE_BASE}"/fast_recovery_area
+
+   -- Setup healthcheck user
+   CREATE USER OPS\$ORACLE IDENTIFIED EXTERNALLY;
+   GRANT CONNECT, SELECT_CATALOG_ROLE TO OPS\$ORACLE;
+
+   exit;
+EOF
+
+# Non-managed (OMF) redo logs aren't deleted automatically (REDO GROUP 3 and 4 above)
+# Need to be deleted manually
+
+rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo03.log
+rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo04.log
+
+###################################
+######## FULL INSTALL DONE ########
+###################################
+
+# If not building the FULL image, remove and shrink additional components
+if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+
+  echo "BUILDER: further optimizations for REGULAR and SLIM image"
+
+  echo "BUILDER: changing database configuration and parameters for REGULAR and SLIM images"
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+     -- Disable password profile checks
+     ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED PASSWORD_LIFE_TIME UNLIMITED;
+
+     ---------------------------
+     ------- Remove APEX -------
+     ---------------------------
+     @${ORACLE_HOME}/apex/apxremov.sql
+     DROP PUBLIC SYNONYM HTMLDB_SYSTEM;
+     DROP PACKAGE HTMLDB_SYSTEM;
+
+     ---------------------------
+     ---- Remove HR schema -----
+     ---------------------------
+     DROP USER HR cascade;
+
+     exit;
+EOF
+
+  #TODO
+  # Uninstall components
+  if [ "${BUILD_MODE}" == "SLIM" ]; then
+    su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+       -- Do not exit on error because of expected error in catmet2.sql
+       -- WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       SHUTDOWN IMMEDIATE;
+       STARTUP UPGRADE;
+
+       ---------------------------
+       ------- Remove XDB --------
+       ---------------------------
+
+       -- Remove XS components manually
+       drop index xdb.sc_xidx;
+       drop index xdb.prin_xidx;
+       drop public synonym XS\$CACHE_DELETE;
+       drop public synonym XS\$CACHE_ACTIONS;
+       drop public synonym DBA_NETWORK_ACLS;
+       drop public synonym DBA_NETWORK_ACL_PRIVILEGES;
+       drop public synonym DBA_WALLET_ACLS;
+       drop public synonym DBA_XDS_OBJECTS;
+       drop public synonym ALL_XDS_OBJECTS;
+       drop public synonym USER_XDS_OBJECTS;
+       drop public synonym DBA_XDS_INSTANCE_SETS;
+       drop public synonym ALL_XDS_INSTANCE_SETS;
+       drop public synonym USER_XDS_INSTANCE_SETS;
+       drop public synonym DBA_XDS_ATTRIBUTE_SECS;
+       drop public synonym ALL_XDS_ATTRIBUTE_SECS;
+       drop public synonym USER_XDS_ATTRIBUTE_SECS;
+       drop public synonym DOCUMENT_LINKS2;
+       drop public synonym ALL_XSC_SECURITY_CLASS;
+       drop public synonym ALL_XSC_SECURITY_CLASS_STATUS;
+       drop public synonym ALL_XSC_SECURITY_CLASS_DEP;
+       drop public synonym ALL_XSC_PRIVILEGE;
+       drop public synonym ALL_XSC_AGGREGATE_PRIVILEGE;
+       drop public synonym XS_SESSION_ROLES;
+       drop public synonym V\$XS_SESSION;
+       drop public synonym V\$XS_SESSION_ROLE;
+       drop public synonym V\$XS_SESSION_ATTRIBUTE;
+       drop public synonym USER_NETWORK_ACL_PRIVILEGES;
+       drop public synonym dbms_network_acl_utility;
+       drop public synonym dbms_network_acl_admin;
+       drop public synonym DBMS_XS_MTCACHE;
+       drop public synonym DBMS_XS_UTIL;
+       drop view DBA_NETWORK_ACLS;
+       drop view DBA_NETWORK_ACL_PRIVILEGES;
+       drop view DBA_WALLET_ACLS;
+       drop view DBA_XDS_OBJECTS;
+       drop view ALL_XDS_OBJECTS;
+       drop view USER_XDS_OBJECTS;
+       drop view DBA_XDS_INSTANCE_SETS;
+       drop view ALL_XDS_INSTANCE_SETS;
+       drop view USER_XDS_INSTANCE_SETS;
+       drop view DBA_XDS_ATTRIBUTE_SECS;
+       drop view ALL_XDS_ATTRIBUTE_SECS;
+       drop view USER_XDS_ATTRIBUTE_SECS;
+       drop view XDB.DOCUMENT_LINKS2;
+       drop view ALL_XSC_SECURITY_CLASS;
+       drop view ALL_XSC_SECURITY_CLASS_STATUS;
+       drop view ALL_XSC_SECURITY_CLASS_DEP;
+       drop view ALL_XSC_PRIVILEGE;
+       drop view ALL_XSC_AGGREGATE_PRIVILEGE;
+       drop view V\$XS_SESSION;
+       drop view V\$XS_SESSION_ROLE;
+       drop view V\$XS_SESSION_ATTRIBUTE;
+       drop view USER_NETWORK_ACL_PRIVILEGES;
+       drop table XDB.XS\$CACHE_ACTIONS;
+       drop table XDB.XS\$CACHE_DELETE;
+       drop table NET\$_ACL;
+       drop table WALLET\$_ACL;
+       drop package XS\$CATVIEW_UTIL;
+       drop package DBMS_XS_PRINCIPALS;
+       drop package DBMS_XS_PRINCIPALS_INT;
+       drop package DBMS_XS_ROLESET_EVENTS_INT;
+       drop package DBMS_XS_PRINCIPAL_EVENTS_INT;
+       drop package DBMS_XS_DATA_SECURITY_EVENTS;
+       drop package DBMS_XS_SECCLASS_EVENTS;
+       drop package DBMS_XS_MTCACHE;
+       drop package DBMS_XS_MTCACHE_FFI;
+       drop package XS_UTIL;
+       drop package dbms_network_acl_admin;
+       drop package dbms_network_acl_utility;
+       drop user XS\$NULL cascade;
+
+       -- XDB removal script
+       @${ORACLE_HOME}/rdbms/admin/catnoqm.sql
+
+       -- Update Data Pump and related objects and KU$_ views
+       @${ORACLE_HOME}/rdbms/admin/catxdbdv.sql
+       @${ORACLE_HOME}/rdbms/admin/dbmsmeta.sql
+       @${ORACLE_HOME}/rdbms/admin/dbmsmeti.sql
+       @${ORACLE_HOME}/rdbms/admin/dbmsmetu.sql
+       @${ORACLE_HOME}/rdbms/admin/dbmsmetb.sql
+       @${ORACLE_HOME}/rdbms/admin/dbmsmetd.sql
+       @${ORACLE_HOME}/rdbms/admin/dbmsmet2.sql
+       @${ORACLE_HOME}/rdbms/admin/catmeta.sql
+       @${ORACLE_HOME}/rdbms/admin/prvtmeta.plb
+       @${ORACLE_HOME}/rdbms/admin/prvtmeti.plb
+       @${ORACLE_HOME}/rdbms/admin/prvtmetu.plb
+       @${ORACLE_HOME}/rdbms/admin/prvtmetb.plb
+       @${ORACLE_HOME}/rdbms/admin/prvtmetd.plb
+       @${ORACLE_HOME}/rdbms/admin/prvtmet2.plb
+       @${ORACLE_HOME}/rdbms/admin/catmet2.sql
+
+       ---------------------------
+       ------- Remove Text -------
+       ---------------------------
+       @${ORACLE_HOME}/ctx/admin/catnoctx.sql
+       drop procedure sys.validate_context;
+
+       ---------------------------
+       ----- Remove Spatial ------
+       ---------------------------
+       -- Drop Spatial user
+       DROP USER MDSYS CASCADE;
+
+       -- Drop all  public synonyms related to spatial
+       BEGIN
+          FOR cur IN (SELECT 'drop public synonym "' || synonym_name || '"' AS cmd
+                        FROM dba_synonyms WHERE table_owner = 'MDSYS')
+          LOOP
+             EXECUTE IMMEDIATE cur.cmd;
+          END LOOP;
+       END;
+       /
+
+       ---------------------------
+       --- Recompile database ----
+       ---------------------------
+       @${ORACLE_HOME}/rdbms/admin/utlrp.sql
+
+       -- Restart DB in normal mode
+       shutdown immediate;
+       startup;
+
+EOF
+  fi;
+
+  # Shrink datafiles
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+     ---------------------------
+     -- Shrink SYSAUX tablespace
+     ---------------------------
+
+     -- Create new temporary SYSAUX tablespace
+     --CREATE TABLESPACE SYSAUX_TEMP DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux_temp.dbf'
+     --SIZE 250M AUTOEXTEND ON NEXT 1M MAXSIZE UNLIMITED;
+
+     -- Move tables to temporary SYSAUX tablespace
+     --#TODO
+     --BEGIN
+     --   FOR cur IN (SELECT  owner || '.' || table_name AS name FROM all_tables WHERE tablespace_name = 'SYSAUX') LOOP
+     --      EXECUTE IMMEDIATE 'ALTER TABLE ' || cur.name || ' MOVE TABLESPACE SYSAUX_TEMP';
+     --   END LOOP;
+     --END;
+     --/
+
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux.dbf' RESIZE ${SYSAUX_SIZE}M;
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/sysaux.dbf'
+     AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     ---------------------------
+     -- Shrink SYSTEM tablespace
+     ---------------------------
+
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system.dbf' RESIZE ${SYSTEM_SIZE}M;
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/system.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     -------------------------
+     -- Shrink TEMP tablespace
+     -------------------------
+
+     ALTER TABLESPACE TEMP SHRINK SPACE;
+     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     --------------------------
+     -- Shrink USERS tablespace
+     --------------------------
+
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/users.dbf' RESIZE ${USERS_SIZE}M;
+     ALTER DATABASE DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/users.dbf'
+        AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     -------------------------
+     -- Shrink UNDO tablespace
+     -------------------------
+
+     -- Create new temporary UNDO tablespace
+     CREATE UNDO TABLESPACE UNDO_TMP DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs_tmp.dbf'
+        SIZE 1M AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     -- Use new temporary UNDO tablespace (so that old one can be deleted)
+     ALTER SYSTEM SET UNDO_TABLESPACE='UNDO_TMP';
+
+     -- Delete old UNDO tablespace
+     DROP TABLESPACE UNDOTBS1 INCLUDING CONTENTS AND DATAFILES;
+
+     -- Recreate old UNDO tablespace with 1M size and AUTOEXTEND
+     CREATE UNDO TABLESPACE UNDOTBS1 DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/undotbs1.dbf'
+        SIZE 1M AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+     -- Use newly created UNDO tablespace
+     ALTER SYSTEM SET UNDO_TABLESPACE='UNDOTBS1';
+
+     -- Drop temporary UNDO tablespace
+     DROP TABLESPACE UNDO_TMP INCLUDING CONTENTS AND DATAFILES;
+
+     exit;
+EOF
+
+# create or replace directory XMLDIR as '${ORACLE_HOME}/rdbms/xml';
+
+fi;
+
+###################################
+########### DB SHUTDOWN ###########
+###################################
+
+echo "BUILDER: graceful database shutdown"
+
+# Shutdown database gracefully (listener is not yet running)
+su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+   -- Shutdown database gracefully
+   shutdown immediate;
+   exit;
+EOF
+
+###############################
+### Compress Database files ###
+###############################
+
+echo "BUILDER: compressing database data files"
+
+cd "${ORACLE_BASE}"/oradata
+zip -r "${ORACLE_SID}".zip "${ORACLE_SID}"
+chown oracle:dba "${ORACLE_SID}".zip
+mv "${ORACLE_SID}".zip "${ORACLE_BASE}"/
+rm  -r "${ORACLE_SID}"
+cd - 1> /dev/null
 
 ########################
 ### Install run file ###
@@ -415,8 +564,10 @@ rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/lck/*
 rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/metadata/*
 rm -r "${ORACLE_BASE}"/oradiag_oracle/*
 
-# Remove additional files for NOMRAL and SLIM builds
+# Remove additional files for REGULAR and SLIM builds
 if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+
+  echo "BUILDER: further cleanup for REGULAR and SLIM image"
 
   # Remove APEX directory
   rm -r "${ORACLE_HOME}"/apex
@@ -425,20 +576,57 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm -r "${ORACLE_HOME}"/jdbc
   rm -r "${ORACLE_HOME}"/jlib
 
-  # Remove ODBC samples
-  rm -r "${ORACLE_HOME}"/odbc
-
   # Remove components from ORACLE_HOME
   if [ "${BUILD_MODE}" == "SLIM" ]; then
 
+    echo "BUILDER: further cleanup for SLIM image"
+
+    # Remove Oracle Text directory
+    rm -r "${ORACLE_HOME}"/ctx
+
+    # Remove XDK
+    rm -r "${ORACLE_HOME}"/xdk
+
+    # Remove Oracle Spatial directory
+    rm -r "${ORACLE_HOME}"/md
+
     # Remove demo directory
     rm -r "${ORACLE_HOME}"/demo
+
+    # Remove ODBC samples
+    rm -r "${ORACLE_HOME}"/odbc
 
     # Remove TNS samples
     rm -r "${ORACLE_HOME}"/network/admin/samples
 
     # Remove NLS demo
     rm -r "${ORACLE_HOME}"/nls/demo
+
+    # Remove hs directory
+    rm -r "${ORACLE_HOME}"/hs
+
+    # Remove ldap directory
+    rm -r "${ORACLE_HOME}"/ldap
+
+    # Remove precomp directory
+    rm -r "${ORACLE_HOME}"/precomp
+
+    # Remove slax directory
+    rm -r "${ORACLE_HOME}"/slax
+
+    # Remove rdbms/demo directory
+    rm -r "${ORACLE_HOME}"/rdbms/demo
+
+    # Remove rdbms/jlib directory
+    rm -r "${ORACLE_HOME}"/rdbms/jlib
+
+    # Remove rdbms/public directory
+    rm -r "${ORACLE_HOME}"/rdbms/public
+
+    # Remove rdbms/jlib directory
+    rm -r "${ORACLE_HOME}"/rdbms/xml
+
+    # TODO
 
   fi;
 
