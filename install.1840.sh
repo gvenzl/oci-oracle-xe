@@ -39,9 +39,10 @@ if [ "${BUILD_MODE}" == "FULL" ]; then
 elif [ "${BUILD_MODE}" == "REGULAR" ]; then
   REDO_SIZE=20
   USERS_SIZE=10
+#  CDB_SYSAUX_SIZE=464
 fi;
 
-echo "BUILDER: Installing dependencies"
+echo "BUILDER: Installing OS dependencies"
 
 # Install installation dependencies
 microdnf -y install bc binutils file elfutils-libelf ksh sysstat procps-ng smartmontools make net-tools hostname
@@ -82,7 +83,77 @@ ORACLE_PASSWORD=$(date '+%s' | sha256sum | base64 | head -c 8)
 
 echo "BUILDER: post config database steps"
 
+############################
+### Create network files ###
+############################
+
+echo "BUILDER: creating network files"
+
+# listener.ora
+echo \
+"LISTENER =
+  (DESCRIPTION_LIST =
+    (DESCRIPTION =
+      (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC_FOR_${ORACLE_SID}))
+      (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+    )
+  )
+
+DEFAULT_SERVICE_LISTENER = ${ORACLE_SID}" > "${ORACLE_HOME}"/network/admin/listener.ora
+
+# tnsnames.ora
+echo \
+"${ORACLE_SID} =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = ${ORACLE_SID})
+    )
+  )
+
+${ORACLE_SID}PDB1 =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = ${ORACLE_SID}PDB1)
+    )
+  )
+
+EXTPROC_CONNECTION_DATA =
+  (DESCRIPTION =
+    (ADDRESS_LIST =
+      (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC_FOR_${ORACLE_SID}))
+    )
+    (CONNECT_DATA =
+      (SID = PLSExtProc)
+      (PRESENTATION = RO)
+    )
+  )
+" > "${ORACLE_HOME}"/network/admin/tnsnames.ora
+
+# sqlnet.ora
+echo "NAME.DIRECTORY_PATH= (EZCONNECT, TNSNAMES)" > "${ORACLE_HOME}"/network/admin/sqlnet.ora
+
+chown -R oracle:dba "${ORACLE_HOME}"/network/admin
+
+####################
+### bash_profile ###
+####################
+
+# Create .bash_profile for oracle user
+echo "BUILDER: creating .bash_profile"
+echo \
+"export ORACLE_BASE=${ORACLE_BASE}
+export ORACLE_HOME=\${ORACLE_BASE}/product/18c/dbhomeXE
+export ORACLE_SID=XE
+export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
+" >> "${ORACLE_BASE}"/.bash_profile
+chown oracle:dba "${ORACLE_BASE}"/.bash_profile
+
 # Perform further Database setup operations
+echo "BUILDER: changing database configuration and parameters for all images"
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
    -- Exit on any errors
@@ -142,6 +213,25 @@ EOF
 
 # If not building the FULL image, remove and shrink additional components
 if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+
+  echo "BUILDER: further optimizations for REGULAR and SLIM image"
+
+  # Open PDB\$SEED to READ/WRITE
+  echo "BUILDER: Opening PDB\$SEED in READ/WRITE mode"
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+     -- Open PDB\$SEED to READ WRITE mode
+     ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
+     ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ WRITE;
+
+     exit;
+EOF
+
+  # Change parameters/settings
+  echo "BUILDER: changing database configuration and parameters for REGULAR and SLIM images"
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
      -- Exit on any errors
@@ -151,12 +241,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
      -- Like with every underscore parameter, DO NOT SET THIS PARAMETER EVER UNLESS YOU KNOW WHAT THE HECK YOU ARE DOING!
      ALTER SYSTEM SET "_dmm_blas_library"='libora_netlib.so' SCOPE=SPFILE;
 
-     ---------
-     -- CDB --
-     ---------
-     -- Open PDB\$SEED in READ/WRITE mode
-     ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
-     ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ WRITE;
+     -------------------------------------
+     -- Disable password profile checks --
+     -------------------------------------
 
      -- Disable password profile checks (can only be done container by container)
      ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED PASSWORD_LIFE_TIME UNLIMITED;
@@ -167,20 +254,108 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
      ALTER SESSION SET CONTAINER=XEPDB1;
      ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED PASSWORD_LIFE_TIME UNLIMITED;
 
-     -- Go back to CDB level
-     ALTER SESSION SET CONTAINER=CDB\$ROOT;
+     -------------------------------
+     -- Remove HR schema from PDB --
+     -------------------------------
 
-     -- Reset PDB\$SEED to READ ONLY mode
+     ALTER SESSION SET CONTAINER=XEPDB1;
+     DROP user HR cascade;
+
+     exit;
+EOF
+
+  ########################
+  # Remove DB components #
+  ########################
+
+  # Needs to be run as 'oracle' user (Perl script otherwise fails #TODO: see whether it can be run with su -c somehow instead)
+  su - oracle << EOF
+    cd "${ORACLE_HOME}"/rdbms/admin
+
+    echo "BUILDER: removing Oracle Multimedia"
+    # Remove Multimedia (dependent on Oracle Database Java Packages)
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -C 'CDB\$ROOT' -e -b builder_remove_multimedia_pdbs -d "${ORACLE_HOME}"/ord/im/admin imremdo.sql
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -e -b builder_recompile_all_objects_pdbs -d "${ORACLE_HOME}"/rdbms/admin utlrp.sql
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'CDB\$ROOT' -e -b builder_remove_multimedia_cdb -d "${ORACLE_HOME}"/ord/im/admin imremdo.sql
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -e -b builder_recompile_all_objects_cdb -d "${ORACLE_HOME}"/rdbms/admin utlrp.sql
+    rm "${ORACLE_HOME}"/rdbms/admin/builder_remove_multimedia*
+    rm "${ORACLE_HOME}"/rdbms/admin/builder_recompile_all_objects*
+
+    # Remove Oracle Database Java Packages
+    echo "BUILDER: Removing Oracle Database Java Packages"
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_java_packages -d "${ORACLE_HOME}"/rdbms/admin catnojav.sql
+    rm "${ORACLE_HOME}"/rdbms/admin/builder_remove_java_packages*
+
+    # Remove Oracle XDK
+    echo "BUILDER: Removing Oracle XDK"
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_xdk -d "${ORACLE_HOME}"/xdk/admin rmxml.sql
+    rm "${ORACLE_HOME}"/rdbms/admin/builder_remove_xdk*
+
+    # Remove Oracle JServer JAVA Virtual Machine
+    echo "BUILDER: Oracle JServer JAVA Virtual Machine"
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_jvm -d "${ORACLE_HOME}"/javavm/install rmjvm.sql
+    rm "${ORACLE_HOME}"/rdbms/admin/builder_remove_jvm*
+
+    # Recompile
+    echo "BUILDER: Recompiling database objects"
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -e -b builder_recompile_all_objects -d "${ORACLE_HOME}"/rdbms/admin utlrp.sql
+    rm "${ORACLE_HOME}"/rdbms/admin/builder_recompile_all_objects*
+
+    exit;
+EOF
+
+  # Drop leftover items
+  echo "BUILDER: Dropping leftover Database dictionary objects"
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+     -- Oracle Multimedia leftovers
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE SYS.ORD_ADMIN');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE SYS.ORDIMDPCALLOUTS');
+
+     -- Open PDB\$SEED to READ WRITE mode (catcon put it into READY ONLY again)
      ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
-     ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ ONLY;
+     ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ WRITE;
 
-     -----------
-     -- XEPDB --
-     -----------
+     ALTER SESSION SET CONTAINER=PDB\$SEED;
+
+     -- Remove Java VM packages leftovers
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE BODY JAVAVM_SYS');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE BODY JVMRJBCINV');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE BODY OJDS_CONTEXT');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$NODE_NUMBER\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$BINDINGS\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$INODE\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$ATTRIBUTES\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$REFADDR\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$PERMISSIONS\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$SHARED\$OBJ\$SEQ\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$SHARED\$OBJ\$');
+
+     -- Oracle Multimedia leftovers
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE SYS.ORD_ADMIN');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE SYS.ORDIMDPCALLOUTS');
+
      ALTER SESSION SET CONTAINER=XEPDB1;
 
-     -- Remove HR schema
-     DROP user HR cascade;
+     -- Remove Java VM packages leftovers
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE BODY JAVAVM_SYS');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE BODY JVMRJBCINV');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE BODY OJDS_CONTEXT');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$NODE_NUMBER\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$BINDINGS\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$INODE\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$ATTRIBUTES\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$REFADDR\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$PERMISSIONS\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$SHARED\$OBJ\$SEQ\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$SHARED\$OBJ\$');
+
+     -- Oracle Multimedia leftovers
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE SYS.ORD_ADMIN');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE SYS.ORDIMDPCALLOUTS');
 
      exit;
 EOF
@@ -190,10 +365,6 @@ EOF
 
      -- Exit on any errors
      WHENEVER SQLERROR EXIT SQL.SQLCODE
-
-     -- Open PDB\$SEED in READ/WRITE mode
-     ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
-     ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ WRITE;
 
      ----------------------------
      -- Shrink SYSAUX tablespaces
@@ -371,18 +542,22 @@ EOF
      -- Drop temporary UNDO tablespace
      DROP TABLESPACE UNDO_TMP INCLUDING CONTENTS AND DATAFILES;
 
-     ------------------------------
-     -- Complete actions and finish
-     ------------------------------
-     ALTER SESSION SET CONTAINER=CDB\$ROOT;
+     exit;
+EOF
 
-     -- Reset PDB\$SEED to READ ONLY mode
+  # Close PDB\$SEED to READ ONLY again
+  echo "BUILDER: Opening PDB\$SEED in READ ONLY (default) mode"
+  su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+     -- Open PDB\$SEED to READ WRITE mode
      ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
      ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ ONLY;
 
      exit;
 EOF
-
 
 fi;
 
@@ -399,7 +574,8 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    WHENEVER SQLERROR EXIT SQL.SQLCODE
 
    -- Shutdown database gracefully
-   shutdown immediate;
+   SHUTDOWN IMMEDIATE;
+
    exit;
 EOF
 
@@ -408,82 +584,13 @@ EOF
 ###############################
 
 echo "BUILDER: compressing database data files"
+
 cd "${ORACLE_BASE}"/oradata
 zip -r "${ORACLE_SID}".zip "${ORACLE_SID}"
 chown oracle:dba "${ORACLE_SID}".zip
 mv "${ORACLE_SID}".zip "${ORACLE_BASE}"/
 rm  -r "${ORACLE_SID}"
 cd - 1> /dev/null
-
-############################
-### Create network files ###
-############################
-
-echo "BUILDER: creating network files"
-
-# listener.ora
-echo \
-"LISTENER =
-  (DESCRIPTION_LIST =
-    (DESCRIPTION =
-      (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC_FOR_${ORACLE_SID}))
-      (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
-    )
-  )
-
-DEFAULT_SERVICE_LISTENER = ${ORACLE_SID}" > "${ORACLE_HOME}"/network/admin/listener.ora
-
-# tnsnames.ora
-echo \
-"${ORACLE_SID} =
-  (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
-    (CONNECT_DATA =
-      (SERVER = DEDICATED)
-      (SERVICE_NAME = ${ORACLE_SID})
-    )
-  )
-
-${ORACLE_SID}PDB1 =
-  (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
-    (CONNECT_DATA =
-      (SERVER = DEDICATED)
-      (SERVICE_NAME = ${ORACLE_SID}PDB1)
-    )
-  )
-
-EXTPROC_CONNECTION_DATA =
-  (DESCRIPTION =
-    (ADDRESS_LIST =
-      (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC_FOR_${ORACLE_SID}))
-    )
-    (CONNECT_DATA =
-      (SID = PLSExtProc)
-      (PRESENTATION = RO)
-    )
-  )
-" > "${ORACLE_HOME}"/network/admin/tnsnames.ora
-
-# sqlnet.ora
-echo "NAME.DIRECTORY_PATH= (EZCONNECT, TNSNAMES)" > "${ORACLE_HOME}"/network/admin/sqlnet.ora
-
-chown -R oracle:dba "${ORACLE_HOME}"/network/admin
-
-####################
-### bash_profile ###
-####################
-
-echo "BUILDER: creating .bash_profile"
-
-# Create .bash_profile for oracle user
-echo \
-"export ORACLE_BASE=${ORACLE_BASE}
-export ORACLE_HOME=\${ORACLE_BASE}/product/18c/dbhomeXE
-export ORACLE_SID=XE
-export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
-" >> "${ORACLE_BASE}"/.bash_profile
-chown oracle:dba "${ORACLE_BASE}"/.bash_profile
 
 ########################
 ### Install run file ###
@@ -500,6 +607,10 @@ chown oracle:dba "${ORACLE_BASE}"/*.sh \
 
 chmod u+x "${ORACLE_BASE}"/*.sh \
           "${ORACLE_BASE}"/resetPassword
+
+# TODO: relink Oracle binaries
+# Multimedia: ord/im/lib/env_ordim.mk
+# Java JIT (JOT) compiler:  make -f $ORACLE_HOME/rdbms/lib/ins_rdbms.mk jox_off_static ioracle
 
 #########################
 ####### Cleanup #########
@@ -542,6 +653,8 @@ rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/metadata/*
 # Remove additional files for NOMRAL and SLIM builds
 if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
+  echo "BUILDER: further cleanup for REGULAR and SLIM image"
+
   # Remove OPatch and QOpatch
   rm -r "${ORACLE_HOME}"/OPatch
   rm -r "${ORACLE_HOME}"/QOpatch
@@ -565,6 +678,24 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
   # Remove zip artifacts in $ORACLE_HOME/lib
   rm "${ORACLE_HOME}"/lib/*.zip
+
+  # Remove Multimedia
+  rm -r "${ORACLE_HOME}"/ord/im
+
+  # Remove Oracle XDK
+  rm -r "${ORACLE_HOME}"/xdk
+
+  # Remove JServer JAVA Virtual Machine
+  rm -r  "${ORACLE_HOME}"/javavm
+
+  # Remove Java JDK
+  rm -r "${ORACLE_HOME}"/jdk
+
+  # Remove dbjava directory
+  rm -r "${ORACLE_HOME}"/dbjava
+
+  # Remove rdbms/jlib
+  rm -r "${ORACLE_HOME}"/rdbms/jlib
 
   # Remove not needed packages
   # Use rpm instad of microdnf to allow removing packages regardless of their dependencies

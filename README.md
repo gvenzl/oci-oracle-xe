@@ -233,6 +233,10 @@ The regular image strives to balance between the functionality required by most 
 #### Database components
 
 * The `HR` schema has been removed
+* `Oracle Multimedia` has been removed
+* `Oracle Database Java Packages` have been removed
+* `Oracle XDK` has been removed
+* `JServer JAVA Virtual Machine` has been removed
 * `OPatch` utility has been removed (`$ORACLE_HOME/OPatch`)
 * `QOpatch` utility has been removed (`$ORACLE_HOME/QOpatch`)
 * `Oracle Database Assistants` have been removed (`$ORACLE_HOME/assistants`)
@@ -242,6 +246,7 @@ The regular image strives to balance between the functionality required by most 
 * `Universal Connection Pool` driver has been removed (`$ORACLE_HOME/ucp`)
 * Intel Math Kernel libraries have been removed (`${ORACLE_HOME}/lib/libmkl_*`)
 * Other utilities have been removed (`${ORACLE_HOME}/lib/*.zip`)
+* Additional Java libraries have been removed (`${ORACLE_HOME}/rdbms/jlib`)
 
 #### Database settings
 

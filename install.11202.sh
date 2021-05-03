@@ -42,7 +42,7 @@ elif [ "${BUILD_MODE}" == "SLIM" ]; then
   USERS_SIZE=2
 fi;
 
-echo "BUILDER: installing additional packages"
+echo "BUILDER: Installing OS dependencies"
 
 # Install installation dependencies
 microdnf -y install bc procps-ng util-linux net-tools
@@ -113,7 +113,77 @@ echo "BUILDER: configuring database"
 
 echo "BUILDER: post config database steps"
 
+############################
+### Create network files ###
+############################
+
+echo "BUILDER: creating network files"
+
+# listener.ora
+echo \
+"SID_LIST_LISTENER =
+  (SID_LIST =
+    (SID_DESC =
+      (SID_NAME = PLSExtProc)
+      (ORACLE_HOME = ${ORACLE_HOME})
+      (PROGRAM = extproc)
+    )
+  )
+
+LISTENER =
+  (DESCRIPTION_LIST =
+    (DESCRIPTION =
+      (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC_FOR_${ORACLE_SID}))
+      (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+    )
+  )
+
+DEFAULT_SERVICE_LISTENER = (${ORACLE_SID})" > "${ORACLE_HOME}"/network/admin/listener.ora
+
+# tnsnames.ora
+echo \
+"${ORACLE_SID} =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = ${ORACLE_SID})
+    )
+  )
+
+EXTPROC_CONNECTION_DATA =
+  (DESCRIPTION =
+    (ADDRESS_LIST =
+      (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC_FOR_${ORACLE_SID}))
+    )
+    (CONNECT_DATA =
+      (SID = PLSExtProc)
+      (PRESENTATION = RO)
+    )
+  )
+" > "${ORACLE_HOME}/network/admin/tnsnames.ora"
+
+# sqlnet.ora
+echo "NAME.DIRECTORY_PATH= (EZCONNECT, TNSNAMES)" > "${ORACLE_HOME}"/network/admin/sqlnet.ora
+
+chown -R oracle:dba "${ORACLE_HOME}"/network/admin
+
+####################
+### bash_profile ###
+####################
+
+# Create .bash_profile for oracle user
+echo "BUILDER: creating .bash_profile"
+echo \
+"export ORACLE_BASE=${ORACLE_BASE}
+export ORACLE_HOME=\${ORACLE_BASE}/product/11.2.0/xe
+export ORACLE_SID=XE
+export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
+" >> "${ORACLE_BASE}"/.bash_profile
+chown oracle:dba "${ORACLE_BASE}"/.bash_profile
+
 # Perform further Database setup operations
+echo "BUILDER: changing database configuration and parameters for all images"
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
    -- Exit on any errors
@@ -162,6 +232,10 @@ rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo04.log
 
 # If not building the FULL image, remove and shrink additional components
 if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
+
+  echo "BUILDER: further optimizations for REGULAR and SLIM image"
+
+  echo "BUILDER: changing database configuration and parameters for REGULAR and SLIM images"
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
      -- Exit on any errors
@@ -193,8 +267,8 @@ EOF
        -- Do not exit on error because of expected error in catmet2.sql
        -- WHENEVER SQLERROR EXIT SQL.SQLCODE
 
-       shutdown immediate;
-       startup upgrade;
+       SHUTDOWN IMMEDIATE;
+       STARTUP UPGRADE;
 
        ---------------------------
        ------- Remove XDB --------
@@ -430,82 +504,13 @@ EOF
 ###############################
 
 echo "BUILDER: compressing database data files"
+
 cd "${ORACLE_BASE}"/oradata
 zip -r "${ORACLE_SID}".zip "${ORACLE_SID}"
 chown oracle:dba "${ORACLE_SID}".zip
 mv "${ORACLE_SID}".zip "${ORACLE_BASE}"/
 rm  -r "${ORACLE_SID}"
 cd - 1> /dev/null
-
-############################
-### Create network files ###
-############################
-
-echo "BUILDER: creating network files"
-
-# listener.ora
-echo \
-"SID_LIST_LISTENER =
-  (SID_LIST =
-    (SID_DESC =
-      (SID_NAME = PLSExtProc)
-      (ORACLE_HOME = ${ORACLE_HOME})
-      (PROGRAM = extproc)
-    )
-  )
-
-LISTENER =
-  (DESCRIPTION_LIST =
-    (DESCRIPTION =
-      (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC_FOR_${ORACLE_SID}))
-      (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
-    )
-  )
-
-DEFAULT_SERVICE_LISTENER = (${ORACLE_SID})" > "${ORACLE_HOME}"/network/admin/listener.ora
-
-# tnsnames.ora
-echo \
-"${ORACLE_SID} =
-  (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
-    (CONNECT_DATA =
-      (SERVER = DEDICATED)
-      (SERVICE_NAME = ${ORACLE_SID})
-    )
-  )
-
-EXTPROC_CONNECTION_DATA =
-  (DESCRIPTION =
-    (ADDRESS_LIST =
-      (ADDRESS = (PROTOCOL = IPC)(KEY = EXTPROC_FOR_${ORACLE_SID}))
-    )
-    (CONNECT_DATA =
-      (SID = PLSExtProc)
-      (PRESENTATION = RO)
-    )
-  )
-" > "${ORACLE_HOME}/network/admin/tnsnames.ora"
-
-# sqlnet.ora
-echo "NAME.DIRECTORY_PATH= (EZCONNECT, TNSNAMES)" > "${ORACLE_HOME}"/network/admin/sqlnet.ora
-
-chown -R oracle:dba "${ORACLE_HOME}"/network/admin
-
-####################
-### bash_profile ###
-####################
-
-echo "BUILDER: creating .bash_profile"
-
-# Create .bash_profile for oracle user
-echo \
-"export ORACLE_BASE=${ORACLE_BASE}
-export ORACLE_HOME=\${ORACLE_BASE}/product/11.2.0/xe
-export ORACLE_SID=XE
-export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
-" >> "${ORACLE_BASE}"/.bash_profile
-chown oracle:dba "${ORACLE_BASE}"/.bash_profile
 
 ########################
 ### Install run file ###
@@ -562,6 +567,8 @@ rm -r "${ORACLE_BASE}"/oradiag_oracle/*
 # Remove additional files for REGULAR and SLIM builds
 if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
+  echo "BUILDER: further cleanup for REGULAR and SLIM image"
+
   # Remove APEX directory
   rm -r "${ORACLE_HOME}"/apex
 
@@ -571,6 +578,8 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
   # Remove components from ORACLE_HOME
   if [ "${BUILD_MODE}" == "SLIM" ]; then
+
+    echo "BUILDER: further cleanup for SLIM image"
 
     # Remove Oracle Text directory
     rm -r "${ORACLE_HOME}"/ctx
