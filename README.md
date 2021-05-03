@@ -139,13 +139,13 @@ CONTAINER: running /container-entrypoint-initdb.d/2_create_data_model.sh ...
 
 Table created.
 ...
-Table		       provided     actual
--------------------- ---------- ----------
-regions 		      7 	 7
-countries		    196        196
-cities			    204        204
-currencies		    146        146
-currencies_countries	    203        203
+Table                provided actual
+-------------------- -------- ------
+regions                     7      7
+countries                 196    196
+cities                    204    204
+currencies                146    146
+currencies_countries      203    203
 
 
 Thank you!
@@ -244,9 +244,9 @@ The regular image strives to balance between the functionality required by most 
 * The `inventory` directory has been removed (`$ORACLE_HOME/inventory`)
 * `JDBC` drivers have been removed (`$ORACLE_HOME/jdbc`, `$ORACLE_HOME/jlib`)
 * `Universal Connection Pool` driver has been removed (`$ORACLE_HOME/ucp`)
-* Intel Math Kernel libraries have been removed (`${ORACLE_HOME}/lib/libmkl_*`)
-* Other utilities have been removed (`${ORACLE_HOME}/lib/*.zip`)
-* Additional Java libraries have been removed (`${ORACLE_HOME}/rdbms/jlib`)
+* Intel Math Kernel libraries have been removed (`$ORACLE_HOME/lib/libmkl_*`)
+* Other utilities have been removed (`$ORACLE_HOME/lib/*.zip`)
+* Additional Java libraries have been removed (`$ORACLE_HOME/rdbms/jlib`)
 
 #### Database settings
 
