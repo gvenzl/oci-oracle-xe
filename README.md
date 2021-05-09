@@ -52,6 +52,12 @@ This variable is mandatory for the first container startup and specifies the pas
 ### `ORACLE_RANDOM_PASSWORD`
 This is an optional variable. Set this variable to a non-empty value, like `yes`, to generate a random initial password for the `SYS` and `SYSTEM` users. The generated password will be printed to stdout (`ORACLE PASSWORD FOR SYS AND SYSTEM: ...`).
 
+### `APP_USER`
+This is an optional variable. Set this variable to a non-empty string to create a new database schema user with the name specified in this variable. This variable requires `APP_USER_PASSWORD` or `APP_USER_PASSWORD_FILE` to be specified as well.
+
+### `APP_USER_PASSWORD`
+This is an optional variable. Set this variable to a non-empty string to define a password for the database schema user specified by `APP_USER`. This variable requires `APP_USER` to be specified as well.
+
 ## Container secrets
 
 As an alternative to passing sensitive information via environment variables, `_FILE` may be appended to some of the previously listed environment variables, causing the initialization script to load the values for those variables from files present in the container. In particular, this can be used to load passwords from Container/Docker secrets stored in `/run/secrets/<secret_name>` files. For example:
@@ -60,7 +66,10 @@ As an alternative to passing sensitive information via environment variables, `_
 docker run --name some-oracle -e ORACLE_PASSWORD_FILE=/run/secrets/oracle-passwd -d gvenzl/oracle-xe
 ```
 
-Currently, this is only supported for `ORACLE_PASSWORD`.
+This mechanism is supported for:
+
+* `ORACLE_PASSWORD`
+* `APP_USER_PASSWORD`
 
 ## Initialization scripts
 If you would like to perform additional initialization of the database running in a container, you can add one or more `*.sql`, `*.sql.gz`, `*.sql.zip` or `*.sh` files under `/container-entrypoint-initdb.d` (creating the directory if necessary). After the database setup is completed, these files will be executed automatically in alphabetical order.
