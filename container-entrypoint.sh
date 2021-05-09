@@ -75,10 +75,13 @@ function setup_env_vars() {
 
   declare -g DATABASE_ALREADY_EXISTS
 
+  ORACLE_VERSION=$(sqlplus -version | grep "Release" | awk '{ print $3 }')
+  declare -g ORACLE_VERSION
+
   if [ -d "${ORACLE_BASE}/oradata/dbconfig/${ORACLE_SID}" ]; then
     DATABASE_ALREADY_EXISTS="true";
   else
-    # Allow for ORACLE_PASSWORD and or ORACLE_PASSWORD_FILE
+    # Allow for ORACLE_PASSWORD and/or ORACLE_PASSWORD_FILE
     file_env "ORACLE_PASSWORD"
 
     # Password is mandatory for first container start
@@ -91,6 +94,20 @@ function setup_env_vars() {
     elif [ -n "${ORACLE_PASSWORD:-}" ] && [ -n "${ORACLE_RANDOM_PASSWORD:-}" ]; then
       echo "Both \$ORACLE_RANDOM_PASSWORD and \$ORACLE_PASSWORD[_FILE] are specified but are mutually exclusive."
       echo "Please specify only one of these variables."
+      exit 1;
+    fi;
+
+    # Allow for APP_USER_PASSWORD and/or APP_USER_PASSWORD_FILE
+    file_env "APP_USER_PASSWORD"
+
+    # Check whether both variables have been specified.
+    if [ -n "${APP_USER:-}" ] && [ -z "${APP_USER_PASSWORD}" ]; then
+      echo "\$APP_USER has been specified without \$APP_USER_PASSWORD[_FILE]."
+      echo "Both variables are required, please specify \$APP_USER and \$APP_USER_PASSWORD[_FILE]."
+      exit 1;
+    elif [ -n "${APP_USER_PASSWORD:-}" ] && [ -z "${APP_USER:-}" ]; then
+      echo "\$APP_USER_PASSWORD[_FILE] has been specified without \$APP_USER."
+      echo "Both variables are required, please specify \$APP_USER and \$APP_USER_PASSWORD[_FILE]."
       exit 1;
     fi;
   fi;
@@ -218,7 +235,25 @@ function run_custom_scripts {
     echo "";
 
   fi;
+}
 
+# Create schema user for the application to use
+function create_app_user {
+
+  # Check whether the user needs to be in a PDB or not
+  ALTER_SESSION_CMD="ALTER SESSION SET CONTAINER=XEPDB1;"
+  if [[ "${ORACLE_VERSION}" = "11.2"* ]]; then
+    ALTER_SESSION_CMD="";
+  fi;
+
+  echo "CONTAINER: Creating database application user."
+  sqlplus -s / as sysdba <<EOF
+     ${ALTER_SESSION_CMD}
+
+     CREATE USER ${APP_USER} IDENTIFIED BY "${APP_USER_PASSWORD}" QUOTA UNLIMITED ON USERS;
+     GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE MATERIALIZED VIEW TO ${APP_USER};
+     exit;
+EOF
 }
 
 ###########################
@@ -232,6 +267,7 @@ trap stop_database SIGINT SIGTERM
 
 echo "CONTAINER: starting up..."
 
+# Setup all required environment variables
 setup_env_vars
 
 # If database does not yet exist, create directory structure
@@ -280,6 +316,12 @@ if healthcheck.sh; then
       echo "SCRIPT ERROR: Unspecified password!"
       echo "Please report a bug at https://github.com/gvenzl/oci-oracle-xe/issues with your environment details."
       exit 1;
+    fi;
+
+    # Check whether app user should be created
+    # setup_env_vars has already validated environment variables
+    if [ -n "${APP_USER:-}" ]; then
+      create_app_user
     fi;
 
     # Running custom database initialization scripts
