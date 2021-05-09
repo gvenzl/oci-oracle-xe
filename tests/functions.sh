@@ -27,19 +27,19 @@
 function checkDB {
 
   CONTAINER_NAME="${1}"
-  
+
   tries=0
   max_tries=12
   sleep_time_secs=10
-  
+
   # Wait until container is ready
   while [ ${tries} -lt ${max_tries} ]; do
     # Sleep until DB is up and running
     sleep ${sleep_time_secs};
-    
+
     # Is the database ready for use?
-    podman logs ${CONTAINER_NAME} | grep 'DATABASE IS READY TO USE' >/dev/null;
-    if [ "$?" == "0" ]; then
+
+    if podman logs ${CONTAINER_NAME} | grep 'DATABASE IS READY TO USE' >/dev/null; then
       return 0;
     fi;
 
@@ -48,6 +48,19 @@ function checkDB {
   done;
 
   return 1;
+}
+
+# Function: tear_down_container
+# Tears down a container
+#
+# Parameters:
+# CONTAINER_NAME: The container name
+
+function tear_down_container {
+
+  echo "Tearing down container";
+  echo "";
+  podman rm -f "${1}" >/dev/null
 }
 
 # Function: run_container_test
@@ -62,17 +75,20 @@ function runContainerTest {
   TEST_NAME="${1}"
   CONTAINER_NAME="${2}"
   IMAGE="${3}"
+  WAIT_FOR_TEAR_DOWN="${4}"
+
+  ORA_PWD_CMD="${ORA_PWD_CMD:--e ORACLE_PASSWORD=LetsTest1}"
 
   echo "TEST ${TEST_NAME}: Started"
   echo ""
-  
+
   # Run and start container
-  podman run -d --name "${CONTAINER_NAME}" -e ORACLE_PASSWORD=LetsTest1 "${IMAGE}"
-  
+  podman run -d --name ${CONTAINER_NAME} ${ORA_PWD_CMD} ${APP_USER} ${APP_USER_PASSWORD} ${IMAGE} >/dev/null
+
   # Check whether Oracle DB came up successfully
   checkDB "${CONTAINER_NAME}"
   TEST_OK=$?
-  
+
   if [ "${TEST_OK}" != "0" ]; then
     # Print logs of failed test
     podman logs "${CONTAINER_NAME}";
@@ -81,14 +97,16 @@ function runContainerTest {
     echo "TEST ${TEST_NAME}: FAILED!";
     echo "";
 
-    podman rm -f "${CONTAINER_NAME}"
+    podman rm -f "${CONTAINER_NAME}" >/dev/null
 
     exit 1;
   else
-    echo "TEST ${TEST_NAME}: OK";
-    echo "";
-
-    podman rm -f "${CONTAINER_NAME}"
+    # Only tear down container if $NO_TEAR_DOWN has NOT been specified
+    if [ -z "${NO_TEAR_DOWN:-}" ]; then
+      echo "TEST ${TEST_NAME}: OK";
+      echo "";
+      tear_down_container "${CONTAINER_NAME}"
+    fi;
 
     return 0;
   fi;
