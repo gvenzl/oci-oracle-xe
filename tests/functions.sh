@@ -60,6 +60,7 @@ function tear_down_container {
 
   echo "Tearing down container";
   echo "";
+  podman kill "${1}" >/dev/null
   podman rm -f "${1}" >/dev/null
 }
 
@@ -75,32 +76,26 @@ function runContainerTest {
   TEST_NAME="${1}"
   CONTAINER_NAME="${2}"
   IMAGE="${3}"
-  WAIT_FOR_TEAR_DOWN="${4}"
-
+  APP_USER_CMD=""
+  APP_USER_PASSWORD_CMD=""
   ORA_PWD_CMD="${ORA_PWD_CMD:--e ORACLE_PASSWORD=LetsTest1}"
+
+  if [ -n "${APP_USER:-}" ]; then
+    APP_USER_CMD="-e APP_USER=${APP_USER}"
+  fi;
+
+  if [ -n "${APP_USER_PASSWORD:-}" ]; then
+    APP_USER_PASSWORD_CMD="-e APP_USER_PASSWORD=${APP_USER_PASSWORD}"
+  fi;
 
   echo "TEST ${TEST_NAME}: Started"
   echo ""
 
   # Run and start container
-  podman run -d --name ${CONTAINER_NAME} ${ORA_PWD_CMD} ${APP_USER} ${APP_USER_PASSWORD} ${IMAGE} >/dev/null
+  podman run -d --name ${CONTAINER_NAME} ${ORA_PWD_CMD} ${APP_USER_CMD} ${APP_USER_PASSWORD_CMD} ${IMAGE} >/dev/null
 
   # Check whether Oracle DB came up successfully
-  checkDB "${CONTAINER_NAME}"
-  TEST_OK=$?
-
-  if [ "${TEST_OK}" != "0" ]; then
-    # Print logs of failed test
-    podman logs "${CONTAINER_NAME}";
-
-    echo "";
-    echo "TEST ${TEST_NAME}: FAILED!";
-    echo "";
-
-    podman rm -f "${CONTAINER_NAME}" >/dev/null
-
-    exit 1;
-  else
+  if checkDB "${CONTAINER_NAME}"; then
     # Only tear down container if $NO_TEAR_DOWN has NOT been specified
     if [ -z "${NO_TEAR_DOWN:-}" ]; then
       echo "TEST ${TEST_NAME}: OK";
@@ -109,6 +104,18 @@ function runContainerTest {
     fi;
 
     return 0;
-  fi;
 
+  # Test failed
+  else
+    # Print logs of failed test
+    podman logs "${CONTAINER_NAME}";
+
+    echo "";
+    echo "TEST ${TEST_NAME}: FAILED!";
+    echo "";
+    tear_down_container "${CONTAINER_NAME}"
+
+    exit 1;
+
+  fi;
 }
