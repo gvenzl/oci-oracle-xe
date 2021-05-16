@@ -242,10 +242,13 @@ The regular image strives to balance between the functionality required by most 
 #### Database components
 
 * The `HR` schema has been removed
+* `Oracle Workspace Manager` has been removed
 * `Oracle Multimedia` has been removed
 * `Oracle Database Java Packages` have been removed
 * `Oracle XDK` has been removed
 * `JServer JAVA Virtual Machine` has been removed
+* `Oracle OLAP API` has been removed
+* `OLAP Analytic Workspace` has been removed
 * `OPatch` utility has been removed (`$ORACLE_HOME/OPatch`)
 * `QOpatch` utility has been removed (`$ORACLE_HOME/QOpatch`)
 * `Oracle Database Assistants` have been removed (`$ORACLE_HOME/assistants`)

@@ -294,6 +294,23 @@ EOF
     echo "BUILDER: Oracle JServer JAVA Virtual Machine"
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_jvm -d "${ORACLE_HOME}"/javavm/install rmjvm.sql
 
+    # Remove Oracle OLAP API
+    echo "BUILDER: Remove Oracle OLAP API"
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -C 'CDB\$ROOT' -b builder_remove_olap_api_pdbs_1 -d "${ORACLE_HOME}"/olap/admin/ olapidrp.plb
+    # Needs to be done one by one, otherwise there is a ORA-65023: active transaction exists in container PDB\$SEED
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'PDB\$SEED' -b builder_remove_olap_api_pdbseed_2 -d "${ORACLE_HOME}"/olap/admin/ catnoxoq.sql
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'XEPDB1' -b builder_remove_olap_api_xepdb1_2 -d "${ORACLE_HOME}"/olap/admin/ catnoxoq.sql
+    # Remove it from the CDB
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'CDB\$ROOT' -b builder_remove_olap_api_cdb_1 -d "${ORACLE_HOME}"/olap/admin/ olapidrp.plb
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'CDB\$ROOT' -b builder_remove_olap_api_cdb_2 -d "${ORACLE_HOME}"/olap/admin/ catnoxoq.sql
+
+    # Remove OLAP Analytic Workspace
+    echo "BUILDER: Remove OLAP Analytic Workspace"
+    # Needs to be done one by one, otherwise there is a ORA-65023: active transaction exists in container PDB\$SEED
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'PDB\$SEED' -b builder_remove_olap_workspace_pdb_seed -d "${ORACLE_HOME}"/olap/admin/ catnoaps.sql
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'XEPDB1' -b builder_remove_olap_workspace_xepdb1 -d "${ORACLE_HOME}"/olap/admin/ catnoaps.sql
+    "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'CDB\$ROOT' -b builder_remove_olap_workspace_cdb -d "${ORACLE_HOME}"/olap/admin/ catnoaps.sql
+
     # Recompile
     echo "BUILDER: Recompiling database objects"
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_recompile_all_objects -d "${ORACLE_HOME}"/rdbms/admin utlrp.sql
@@ -488,7 +505,6 @@ EOF
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM ORDDCM_CONSTRAINT_NAMES');
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM ORDDCM_DOCUMENT_REFS');
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM ORDDCM_CONFORMANCE_VLD_MSGS');
-
 
      exit;
 EOF
@@ -829,6 +845,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
   # Remove rdbms/jlib
   rm -r "${ORACLE_HOME}"/rdbms/jlib
+
+  # Remove olap
+  rm -r "${ORACLE_HOME}"/olap
 
   # Remove not needed packages
   # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
