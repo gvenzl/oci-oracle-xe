@@ -269,15 +269,16 @@ EOF
   ########################
 
   # Needs to be run as 'oracle' user (Perl script otherwise fails #TODO: see whether it can be run with su -c somehow instead)
+  echo "BUILDER: Removing additional components for REGULAR image"
   su - oracle << EOF
     cd "${ORACLE_HOME}"/rdbms/admin
 
     # Remove Workspace Manager
-    echo "BUILDER: Oracle Workspace Manager"
+    echo "BUILDER: Removing Oracle Workspace Manager"
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1  -C 'CDB\$ROOT' -b builder_remove_workspace_manager_pdbs -d "${ORACLE_HOME}"/rdbms/admin owmuinst.plb
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1  -c 'CDB\$ROOT' -b builder_remove_workspace_manager_cdb -d "${ORACLE_HOME}"/rdbms/admin owmuinst.plb
 
-    echo "BUILDER: removing Oracle Multimedia"
+    echo "BUILDER: Removing Oracle Multimedia"
     # Remove Multimedia (dependent on Oracle Database Java Packages)
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -C 'CDB\$ROOT' -b builder_remove_multimedia_pdbs -d "${ORACLE_HOME}"/ord/im/admin imremdo.sql
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'CDB\$ROOT' -b builder_remove_multimedia_cdb -d "${ORACLE_HOME}"/ord/im/admin imremdo.sql
@@ -291,11 +292,11 @@ EOF
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_xdk -d "${ORACLE_HOME}"/xdk/admin rmxml.sql
 
     # Remove Oracle JServer JAVA Virtual Machine
-    echo "BUILDER: Oracle JServer JAVA Virtual Machine"
+    echo "BUILDER: Removing Oracle JServer JAVA Virtual Machine"
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_jvm -d "${ORACLE_HOME}"/javavm/install rmjvm.sql
 
     # Remove Oracle OLAP API
-    echo "BUILDER: Remove Oracle OLAP API"
+    echo "BUILDER: Removing  Oracle OLAP API"
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -C 'CDB\$ROOT' -b builder_remove_olap_api_pdbs_1 -d "${ORACLE_HOME}"/olap/admin/ olapidrp.plb
     # Needs to be done one by one, otherwise there is a ORA-65023: active transaction exists in container PDB\$SEED
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'PDB\$SEED' -b builder_remove_olap_api_pdbseed_2 -d "${ORACLE_HOME}"/olap/admin/ catnoxoq.sql
@@ -305,7 +306,7 @@ EOF
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'CDB\$ROOT' -b builder_remove_olap_api_cdb_2 -d "${ORACLE_HOME}"/olap/admin/ catnoxoq.sql
 
     # Remove OLAP Analytic Workspace
-    echo "BUILDER: Remove OLAP Analytic Workspace"
+    echo "BUILDER: Removing OLAP Analytic Workspace"
     # Needs to be done one by one, otherwise there is a ORA-65023: active transaction exists in container PDB\$SEED
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'PDB\$SEED' -b builder_remove_olap_workspace_pdb_seed -d "${ORACLE_HOME}"/olap/admin/ catnoaps.sql
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'XEPDB1' -b builder_remove_olap_workspace_xepdb1 -d "${ORACLE_HOME}"/olap/admin/ catnoaps.sql
@@ -322,7 +323,7 @@ EOF
 EOF
 
   # Drop leftover items
-  echo "BUILDER: Dropping leftover Database dictionary objects"
+  echo "BUILDER: Dropping leftover Database dictionary objects for REGULAR"
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
      -- Exit on any errors
