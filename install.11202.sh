@@ -611,9 +611,6 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     # Remove precomp directory
     rm -r "${ORACLE_HOME}"/precomp
 
-    # Remove slax directory
-    rm -r "${ORACLE_HOME}"/slax
-
     # Remove rdbms/demo directory
     rm -r "${ORACLE_HOME}"/rdbms/demo
 

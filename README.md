@@ -364,7 +364,6 @@ The slim images aims for smallest possible image size with only the Oracle Datab
 * The hs directory has been removed (`$ORACLE_HOME/hs`)
 * The ldap directory has been removed (`$ORACLE_HOME/ldap`)
 * The precomp directory has been removed (`$ORACLE_HOME/precomp`)
-* The slax directory has been removed (`$ORACLE_HOME/slax`)
 * The rdbms/demo directory has been removed (`$ORACLE_HOME/rdbms/demo`)
 * The rdbms/jlib directory has been removed (`$ORACLE_HOME/rdbms/jlib`)
 * The rdbms/public directory has been removed (`$ORACLE_HOME/rdbms/public`)
