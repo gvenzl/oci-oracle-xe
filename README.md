@@ -275,7 +275,7 @@ The regular image strives to balance between the functionality required by most 
 * `Oracle Workspace Manager` has been removed
 * `Oracle Multimedia` has been removed
 * `Oracle Database Java Packages` have been removed
-* `Oracle XDK` has been removed
+* `Oracle XDK` has been removed (`$ORACLE_HOME/xdk`)
 * `JServer JAVA Virtual Machine` has been removed
 * `Oracle OLAP API` has been removed
 * `OLAP Analytic Workspace` has been removed
@@ -307,6 +307,23 @@ The regular image strives to balance between the functionality required by most 
   * `pkgconf`
   * `pkgconf-m4`
   * `pkgconf-pkg-config`
+
+### Slim image flavor (`18-slim`)
+
+The slim images aims for smallest possible image size with only the Oracle Database relational components. It has all customizations that the regular image has and removes all non-relational components (where possible) to further decrease the image size:
+
+#### Database components
+
+* `Oracle Text` has been uninstalled and removed (`$ORACLE_HOME/ctx`)
+* The demo samples directory has been removed (`$ORACLE_HOME/demo`)
+* `ODBC` driver samples have been removed (`$ORACLE_HOME/odbc`)
+* `TNS` demo samples have been removed (`$ORACLE_HOME/network/admin/samples`)
+* `NLS LBuilder` directory has been removed (`$ORACLE_HOME/nls/lbuilder`)
+* The hs directory has been removed (`$ORACLE_HOME/hs`)
+* The ldap directory has been removed (`$ORACLE_HOME/ldap`)
+* The precomp directory has been removed (`$ORACLE_HOME/precomp`)
+* The rdbms/public directory has been removed (`$ORACLE_HOME/rdbms/public`)
+* The rdbms/xml directory has been removed (`$ORACLE_HOME/rdbms/xml`)
 
 ## 11g XE
 

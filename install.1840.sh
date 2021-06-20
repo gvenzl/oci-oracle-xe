@@ -40,6 +40,10 @@ elif [ "${BUILD_MODE}" == "REGULAR" ]; then
   REDO_SIZE=20
   USERS_SIZE=10
 #  CDB_SYSAUX_SIZE=464
+elif [ "${BUILD_MODE}" == "SLIM" ]; then
+  REDO_SIZE=10
+  USERS_SIZE=2
+#  CDB_SYSAUX_SIZE=464
 fi;
 
 echo "BUILDER: Installing OS dependencies"
@@ -323,7 +327,7 @@ EOF
 EOF
 
   # Drop leftover items
-  echo "BUILDER: Dropping leftover Database dictionary objects for REGULAR"
+  echo "BUILDER: Dropping leftover Database dictionary objects for REGULAR image"
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
      -- Exit on any errors
@@ -514,7 +518,73 @@ EOF
      exit;
 EOF
 
-  # Shrink datafiles
+  ####################################
+  # SLIM Image: Remove DB components #
+  ####################################
+
+  if [ "${BUILD_MODE}" == "SLIM" ]; then
+
+    # Needs to be run as 'oracle' user (Perl script otherwise fails #TODO: see whether it can be run with su -c somehow instead)
+    echo "BUILDER: Removing additional components for SLIM image"
+    su - oracle << EOF
+      cd "${ORACLE_HOME}"/rdbms/admin
+
+      # Remove Oracle Text
+      "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_text_pdbs -C 'CDB\$ROOT' -d "${ORACLE_HOME}"/ctx/admin catnoctx.sql
+      "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_text_cdb -c 'CDB\$ROOT' -d "${ORACLE_HOME}"/ctx/admin catnoctx.sql
+
+      # Recompile
+      echo "BUILDER: Recompiling database objects"
+      "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_recompile_all_objects -d "${ORACLE_HOME}"/rdbms/admin utlrp.sql
+
+      # Remove all log files
+      rm "${ORACLE_HOME}"/rdbms/admin/builder_*
+
+      exit;
+EOF
+
+    # Drop leftover items
+    echo "BUILDER: Dropping leftover Database dictionary objects for SLIM image"
+    su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+       -- Exit on any errors
+       WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       -- Oracle Text leftovers
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE XDB.XDB_DATASTORE_PROC');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM DBMS_XDBT');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE XDB.DBMS_XDBT');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE SYS.VALIDATE_CONTEXT');
+
+       -- Open PDB\$SEED to READ WRITE mode (catcon put it into READY ONLY again)
+       ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
+       ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ WRITE;
+
+       ALTER SESSION SET CONTAINER=PDB\$SEED;
+
+       -- Oracle Text leftovers
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE XDB.XDB_DATASTORE_PROC');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM DBMS_XDBT');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE XDB.DBMS_XDBT');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE SYS.VALIDATE_CONTEXT');
+
+       ALTER SESSION SET CONTAINER=XEPDB1;
+
+       -- Oracle Text leftovers
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE XDB.XDB_DATASTORE_PROC');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM DBMS_XDBT');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE XDB.DBMS_XDBT');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE SYS.VALIDATE_CONTEXT');
+
+       exit;
+EOF
+
+  fi;
+
+  #####################
+  # Shrink data files #
+  #####################
+
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
      -- Exit on any errors
@@ -858,6 +928,45 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
   rpm -e --nodeps glibc-devel glibc-headers kernel-headers libpkgconf libxcrypt-devel \
                   pkgconf pkgconf-m4 pkgconf-pkg-config
+
+  # Remove components from ORACLE_HOME
+  if [ "${BUILD_MODE}" == "SLIM" ]; then
+
+    echo "BUILDER: further cleanup for SLIM image"
+
+    # Remove Oracle Text directory
+    rm -r "${ORACLE_HOME}"/ctx
+
+    # Remove demo directory
+    rm -r "${ORACLE_HOME}"/demo
+
+    # Remove ODBC samples
+    rm -r "${ORACLE_HOME}"/odbc
+
+    # Remove TNS samples
+    rm -r "${ORACLE_HOME}"/network/admin/samples
+
+    # Remove NLS LBuilder
+    rm -r "${ORACLE_HOME}"/nls/lbuilder
+
+    # Remove hs directory
+    rm -r "${ORACLE_HOME}"/hs
+
+    # Remove ldap directory
+    rm -r "${ORACLE_HOME}"/ldap
+
+    # Remove precomp directory
+    rm -r "${ORACLE_HOME}"/precomp
+
+    # Remove rdbms/public directory
+    rm -r "${ORACLE_HOME}"/rdbms/public
+
+    # Remove rdbms/jlib directory
+    rm -r "${ORACLE_HOME}"/rdbms/xml
+
+    # TODO
+
+  fi;
 
 fi;
 
