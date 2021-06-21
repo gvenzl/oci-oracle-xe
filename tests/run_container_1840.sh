@@ -36,7 +36,10 @@ runContainerTest "18.4.0 REGULAR image" "1840" "gvenzl/oracle-xe:18.4.0"
 runContainerTest "18 REGULAR image" "18" "gvenzl/oracle-xe:18"
 runContainerTest "REGULAR image" "latest" "gvenzl/oracle-xe"
 
-#runContainerTest "18.4.0 SLIM image" "1840-slim" "gvenzl/oracle-xe:18.4.0-slim"
+runContainerTest "18.4.0 SLIM image" "1840-slim" "gvenzl/oracle-xe:18.4.0-slim"
+runContainerTest "18.4.0 SLIM image" "18-slim" "gvenzl/oracle-xe:18-slim"
+runContainerTest "18.4.0 SLIM image" "slim" "gvenzl/oracle-xe:slim"
+
 
 #################################
 ##### Oracle password tests #####
