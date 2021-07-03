@@ -26,13 +26,16 @@ set -Eeuo pipefail
 # Stop container when SIGINT or SIGTERM is received
 ########### stop database helper function ############
 function stop_database() {
-   echo "CONTAINER: shutdown request received."
-   echo "CONTAINER: shutting down database!"
+  echo "CONTAINER: shutdown request received."
+  echo "CONTAINER: shutting down database!"
 
-   lsnrctl stop
-   sqlplus -s / as sysdba <<EOF
-      shutdown immediate;
-      exit;
+  lsnrctl stop
+  sqlplus -s / as sysdba <<EOF
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+     shutdown immediate;
+     exit;
 EOF
    echo "CONTAINER: stopping container."
 }
@@ -248,6 +251,9 @@ function create_app_user {
 
   echo "CONTAINER: Creating database application user."
   sqlplus -s / as sysdba <<EOF
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
+
      ${ALTER_SESSION_CMD}
 
      CREATE USER ${APP_USER} IDENTIFIED BY "${APP_USER_PASSWORD}" QUOTA UNLIMITED ON USERS;
@@ -285,8 +291,11 @@ fi;
 echo "CONTAINER: starting up Oracle Database..."
 lsnrctl start && \
 sqlplus -s / as sysdba << EOF
-  startup;
-  exit;
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+   startup;
+   exit;
 EOF
 echo ""
 
