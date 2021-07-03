@@ -952,8 +952,10 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     # Remove hs directory
     rm -r "${ORACLE_HOME}"/hs
 
-    # Remove ldap directory
-    rm -r "${ORACLE_HOME}"/ldap
+    # DO NOT remove ldap directory.
+    # Some message files (mesg/*.msb) are needed for ALTER USER ... IDENTIFIED BY
+    # TODO: Clean up not needed ldap files
+    #rm -r "${ORACLE_HOME}"/ldap
 
     # Remove precomp directory
     rm -r "${ORACLE_HOME}"/precomp

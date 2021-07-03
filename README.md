@@ -320,7 +320,6 @@ The slim images aims for smallest possible image size with only the Oracle Datab
 * `TNS` demo samples have been removed (`$ORACLE_HOME/network/admin/samples`)
 * `NLS LBuilder` directory has been removed (`$ORACLE_HOME/nls/lbuilder`)
 * The hs directory has been removed (`$ORACLE_HOME/hs`)
-* The ldap directory has been removed (`$ORACLE_HOME/ldap`)
 * The precomp directory has been removed (`$ORACLE_HOME/precomp`)
 * The rdbms/public directory has been removed (`$ORACLE_HOME/rdbms/public`)
 * The rdbms/xml directory has been removed (`$ORACLE_HOME/rdbms/xml`)
