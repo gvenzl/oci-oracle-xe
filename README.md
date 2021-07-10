@@ -46,17 +46,54 @@ The 11gR2 (11.2.0.2) Oracle Database version stores the database data files unde
 
 ## Environment variables
 
+Environment variables allow you to customize your container. Note that these variables will only be considered during the database initialization (first container startup).
+
 ### `ORACLE_PASSWORD`
 This variable is mandatory for the first container startup and specifies the password for the Oracle Database `SYS` and `SYSTEM` users.
 
 ### `ORACLE_RANDOM_PASSWORD`
 This is an optional variable. Set this variable to a non-empty value, like `yes`, to generate a random initial password for the `SYS` and `SYSTEM` users. The generated password will be printed to stdout (`ORACLE PASSWORD FOR SYS AND SYSTEM: ...`).
 
+### `ORACLE_DATABASE` (for 18c only)
+This is an optional variable. Set this variable to a non-empty string to create a new pluggable database with the name specified in this variable.  
+**Note:** this variable is only supported for Oracle Database XE 18c as 11g does not support pluggable databases.  
+**Note:** creating a new database will add to the initial container startup time. If you do not want that additional startup time, use the already existing `XEPDB1` database instead.
+
 ### `APP_USER`
-This is an optional variable. Set this variable to a non-empty string to create a new database schema user with the name specified in this variable. This variable requires `APP_USER_PASSWORD` or `APP_USER_PASSWORD_FILE` to be specified as well.
+This is an optional variable. Set this variable to a non-empty string to create a new database schema user with the name specified in this variable. The user will be created in the default `XEPDB1` pluggable database. If `ORACLE_DATABASE` has been specified, the user will also be created in that pluggable database. This variable requires `APP_USER_PASSWORD` or `APP_USER_PASSWORD_FILE` to be specified as well.
 
 ### `APP_USER_PASSWORD`
 This is an optional variable. Set this variable to a non-empty string to define a password for the database schema user specified by `APP_USER`. This variable requires `APP_USER` to be specified as well.
+
+## GitHub Actions
+The images can be used as a [Service Container](https://docs.github.com/en/actions/guides/about-service-containers) within a [GitHub Actions](https://docs.github.com/en/actions) workflow. Below is an example service definition for your GitHub Actions YAML file:
+
+```yaml
+    services:
+
+      # Oracle service
+      oracle:
+
+        # Docker Hub image (feel free to change the tag "latest" to any other available one)
+        image: gvenzl/oracle-xe:latest
+
+        # Provide passwords and other environment variables to container
+        env:
+          ORACLE_RANDOM_PASSWORD: true
+          APP_USER: my_user
+          APP_USER_PASSWORD: my_password_which_I_really_should_change
+
+        # Forward Oracle port
+        ports:
+          - 1521:1521
+
+        # Provide healthcheck script options for startup
+        options: >-
+          --health-cmd healthcheck.sh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+```
 
 ## Container secrets
 
@@ -68,8 +105,9 @@ docker run --name some-oracle -e ORACLE_PASSWORD_FILE=/run/secrets/oracle-passwd
 
 This mechanism is supported for:
 
-* `ORACLE_PASSWORD`
 * `APP_USER_PASSWORD`
+* `ORACLE_PASSWORD`
+* `ORACLE_DATABASE`
 
 ## Initialization scripts
 If you would like to perform additional initialization of the database running in a container, you can add one or more `*.sql`, `*.sql.gz`, `*.sql.zip` or `*.sh` files under `/container-entrypoint-initdb.d` (creating the directory if necessary). After the database setup is completed, these files will be executed automatically in alphabetical order.
@@ -245,10 +283,11 @@ The regular image strives to balance between the functionality required by most 
 * `Oracle Workspace Manager` has been removed
 * `Oracle Multimedia` has been removed
 * `Oracle Database Java Packages` have been removed
-* `Oracle XDK` has been removed
+* `Oracle XDK` has been removed (`$ORACLE_HOME/xdk`)
 * `JServer JAVA Virtual Machine` has been removed
 * `Oracle OLAP API` has been removed
 * `OLAP Analytic Workspace` has been removed
+* `Oracle PGX` has been removed (`$ORACLE_HOME/md/property_graph`)
 * `OPatch` utility has been removed (`$ORACLE_HOME/OPatch`)
 * `QOpatch` utility has been removed (`$ORACLE_HOME/QOpatch`)
 * `Oracle Database Assistants` have been removed (`$ORACLE_HOME/assistants`)
@@ -277,6 +316,22 @@ The regular image strives to balance between the functionality required by most 
   * `pkgconf`
   * `pkgconf-m4`
   * `pkgconf-pkg-config`
+
+### Slim image flavor (`18-slim`)
+
+The slim images aims for smallest possible image size with only the Oracle Database relational components. It has all customizations that the regular image has and removes all non-relational components (where possible) to further decrease the image size:
+
+#### Database components
+
+* `Oracle Text` has been uninstalled and removed (`$ORACLE_HOME/ctx`)
+* The demo samples directory has been removed (`$ORACLE_HOME/demo`)
+* `ODBC` driver samples have been removed (`$ORACLE_HOME/odbc`)
+* `TNS` demo samples have been removed (`$ORACLE_HOME/network/admin/samples`)
+* `NLS LBuilder` directory has been removed (`$ORACLE_HOME/nls/lbuilder`)
+* The hs directory has been removed (`$ORACLE_HOME/hs`)
+* The precomp directory has been removed (`$ORACLE_HOME/precomp`)
+* The rdbms/public directory has been removed (`$ORACLE_HOME/rdbms/public`)
+* The rdbms/xml directory has been removed (`$ORACLE_HOME/rdbms/xml`)
 
 ## 11g XE
 
@@ -334,7 +389,6 @@ The slim images aims for smallest possible image size with only the Oracle Datab
 * The hs directory has been removed (`$ORACLE_HOME/hs`)
 * The ldap directory has been removed (`$ORACLE_HOME/ldap`)
 * The precomp directory has been removed (`$ORACLE_HOME/precomp`)
-* The slax directory has been removed (`$ORACLE_HOME/slax`)
 * The rdbms/demo directory has been removed (`$ORACLE_HOME/rdbms/demo`)
 * The rdbms/jlib directory has been removed (`$ORACLE_HOME/rdbms/jlib`)
 * The rdbms/public directory has been removed (`$ORACLE_HOME/rdbms/public`)

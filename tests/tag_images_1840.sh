@@ -27,3 +27,6 @@ podman tag gvenzl/oracle-xe:18.4.0-full gvenzl/oracle-xe:18-full
 podman tag gvenzl/oracle-xe:18.4.0-full gvenzl/oracle-xe:full
 
 podman tag gvenzl/oracle-xe:18.4.0 gvenzl/oracle-xe:18
+
+podman tag gvenzl/oracle-xe:18.4.0-slim gvenzl/oracle-xe:18-slim
+podman tag gvenzl/oracle-xe:18.4.0-slim gvenzl/oracle-xe:slim

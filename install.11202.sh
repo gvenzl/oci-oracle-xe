@@ -611,9 +611,6 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     # Remove precomp directory
     rm -r "${ORACLE_HOME}"/precomp
 
-    # Remove slax directory
-    rm -r "${ORACLE_HOME}"/slax
-
     # Remove rdbms/demo directory
     rm -r "${ORACLE_HOME}"/rdbms/demo
 
@@ -636,8 +633,9 @@ fi;
 # Unfortunately microdnf does not automatically uninstall dependencies that have been
 # installed with a package, so if you were to uninstall just util-linux, for example,
 # it does not automatically also remove gzip and cracklib again.
-microdnf -y remove bc libtirpc libnsl2 libfdisk libutempter cracklib libpwquality \
-                   pam util-linux dbus-libs dbus-tools pam libpwquality dbus-common \
+microdnf -y remove bc libtirpc libnsl2 libfdisk libutempter cracklib cracklib-dicts \
+                   libpwquality hwdata libibverbs libnl3 pciutils pciutils-libs \
+                   rdma-core pam  dbus-libs dbus-tools pam dbus-common \
                    dbus-daemon libpcap iptables-libs libseccomp kmod-libs acl \
                    device-mapper device-mapper-libs cryptsetup-libs \
                    elfutils-default-yama-scope elfutils-libs systemd-pam systemd dbus \

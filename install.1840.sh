@@ -40,6 +40,10 @@ elif [ "${BUILD_MODE}" == "REGULAR" ]; then
   REDO_SIZE=20
   USERS_SIZE=10
 #  CDB_SYSAUX_SIZE=464
+elif [ "${BUILD_MODE}" == "SLIM" ]; then
+  REDO_SIZE=10
+  USERS_SIZE=2
+#  CDB_SYSAUX_SIZE=464
 fi;
 
 echo "BUILDER: Installing OS dependencies"
@@ -269,15 +273,16 @@ EOF
   ########################
 
   # Needs to be run as 'oracle' user (Perl script otherwise fails #TODO: see whether it can be run with su -c somehow instead)
+  echo "BUILDER: Removing additional components for REGULAR image"
   su - oracle << EOF
     cd "${ORACLE_HOME}"/rdbms/admin
 
     # Remove Workspace Manager
-    echo "BUILDER: Oracle Workspace Manager"
+    echo "BUILDER: Removing Oracle Workspace Manager"
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1  -C 'CDB\$ROOT' -b builder_remove_workspace_manager_pdbs -d "${ORACLE_HOME}"/rdbms/admin owmuinst.plb
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1  -c 'CDB\$ROOT' -b builder_remove_workspace_manager_cdb -d "${ORACLE_HOME}"/rdbms/admin owmuinst.plb
 
-    echo "BUILDER: removing Oracle Multimedia"
+    echo "BUILDER: Removing Oracle Multimedia"
     # Remove Multimedia (dependent on Oracle Database Java Packages)
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -C 'CDB\$ROOT' -b builder_remove_multimedia_pdbs -d "${ORACLE_HOME}"/ord/im/admin imremdo.sql
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'CDB\$ROOT' -b builder_remove_multimedia_cdb -d "${ORACLE_HOME}"/ord/im/admin imremdo.sql
@@ -291,11 +296,11 @@ EOF
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_xdk -d "${ORACLE_HOME}"/xdk/admin rmxml.sql
 
     # Remove Oracle JServer JAVA Virtual Machine
-    echo "BUILDER: Oracle JServer JAVA Virtual Machine"
+    echo "BUILDER: Removing Oracle JServer JAVA Virtual Machine"
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_jvm -d "${ORACLE_HOME}"/javavm/install rmjvm.sql
 
     # Remove Oracle OLAP API
-    echo "BUILDER: Remove Oracle OLAP API"
+    echo "BUILDER: Removing  Oracle OLAP API"
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -C 'CDB\$ROOT' -b builder_remove_olap_api_pdbs_1 -d "${ORACLE_HOME}"/olap/admin/ olapidrp.plb
     # Needs to be done one by one, otherwise there is a ORA-65023: active transaction exists in container PDB\$SEED
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'PDB\$SEED' -b builder_remove_olap_api_pdbseed_2 -d "${ORACLE_HOME}"/olap/admin/ catnoxoq.sql
@@ -305,7 +310,7 @@ EOF
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'CDB\$ROOT' -b builder_remove_olap_api_cdb_2 -d "${ORACLE_HOME}"/olap/admin/ catnoxoq.sql
 
     # Remove OLAP Analytic Workspace
-    echo "BUILDER: Remove OLAP Analytic Workspace"
+    echo "BUILDER: Removing OLAP Analytic Workspace"
     # Needs to be done one by one, otherwise there is a ORA-65023: active transaction exists in container PDB\$SEED
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'PDB\$SEED' -b builder_remove_olap_workspace_pdb_seed -d "${ORACLE_HOME}"/olap/admin/ catnoaps.sql
     "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'XEPDB1' -b builder_remove_olap_workspace_xepdb1 -d "${ORACLE_HOME}"/olap/admin/ catnoaps.sql
@@ -322,7 +327,7 @@ EOF
 EOF
 
   # Drop leftover items
-  echo "BUILDER: Dropping leftover Database dictionary objects"
+  echo "BUILDER: Dropping leftover Database dictionary objects for REGULAR image"
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
      -- Exit on any errors
@@ -338,10 +343,11 @@ EOF
 
      ALTER SESSION SET CONTAINER=PDB\$SEED;
 
-     -- Remove Java VM packages leftovers
-     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE BODY JAVAVM_SYS');
-     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE BODY JVMRJBCINV');
-     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE BODY OJDS_CONTEXT');
+     -- Remove Java VM leftovers
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE JAVAVM_SYS');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE JVMRJBCINV');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE DBMS_JAVA_MISC');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE OJDS_CONTEXT');
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$NODE_NUMBER\$');
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$BINDINGS\$');
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$INODE\$');
@@ -350,6 +356,8 @@ EOF
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$PERMISSIONS\$');
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$SHARED\$OBJ\$SEQ\$');
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$SHARED\$OBJ\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP TRIGGER OJDS\$ROLE_TRIGGER\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP USER OJVMSYS');
 
      -- Oracle Multimedia leftovers
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE SYS.ORD_ADMIN');
@@ -423,10 +431,11 @@ EOF
 
      ALTER SESSION SET CONTAINER=XEPDB1;
 
-     -- Remove Java VM packages leftovers
-     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE BODY JAVAVM_SYS');
-     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE BODY JVMRJBCINV');
-     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE BODY OJDS_CONTEXT');
+     -- Remove Java VM leftovers
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE JAVAVM_SYS');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE JVMRJBCINV');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE DBMS_JAVA_MISC');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE OJDS_CONTEXT');
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$NODE_NUMBER\$');
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$BINDINGS\$');
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$INODE\$');
@@ -435,6 +444,8 @@ EOF
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$PERMISSIONS\$');
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$SHARED\$OBJ\$SEQ\$');
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP SYNONYM OJDS\$SHARED\$OBJ\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP TRIGGER OJDS\$ROLE_TRIGGER\$');
+     exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP USER OJVMSYS');
 
      -- Oracle Multimedia leftovers
      exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE SYS.ORD_ADMIN');
@@ -509,7 +520,73 @@ EOF
      exit;
 EOF
 
-  # Shrink datafiles
+  ####################################
+  # SLIM Image: Remove DB components #
+  ####################################
+
+  if [ "${BUILD_MODE}" == "SLIM" ]; then
+
+    # Needs to be run as 'oracle' user (Perl script otherwise fails #TODO: see whether it can be run with su -c somehow instead)
+    echo "BUILDER: Removing additional components for SLIM image"
+    su - oracle << EOF
+      cd "${ORACLE_HOME}"/rdbms/admin
+
+      # Remove Oracle Text
+      "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_text_pdbs -C 'CDB\$ROOT' -d "${ORACLE_HOME}"/ctx/admin catnoctx.sql
+      "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_text_cdb -c 'CDB\$ROOT' -d "${ORACLE_HOME}"/ctx/admin catnoctx.sql
+
+      # Recompile
+      echo "BUILDER: Recompiling database objects"
+      "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_recompile_all_objects -d "${ORACLE_HOME}"/rdbms/admin utlrp.sql
+
+      # Remove all log files
+      rm "${ORACLE_HOME}"/rdbms/admin/builder_*
+
+      exit;
+EOF
+
+    # Drop leftover items
+    echo "BUILDER: Dropping leftover Database dictionary objects for SLIM image"
+    su -p oracle -c "sqlplus -s / as sysdba" << EOF
+
+       -- Exit on any errors
+       WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       -- Oracle Text leftovers
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE XDB.XDB_DATASTORE_PROC');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM DBMS_XDBT');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE XDB.DBMS_XDBT');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE SYS.VALIDATE_CONTEXT');
+
+       -- Open PDB\$SEED to READ WRITE mode (catcon put it into READY ONLY again)
+       ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
+       ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ WRITE;
+
+       ALTER SESSION SET CONTAINER=PDB\$SEED;
+
+       -- Oracle Text leftovers
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE XDB.XDB_DATASTORE_PROC');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM DBMS_XDBT');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE XDB.DBMS_XDBT');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE SYS.VALIDATE_CONTEXT');
+
+       ALTER SESSION SET CONTAINER=XEPDB1;
+
+       -- Oracle Text leftovers
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE XDB.XDB_DATASTORE_PROC');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM DBMS_XDBT');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE XDB.DBMS_XDBT');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE SYS.VALIDATE_CONTEXT');
+
+       exit;
+EOF
+
+  fi;
+
+  #####################
+  # Shrink data files #
+  #####################
+
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
      -- Exit on any errors
@@ -677,6 +754,7 @@ EOF
 
      -- Use new temporary UNDO tablespace (so that old one can be deleted)
      ALTER SYSTEM SET UNDO_TABLESPACE='UNDO_TMP';
+     ALTER SYSTEM CHECKPOINT;
 
      -- Delete old UNDO tablespace
      DROP TABLESPACE UNDOTBS1 INCLUDING CONTENTS AND DATAFILES;
@@ -687,6 +765,7 @@ EOF
 
      -- Use newly created UNDO tablespace
      ALTER SYSTEM SET UNDO_TABLESPACE='UNDOTBS1';
+     ALTER SYSTEM CHECKPOINT;
 
      -- Drop temporary UNDO tablespace
      DROP TABLESPACE UNDO_TMP INCLUDING CONTENTS AND DATAFILES;
@@ -849,10 +928,54 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove olap
   rm -r "${ORACLE_HOME}"/olap
 
+  # Remove property graph (standalone component that can be downloaded from the web)
+  rm -r "${ORACLE_HOME}"/md/property_graph
+
   # Remove not needed packages
   # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
   rpm -e --nodeps glibc-devel glibc-headers kernel-headers libpkgconf libxcrypt-devel \
                   pkgconf pkgconf-m4 pkgconf-pkg-config
+
+  # Remove components from ORACLE_HOME
+  if [ "${BUILD_MODE}" == "SLIM" ]; then
+
+    echo "BUILDER: further cleanup for SLIM image"
+
+    # Remove Oracle Text directory
+    rm -r "${ORACLE_HOME}"/ctx
+
+    # Remove demo directory
+    rm -r "${ORACLE_HOME}"/demo
+
+    # Remove ODBC samples
+    rm -r "${ORACLE_HOME}"/odbc
+
+    # Remove TNS samples
+    rm -r "${ORACLE_HOME}"/network/admin/samples
+
+    # Remove NLS LBuilder
+    rm -r "${ORACLE_HOME}"/nls/lbuilder
+
+    # Remove hs directory
+    rm -r "${ORACLE_HOME}"/hs
+
+    # DO NOT remove ldap directory.
+    # Some message files (mesg/*.msb) are needed for ALTER USER ... IDENTIFIED BY
+    # TODO: Clean up not needed ldap files
+    #rm -r "${ORACLE_HOME}"/ldap
+
+    # Remove precomp directory
+    rm -r "${ORACLE_HOME}"/precomp
+
+    # Remove rdbms/public directory
+    rm -r "${ORACLE_HOME}"/rdbms/public
+
+    # Remove rdbms/jlib directory
+    rm -r "${ORACLE_HOME}"/rdbms/xml
+
+    # TODO
+
+  fi;
 
 fi;
 
@@ -860,10 +983,11 @@ fi;
 # Use rpm instead of microdnf to allow removing packages regardless of dependencies specified by the Oracle XE RPM
 rpm -e --nodeps dbus-libs libtirpc diffutils libnsl2 dbus-tools dbus-common dbus-daemon \
                 libpcap iptables-libs libseccomp libfdisk xz lm_sensors-libs libutempter \
-                kmod-libs cracklib libpwquality pam util-linux findutils acl \
+                kmod-libs cracklib cracklib-dicts libpwquality pam util-linux findutils acl \
                 device-mapper device-mapper-libs cryptsetup-libs elfutils-default-yama-scope \
                 elfutils-libs systemd-pam systemd dbus smartmontools ksh sysstat procps-ng \
-                binutils file make bc net-tools hostname
+                binutils file make bc net-tools hostname hwdata pciutils-libs pciutils \
+                rdma-core libibverbs libnl3
 
 rm /etc/sysctl.conf.rpmsave
 
