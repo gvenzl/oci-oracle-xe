@@ -46,14 +46,19 @@ The 11gR2 (11.2.0.2) Oracle Database version stores the database data files unde
 
 ## Environment variables
 
+Environment variables allow you to customize your container. Note that these variables will only be considered during the database initialization (first container startup).
+
 ### `ORACLE_PASSWORD`
 This variable is mandatory for the first container startup and specifies the password for the Oracle Database `SYS` and `SYSTEM` users.
 
 ### `ORACLE_RANDOM_PASSWORD`
 This is an optional variable. Set this variable to a non-empty value, like `yes`, to generate a random initial password for the `SYS` and `SYSTEM` users. The generated password will be printed to stdout (`ORACLE PASSWORD FOR SYS AND SYSTEM: ...`).
 
+### `ORACLE_DATABASE`
+This is an optional variable. Set this variable to a non-empty string to create a new pluggable database with the name specified in this variable. **Note:** creating a new database can add several additional seconds to the initial container startup. If you do not want that additional startup time, use the already existing `XEPDB1` database instead.
+
 ### `APP_USER`
-This is an optional variable. Set this variable to a non-empty string to create a new database schema user with the name specified in this variable. This variable requires `APP_USER_PASSWORD` or `APP_USER_PASSWORD_FILE` to be specified as well.
+This is an optional variable. Set this variable to a non-empty string to create a new database schema user with the name specified in this variable. The user will be created in the default `XEPDB1` pluggable database. If `ORACLE_DATABASE` has been specified, the user will also be created in that pluggable database. This variable requires `APP_USER_PASSWORD` or `APP_USER_PASSWORD_FILE` to be specified as well.
 
 ### `APP_USER_PASSWORD`
 This is an optional variable. Set this variable to a non-empty string to define a password for the database schema user specified by `APP_USER`. This variable requires `APP_USER` to be specified as well.
@@ -100,6 +105,7 @@ This mechanism is supported for:
 
 * `ORACLE_PASSWORD`
 * `APP_USER_PASSWORD`
+* `ORACLE_DATABASE`
 
 ## Initialization scripts
 If you would like to perform additional initialization of the database running in a container, you can add one or more `*.sql`, `*.sql.gz`, `*.sql.zip` or `*.sh` files under `/container-entrypoint-initdb.d` (creating the directory if necessary). After the database setup is completed, these files will be executed automatically in alphabetical order.

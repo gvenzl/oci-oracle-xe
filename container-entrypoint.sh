@@ -84,7 +84,16 @@ function setup_env_vars() {
   if [ -d "${ORACLE_BASE}/oradata/dbconfig/${ORACLE_SID}" ]; then
     DATABASE_ALREADY_EXISTS="true";
   else
-    # Allow for ORACLE_PASSWORD and/or ORACLE_PASSWORD_FILE
+
+    # Variable is only supported for >=18c
+    if [[ "${ORACLE_VERSION}" = "11.2"* ]]; then
+      unset "ORACLE_DATABASE"
+    else
+      # Allow for ORACLE_DATABASE or ORACLE_DATABASE_FILE
+      file_env "ORACLE_DATABASE"
+    fi;
+
+    # Allow for ORACLE_PASSWORD or ORACLE_PASSWORD_FILE
     file_env "ORACLE_PASSWORD"
 
     # Password is mandatory for first container start
@@ -100,7 +109,7 @@ function setup_env_vars() {
       exit 1;
     fi;
 
-    # Allow for APP_USER_PASSWORD and/or APP_USER_PASSWORD_FILE
+    # Allow for APP_USER_PASSWORD or APP_USER_PASSWORD_FILE
     file_env "APP_USER_PASSWORD"
 
     # Check whether both variables have been specified.
@@ -240,6 +249,38 @@ function run_custom_scripts {
   fi;
 }
 
+# Create pluggable database
+function create_database {
+
+  echo "CONTAINER: Creating pluggable database."
+
+  RANDOM_PDBADIN_PASSWORD=$(date +%s | sha256sum | base64 | head -c 8)
+
+  PDB_CREATE_START_TMS=$(date '+%s')
+
+  sqlplus -s / as sysdba <<EOF
+     -- Exit on any errors
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+     CREATE PLUGGABLE DATABASE ${ORACLE_DATABASE} \
+      ADMIN USER PDBADMIN IDENTIFIED BY "${RANDOM_PDBADIN_PASSWORD}" \
+       FILE_NAME_CONVERT=('pdbseed','${ORACLE_DATABASE}') \
+        DEFAULT TABLESPACE USERS \
+         DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/${ORACLE_DATABASE}/users01.dbf' \
+          SIZE 1m AUTOEXTEND ON NEXT 10m MAXSIZE UNLIMITED;
+
+     ALTER PLUGGABLE DATABASE ${ORACLE_DATABASE} OPEN READ WRITE;
+     ALTER PLUGGABLE DATABASE ${ORACLE_DATABASE} SAVE STATE;
+     exit;
+EOF
+
+  PDB_CREATE_END_TMS=$(date '+%s')
+  PDB_CREATE_DURATION=$(( PDB_CREATE_END_TMS - PDB_CREATE_START_TMS ))
+  echo "CONTAINER: DONE: Creating pluggable database, duration: ${PDB_CREATE_DURATION} seconds."
+
+  unset RANDOM_PDBADIN_PASSWORD
+}
+
 # Create schema user for the application to use
 function create_app_user {
 
@@ -250,6 +291,7 @@ function create_app_user {
   fi;
 
   echo "CONTAINER: Creating database application user."
+
   sqlplus -s / as sysdba <<EOF
      -- Exit on any errors
      WHENEVER SQLERROR EXIT SQL.SQLCODE
@@ -260,6 +302,21 @@ function create_app_user {
      GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE MATERIALIZED VIEW TO ${APP_USER};
      exit;
 EOF
+
+  # If ORACLE_DATABASE is specified, create user also in app PDB (only applicable >=18c)
+  if [ -n "${ORACLE_DATABASE:-}" ]; then
+    sqlplus -s / as sysdba <<EOF
+       -- Exit on any errors
+       WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       ALTER SESSION SET CONTAINER=${ORACLE_DATABASE};
+
+       CREATE USER ${APP_USER} IDENTIFIED BY "${APP_USER_PASSWORD}" QUOTA UNLIMITED ON USERS;
+       GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE MATERIALIZED VIEW TO ${APP_USER};
+       exit;
+EOF
+  fi;
+
 }
 
 ###########################
@@ -327,6 +384,12 @@ if healthcheck.sh; then
       exit 1;
     fi;
 
+    # Check whether user PDB should be created
+    # setup_env_vars has already validated >=18c requirement
+    if [ -n "${ORACLE_DATABASE:-}" ]; then
+      create_database
+    fi;
+
     # Check whether app user should be created
     # setup_env_vars has already validated environment variables
     if [ -n "${APP_USER:-}" ]; then
@@ -338,6 +401,7 @@ if healthcheck.sh; then
     # For backwards compatibility
     run_custom_scripts /docker-entrypoint-initdb.d
 
+  # Database already initialized
   else
 
     # Password was passed on for container start but DB is already initialized, ignoring.

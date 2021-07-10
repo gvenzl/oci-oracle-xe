@@ -1,7 +1,7 @@
 #!/bin/bash
 # Since: March, 2021
 # Author: gvenzl
-# Name: run_container_1840.sh
+# Name: test_container_1840.sh
 # Description: Run container test scripts for Oracle DB XE 18.4.0
 #
 # Copyright 2021 Gerald Venzl
@@ -70,9 +70,6 @@ result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s system/"${ORA_PWD}" <<EOF
 EOF
 )
 
-# Tear down the container, no longer needed
-tear_down_container "${CONTAINER_NAME}"
-
 # See whether we got "OK" back from our test
 if [ "${result}" == "${EXPECTED_RESULT}" ]; then
   echo "TEST ${TEST_NAME}: OK";
@@ -81,6 +78,9 @@ else
   echo "TEST ${TEST_NAME}: FAILED!";
   exit 1;
 fi;
+
+# Tear down the container, no longer needed
+tear_down_container "${CONTAINER_NAME}"
 
 # Clean up environment variables, all tests should remain self-contained
 unset CONTAINER_NAME
@@ -119,9 +119,6 @@ result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s system/"${rand_pwd}"@//loca
 EOF
 )
 
-# Tear down the container, no longer needed
-tear_down_container "${CONTAINER_NAME}"
-
 # See whether we got "OK" back from our test
 if [ "${result}" == "${EXPECTED_RESULT}" ]; then
   echo "TEST ${TEST_NAME}: OK";
@@ -130,6 +127,9 @@ else
   echo "TEST ${TEST_NAME}: FAILED!";
   exit 1;
 fi;
+
+# Tear down the container, no longer needed
+tear_down_container "${CONTAINER_NAME}"
 
 # Clean up environment variables, all tests should remain self-contained
 unset CONTAINER_NAME
@@ -167,8 +167,56 @@ result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_P
 EOF
 )
 
+# See whether we got "OK" back from our test
+if [ "${result}" == "${EXPECTED_RESULT}" ]; then
+  echo "TEST ${TEST_NAME}: OK";
+  echo "";
+else
+  echo "TEST ${TEST_NAME}: FAILED!";
+  exit 1;
+fi;
+
 # Tear down the container, no longer needed
 tear_down_container "${CONTAINER_NAME}"
+
+# Clean up environment variables, all tests should remain self-contained
+unset CONTAINER_NAME
+unset NO_TEAR_DOWN
+unset TEST_NAME
+unset EXPECTED_RESULT
+unset APP_USER
+unset APP_USER_PASSWORD
+
+######################################
+##### Oracle Database (PDB) test #####
+######################################
+
+# Tell test method not to tear down container
+NO_TEAR_DOWN="true"
+# Let's keep the container name in a var to keep it simple
+CONTAINER_NAME="18-oracle-db"
+# Let's keep the test name in a var to keep it simple too
+TEST_NAME="18.4.0 ORACLE_DATABASE"
+# This is what we want to have back from the SQL statement
+EXPECTED_RESULT="Hi from your Oracle PDB"
+# Oracle PDB
+ORACLE_DATABASE="GERALD_PDB"
+# Oracle password
+ORA_PWD="MyTestPassword"
+ORA_PWD_CMD="-e ORACLE_PASSWORD=${ORA_PWD}"
+
+# Spin up container
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:18.4.0-slim"
+
+# Test the random password, if it works we will get "OK" back from the SQL statement
+result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s sys/"${ORA_PWD}"@//localhost/"${ORACLE_DATABASE}" as sysdba <<EOF
+   set heading off;
+   set echo off;
+   set pagesize 0;
+   SELECT '${EXPECTED_RESULT}' FROM dual;
+   exit;
+EOF
+)
 
 # See whether we got "OK" back from our test
 if [ "${result}" == "${EXPECTED_RESULT}" ]; then
@@ -179,6 +227,62 @@ else
   exit 1;
 fi;
 
+# Tear down the container, no longer needed
+tear_down_container "${CONTAINER_NAME}"
+
+# Clean up environment variables, all tests should remain self-contained
+unset CONTAINER_NAME
+unset NO_TEAR_DOWN
+unset TEST_NAME
+unset EXPECTED_RESULT
+unset ORACLE_DATABASE
+unset ORA_PWD
+unset ORA_PWD_CMD
+
+#################################################
+##### Oracle Database (PDB) + APP_USER test #####
+#################################################
+
+# Tell test method not to tear down container
+NO_TEAR_DOWN="true"
+# Let's keep the container name in a var to keep it simple
+CONTAINER_NAME="18-oracle-db"
+# Let's keep the test name in a var to keep it simple too
+TEST_NAME="18.4.0 ORACLE_DATABASE & APP_USER"
+# This is what we want to have back from the SQL statement
+EXPECTED_RESULT="Hi from your Oracle PDB"
+# App user
+APP_USER="other_app_user"
+# App user password
+APP_USER_PASSWORD="ThatAppUserPassword1"
+# Oracle PDB
+ORACLE_DATABASE="REGRESSION_TESTS"
+
+# Spin up container
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:18.4.0"
+
+# Test the random password, if it works we will get "OK" back from the SQL statement
+result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_PASSWORD}"@//localhost/"${ORACLE_DATABASE}" <<EOF
+   set heading off;
+   set echo off;
+   set pagesize 0;
+   SELECT '${EXPECTED_RESULT}' FROM dual;
+   exit;
+EOF
+)
+
+# See whether we got "OK" back from our test
+if [ "${result}" == "${EXPECTED_RESULT}" ]; then
+  echo "TEST ${TEST_NAME}: OK";
+  echo "";
+else
+  echo "TEST ${TEST_NAME}: FAILED!";
+  exit 1;
+fi;
+
+# Tear down the container, no longer needed
+tear_down_container "${CONTAINER_NAME}"
+
 # Clean up environment variables, all tests should remain self-contained
 unset CONTAINER_NAME
 unset NO_TEAR_DOWN
@@ -186,3 +290,4 @@ unset TEST_NAME
 unset EXPECTED_RESULT
 unset APP_USER
 unset APP_USER_PASSWORD
+unset ORACLE_DATABASE

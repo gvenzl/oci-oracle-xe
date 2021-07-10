@@ -1,7 +1,7 @@
 #!/bin/bash
 # Since: January, 2021
 # Author: gvenzl
-# Name: run_container_11202.sh
+# Name: test_container_11202.sh
 # Description: Run container test scripts for Oracle DB XE 11.2.0.2
 #
 # Copyright 2021 Gerald Venzl
