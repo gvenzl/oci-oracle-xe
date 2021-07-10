@@ -54,8 +54,10 @@ This variable is mandatory for the first container startup and specifies the pas
 ### `ORACLE_RANDOM_PASSWORD`
 This is an optional variable. Set this variable to a non-empty value, like `yes`, to generate a random initial password for the `SYS` and `SYSTEM` users. The generated password will be printed to stdout (`ORACLE PASSWORD FOR SYS AND SYSTEM: ...`).
 
-### `ORACLE_DATABASE`
-This is an optional variable. Set this variable to a non-empty string to create a new pluggable database with the name specified in this variable. **Note:** creating a new database can add several additional seconds to the initial container startup. If you do not want that additional startup time, use the already existing `XEPDB1` database instead.
+### `ORACLE_DATABASE` (for 18c only)
+This is an optional variable. Set this variable to a non-empty string to create a new pluggable database with the name specified in this variable.  
+**Note:** this variable is only supported for Oracle Database XE 18c as 11g does not support pluggable databases.  
+**Note:** creating a new database will add to the initial container startup time. If you do not want that additional startup time, use the already existing `XEPDB1` database instead.
 
 ### `APP_USER`
 This is an optional variable. Set this variable to a non-empty string to create a new database schema user with the name specified in this variable. The user will be created in the default `XEPDB1` pluggable database. If `ORACLE_DATABASE` has been specified, the user will also be created in that pluggable database. This variable requires `APP_USER_PASSWORD` or `APP_USER_PASSWORD_FILE` to be specified as well.
@@ -103,8 +105,8 @@ docker run --name some-oracle -e ORACLE_PASSWORD_FILE=/run/secrets/oracle-passwd
 
 This mechanism is supported for:
 
-* `ORACLE_PASSWORD`
 * `APP_USER_PASSWORD`
+* `ORACLE_PASSWORD`
 * `ORACLE_DATABASE`
 
 ## Initialization scripts
