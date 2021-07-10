@@ -928,6 +928,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove olap
   rm -r "${ORACLE_HOME}"/olap
 
+  # Remove property graph (standalone component that can be downloaded from the web)
+  rm -r "${ORACLE_HOME}"/md/property_graph
+
   # Remove not needed packages
   # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
   rpm -e --nodeps glibc-devel glibc-headers kernel-headers libpkgconf libxcrypt-devel \

@@ -285,6 +285,7 @@ The regular image strives to balance between the functionality required by most 
 * `JServer JAVA Virtual Machine` has been removed
 * `Oracle OLAP API` has been removed
 * `OLAP Analytic Workspace` has been removed
+* `Oracle PGX` has been removed (`$ORACLE_HOME/md/property_graph`)
 * `OPatch` utility has been removed (`$ORACLE_HOME/OPatch`)
 * `QOpatch` utility has been removed (`$ORACLE_HOME/QOpatch`)
 * `Oracle Database Assistants` have been removed (`$ORACLE_HOME/assistants`)
