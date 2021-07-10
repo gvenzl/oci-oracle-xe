@@ -754,6 +754,7 @@ EOF
 
      -- Use new temporary UNDO tablespace (so that old one can be deleted)
      ALTER SYSTEM SET UNDO_TABLESPACE='UNDO_TMP';
+     ALTER SYSTEM CHECKPOINT;
 
      -- Delete old UNDO tablespace
      DROP TABLESPACE UNDOTBS1 INCLUDING CONTENTS AND DATAFILES;
@@ -764,6 +765,7 @@ EOF
 
      -- Use newly created UNDO tablespace
      ALTER SYSTEM SET UNDO_TABLESPACE='UNDOTBS1';
+     ALTER SYSTEM CHECKPOINT;
 
      -- Drop temporary UNDO tablespace
      DROP TABLESPACE UNDO_TMP INCLUDING CONTENTS AND DATAFILES;
