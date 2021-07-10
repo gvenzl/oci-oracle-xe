@@ -6,6 +6,7 @@ Oracle Database Express Edition Container / Docker images.
 # Supported tags and respective `Dockerfile` links
 
 * [`18.4.0`, `18`, `latest`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.1840)
+* [`18.4.0-slim`, `18-slim`, `slim`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.1840)
 * [`18.4.0-full`, `18-full`, `full`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.1840)
 * [`11.2.0.2`, `11`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.11202)
 * [`11.2.0.2-slim`, `11-slim`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.11202)
