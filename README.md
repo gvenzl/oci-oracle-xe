@@ -300,6 +300,7 @@ The regular image strives to balance between the functionality required by most 
 * Other utilities have been removed (`$ORACLE_HOME/lib/*.zip`)
 * Additional Java libraries have been removed (`$ORACLE_HOME/rdbms/jlib`)
 * The `Cluster Ready Services` directory has been removed (`$ORACLE_HOME/crs`)
+* The `Cluster Verification Utility` directory has been removed (`$ORACLE_HOME/cv`)
 
 #### Database settings
 
