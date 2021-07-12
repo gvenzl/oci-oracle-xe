@@ -527,13 +527,20 @@ EOF
   if [ "${BUILD_MODE}" == "SLIM" ]; then
 
     # Needs to be run as 'oracle' user (Perl script otherwise fails #TODO: see whether it can be run with su -c somehow instead)
+
     echo "BUILDER: Removing additional components for SLIM image"
     su - oracle << EOF
       cd "${ORACLE_HOME}"/rdbms/admin
 
       # Remove Oracle Text
+      echo "BUILDER: Removing Oracle Text"
       "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_text_pdbs -C 'CDB\$ROOT' -d "${ORACLE_HOME}"/ctx/admin catnoctx.sql
       "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -b builder_remove_text_cdb -c 'CDB\$ROOT' -d "${ORACLE_HOME}"/ctx/admin catnoctx.sql
+
+      # Remove Spatial
+      echo "BUILDER: Removing Oracle Spatial"
+      "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -C 'CDB\$ROOT' -b builder_remove_spatial_pdbs -d "${ORACLE_HOME}"/md/admin mddins.sql
+      "${ORACLE_HOME}"/perl/bin/perl catcon.pl -n 1 -c 'CDB\$ROOT' -b builder_remove_spatial_cdb  -d "${ORACLE_HOME}"/md/admin mddins.sql
 
       # Recompile
       echo "BUILDER: Recompiling database objects"
@@ -558,6 +565,10 @@ EOF
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE XDB.DBMS_XDBT');
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE SYS.VALIDATE_CONTEXT');
 
+       -- Remove Spatial leftover components
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP USER MDDATA CASCADE');
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP USER MDSYS CASCADE');
+
        -- Open PDB\$SEED to READ WRITE mode (catcon put it into READY ONLY again)
        ALTER PLUGGABLE DATABASE PDB\$SEED CLOSE;
        ALTER PLUGGABLE DATABASE PDB\$SEED OPEN READ WRITE;
@@ -570,6 +581,9 @@ EOF
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE XDB.DBMS_XDBT');
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE SYS.VALIDATE_CONTEXT');
 
+       -- Remove Spatial leftover components
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP USER MDDATA CASCADE');
+
        ALTER SESSION SET CONTAINER=XEPDB1;
 
        -- Oracle Text leftovers
@@ -577,6 +591,9 @@ EOF
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PUBLIC SYNONYM DBMS_XDBT');
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PACKAGE XDB.DBMS_XDBT');
        exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP PROCEDURE SYS.VALIDATE_CONTEXT');
+
+       -- Remove Spatial leftover components
+       exec DBMS_PDB.EXEC_AS_ORACLE_SCRIPT('DROP USER MDDATA CASCADE');
 
        exit;
 EOF
@@ -586,7 +603,6 @@ EOF
   #####################
   # Shrink data files #
   #####################
-
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
      -- Exit on any errors
@@ -972,6 +988,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
     # Remove rdbms/jlib directory
     rm -r "${ORACLE_HOME}"/rdbms/xml
+
+    # Remove Spatial
+    rm -r "${ORACLE_HOME}"/md
 
     # TODO
 

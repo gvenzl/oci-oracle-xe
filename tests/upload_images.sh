@@ -46,6 +46,13 @@ podman push gvenzl/oracle-xe:18.4.0          docker.io/gvenzl/oracle-xe:18.4.0
 echo "Upload 18"
 podman push gvenzl/oracle-xe:18              docker.io/gvenzl/oracle-xe:18
 
+echo "Upload 18.4.0-slim"
+podman push gvenzl/oracle-xe:18.4.0-slim     docker.io/gvenzl/oracle-xe:18.4.0-slim
+echo "Upload 18-slim"
+podman push gvenzl/oracle-xe:18-slim         docker.io/gvenzl/oracle-xe:18-slim
+echo "Upload slim"
+podman push gvenzl/oracle-xe:slim            docker.io/gvenzl/oracle-xe:slim
+
 # Upload 11g images
 echo "Upload 11.2.0.2-full"
 podman push gvenzl/oracle-xe:11.2.0.2-full   docker.io/gvenzl/oracle-xe:11.2.0.2-full
