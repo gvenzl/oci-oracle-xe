@@ -1005,6 +1005,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     # Remove deinstall directory
     rm -r "${ORACLE_HOME}"/deinstall
 
+    # Remove Oracle Database Provider for Distributed Relational Database Architecture (DRDA)
+    rm -r "${ORACLE_HOME}"/drdaas
+
     # TODO
 
   fi;

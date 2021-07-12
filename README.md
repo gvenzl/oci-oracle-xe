@@ -338,6 +338,7 @@ The slim images aims for smallest possible image size with only the Oracle Datab
 * The rdbms/xml directory has been removed (`$ORACLE_HOME/rdbms/xml`)
 * `Oracle R` has been removed (`$ORACLE_HOME/R`)
 * The deinstall directory has been removed (`$ORACLE_HOME/deinstall`)
+* The `Oracle Database Provider for Distributed Relational Database Architecture (DRDA)` has been removed (`$ORACLE_HOME/drdaas`)
 
 ## 11g XE
 
