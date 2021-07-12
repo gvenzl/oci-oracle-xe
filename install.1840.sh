@@ -953,6 +953,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove Cluster Verification Utility (CVU)
   rm -r "${ORACLE_HOME}"/cv
 
+  # Remove install directory
+  rm -r "${ORACLE_HOME}"/install
+
   # Remove not needed packages
   # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
   rpm -e --nodeps glibc-devel glibc-headers kernel-headers libpkgconf libxcrypt-devel \
