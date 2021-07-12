@@ -1002,6 +1002,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     rm -r "${ORACLE_HOME}"/R
     rm "${ORACLE_HOME}"/bin/ORE
 
+    # Remove deinstall directory
+    rm -r "${ORACLE_HOME}"/deinstall
+
     # TODO
 
   fi;
