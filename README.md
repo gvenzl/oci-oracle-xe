@@ -302,6 +302,7 @@ The regular image strives to balance between the functionality required by most 
 * The `Cluster Ready Services` directory has been removed (`$ORACLE_HOME/crs`)
 * The `Cluster Verification Utility` directory has been removed (`$ORACLE_HOME/cv`)
 * The `install` directory has been removed (`$ORACLE_HOME/install`)
+* The `Oracle Universal installer` has been removed (`$ORACLE_HOME/oui`)
 
 #### Database settings
 
