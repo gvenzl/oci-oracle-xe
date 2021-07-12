@@ -299,6 +299,7 @@ The regular image strives to balance between the functionality required by most 
 * Intel Math Kernel libraries have been removed (`$ORACLE_HOME/lib/libmkl_*`)
 * Other utilities have been removed (`$ORACLE_HOME/lib/*.zip`)
 * Additional Java libraries have been removed (`$ORACLE_HOME/rdbms/jlib`)
+* The `Cluster Ready Services` directory has been removed (`$ORACLE_HOME/crs`)
 
 #### Database settings
 
