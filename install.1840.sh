@@ -992,6 +992,10 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     # Remove Spatial
     rm -r "${ORACLE_HOME}"/md
 
+    # Remove Oracle R
+    rm -r "${ORACLE_HOME}"/R
+    rm "${ORACLE_HOME}"/bin/ORE
+
     # TODO
 
   fi;
