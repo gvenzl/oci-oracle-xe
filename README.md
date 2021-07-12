@@ -328,7 +328,6 @@ The slim images aims for smallest possible image size with only the Oracle Datab
 #### Database components
 
 * `Oracle Text` has been uninstalled and removed (`$ORACLE_HOME/ctx`)
-* `Oracle Spatial` has been uninstalled and removed (`$ORACLE_HOME/md`)
 * The demo samples directory has been removed (`$ORACLE_HOME/demo`)
 * `ODBC` driver samples have been removed (`$ORACLE_HOME/odbc`)
 * `TNS` demo samples have been removed (`$ORACLE_HOME/network/admin/samples`)
@@ -337,6 +336,9 @@ The slim images aims for smallest possible image size with only the Oracle Datab
 * The `precomp` directory has been removed (`$ORACLE_HOME/precomp`)
 * The `rdbms/public` directory has been removed (`$ORACLE_HOME/rdbms/public`)
 * The `rdbms/xml` directory has been removed (`$ORACLE_HOME/rdbms/xml`)
+* `Oracle Spatial` has been uninstalled and removed (`$ORACLE_HOME/md`)
+* The `ord` directory has been removed (`$ORACLE_HOME/ord`)
+* The `ordim` directory has been removed (`$ORACLE_HOME/ordim`)
 * `Oracle R` has been removed (`$ORACLE_HOME/R`)
 * The `deinstall` directory has been removed (`$ORACLE_HOME/deinstall`)
 * The `Oracle Database Provider for Distributed Relational Database Architecture (DRDA)` has been removed (`$ORACLE_HOME/drdaas`)
