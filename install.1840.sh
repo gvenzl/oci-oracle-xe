@@ -923,6 +923,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove zip artifacts in $ORACLE_HOME/lib
   rm "${ORACLE_HOME}"/lib/*.zip
 
+  # Remove lib/*.jar files
+  rm "${ORACLE_HOME}"/lib/*.jar
+
   # Remove Multimedia
   rm -r "${ORACLE_HOME}"/ord/im
 
@@ -946,6 +949,24 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
   # Remove property graph (standalone component that can be downloaded from the web)
   rm -r "${ORACLE_HOME}"/md/property_graph
+
+  # Remove Cluster Ready Services
+  rm -r "${ORACLE_HOME}"/crs
+
+  # Remove Cluster Verification Utility (CVU)
+  rm -r "${ORACLE_HOME}"/cv
+
+  # Remove install directory
+  rm -r "${ORACLE_HOME}"/install
+
+  # Remove network/jlib directory
+  rm -r "${ORACLE_HOME}"/network/jlib
+
+  # Remove network/tools directory
+  rm -r "${ORACLE_HOME}"/network/tools
+
+  # Remove opmn directory
+  rm -r "${ORACLE_HOME}"/opmn
 
   # Remove not needed packages
   # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
@@ -991,6 +1012,28 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
     # Remove Spatial
     rm -r "${ORACLE_HOME}"/md
+
+    # Remove ord directory
+    rm -r "${ORACLE_HOME}"/ord
+
+    # Remove ordim directory
+    rm -r "${ORACLE_HOME}"/ordim
+
+    # Remove Oracle R
+    rm -r "${ORACLE_HOME}"/R
+    rm "${ORACLE_HOME}"/bin/ORE
+
+    # Remove deinstall directory
+    rm -r "${ORACLE_HOME}"/deinstall
+
+    # Remove Oracle Database Provider for Distributed Relational Database Architecture (DRDA)
+    rm -r "${ORACLE_HOME}"/drdaas
+
+    # Remove Oracle Universal Installer
+    rm -r "${ORACLE_HOME}"/oui
+
+    # Remove Perl
+    rm -r "${ORACLE_HOME}"/perl
 
     # TODO
 

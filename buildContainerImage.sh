@@ -30,19 +30,19 @@ SKIP_CHECKSUM="false"
 function usage() {
     cat << EOF
 
-Usage: buildContainerImage.sh [-f | -n | -s] [-v version] [-i] [-o] [container build option]
+Usage: buildContainerImage.sh [-f | -r | -s] [-v version] [-i] [-o] [container build option]
 Builds a container image for Oracle Database XE.
 
 Parameters:
    -f: creates a 'full' image
-   -n: creates a regular image (default)
+   -r: creates a regular image (default)
    -s: creates a 'slim' image
    -v: version of Oracle Database XE to build
        Choose one of: 11.2.0.2, 18.4.0
    -i: ignores checksum test
    -o: passes on container build option
 
-* select only one flavor: -f, -n, or -s
+* select only one flavor: -f, -r, or -s
 
 Apache License, Version 2.0
 
@@ -64,7 +64,7 @@ while getopts "hfnsv:io:" optname; do
     "f")
       FLAVOR="FULL"
       ;;
-    "n")
+    "r")
       FLAVOR="REGULAR"
       ;;
     "s")
