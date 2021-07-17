@@ -296,13 +296,17 @@ The regular image strives to balance between the functionality required by most 
 * The `inventory` directory has been removed (`$ORACLE_HOME/inventory`)
 * `JDBC` drivers have been removed (`$ORACLE_HOME/jdbc`, `$ORACLE_HOME/jlib`)
 * `Universal Connection Pool` driver has been removed (`$ORACLE_HOME/ucp`)
-* Intel Math Kernel libraries have been removed (`$ORACLE_HOME/lib/libmkl_*`)
-* Other utilities have been removed (`$ORACLE_HOME/lib/*.zip`)
+* `Intel Math Kernel` libraries have been removed (`$ORACLE_HOME/lib/libmkl_*`)
+* Zip files in lib/ have been removed (`$ORACLE_HOME/lib/*.zip`)
+* Jar files in lib/ have been removed (`$ORACLE_HOME/lib/*.jar`)
 * Additional Java libraries have been removed (`$ORACLE_HOME/rdbms/jlib`)
 * The `Cluster Ready Services` directory has been removed (`$ORACLE_HOME/crs`)
 * The `Cluster Verification Utility` directory has been removed (`$ORACLE_HOME/cv`)
 * The `install` directory has been removed (`$ORACLE_HOME/install`)
 * The `Oracle Universal installer` has been removed (`$ORACLE_HOME/oui`)
+* The `network/jlib` directory has been remove (`$ORACLE_HOME/network/jlib`)
+* The `network/tools` directory has been remove (`$ORACLE_HOME/network/tools`)
+* The `Oracle Process Manager and Notification` directory has been removed (`$ORACLE_HOME/opmn`)
 
 #### Database settings
 
@@ -343,6 +347,7 @@ The slim images aims for smallest possible image size with only the Oracle Datab
 * `Oracle R` has been removed (`$ORACLE_HOME/R`)
 * The `deinstall` directory has been removed (`$ORACLE_HOME/deinstall`)
 * The `Oracle Database Provider for Distributed Relational Database Architecture (DRDA)` has been removed (`$ORACLE_HOME/drdaas`)
+* `Perl` has been removed (`$ORACLE_HOME/perl`)
 
 ## 11g XE
 

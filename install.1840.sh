@@ -923,6 +923,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove zip artifacts in $ORACLE_HOME/lib
   rm "${ORACLE_HOME}"/lib/*.zip
 
+  # Remove lib/*.jar files
+  rm "${ORACLE_HOME}"/lib/*.jar
+
   # Remove Multimedia
   rm -r "${ORACLE_HOME}"/ord/im
 
@@ -955,6 +958,15 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
   # Remove install directory
   rm -r "${ORACLE_HOME}"/install
+
+  # Remove network/jlib directory
+  rm -r "${ORACLE_HOME}"/network/jlib
+
+  # Remove network/tools directory
+  rm -r "${ORACLE_HOME}"/network/tools
+
+  # Remove opmn directory
+  rm -r "${ORACLE_HOME}"/opmn
 
   # Remove not needed packages
   # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
@@ -1019,6 +1031,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
     # Remove Oracle Universal Installer
     rm -r "${ORACLE_HOME}"/oui
+
+    # Remove Perl
+    rm -r "${ORACLE_HOME}"/perl
 
     # TODO
 
