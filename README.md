@@ -313,6 +313,7 @@ The regular image strives to balance between the functionality required by most 
 * The `DEFAULT` profile has the following set:
   * `FAILED_LOGIN_ATTEMPTS=UNLIMITED`
   * `PASSWORD_LIFE_TIME=UNLIMITED`
+* `SHARED_SERVERS=0`
 
 #### Operating system
 
@@ -379,6 +380,7 @@ The regular image strives to balance between the functionality required by most 
 * The `DEFAULT` profile has the following set:
   * `FAILED_LOGIN_ATTEMPTS=UNLIMITED`
   * `PASSWORD_LIFE_TIME=UNLIMITED`
+* `SHARED_SERVERS=0`
 
 #### Operating system
 

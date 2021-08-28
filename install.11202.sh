@@ -241,6 +241,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
      -- Exit on any errors
      WHENEVER SQLERROR EXIT SQL.SQLCODE
 
+     -- Disable shared servers (enables faster shutdown)
+     ALTER SYSTEM SET SHARED_SERVERS=0;
+
      -- Disable password profile checks
      ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED PASSWORD_LIFE_TIME UNLIMITED;
 
