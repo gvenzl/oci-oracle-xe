@@ -269,8 +269,12 @@ function create_database {
          DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/${ORACLE_DATABASE}/users01.dbf' \
           SIZE 1m AUTOEXTEND ON NEXT 10m MAXSIZE UNLIMITED;
 
+     -- Open PDB and save state
      ALTER PLUGGABLE DATABASE ${ORACLE_DATABASE} OPEN READ WRITE;
      ALTER PLUGGABLE DATABASE ${ORACLE_DATABASE} SAVE STATE;
+
+     -- Register new database with listener
+     ALTER SYSTEM REGISTER;
      exit;
 EOF
 
