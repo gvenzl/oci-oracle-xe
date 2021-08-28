@@ -138,7 +138,7 @@ EXTPROC_CONNECTION_DATA =
 " > "${ORACLE_HOME}"/network/admin/tnsnames.ora
 
 # sqlnet.ora
-echo "NAME.DIRECTORY_PATH= (EZCONNECT, TNSNAMES)" > "${ORACLE_HOME}"/network/admin/sqlnet.ora
+echo "NAMES.DIRECTORY_PATH = (EZCONNECT, TNSNAMES)" > "${ORACLE_HOME}"/network/admin/sqlnet.ora
 
 chown -R oracle:dba "${ORACLE_HOME}"/network/admin
 
