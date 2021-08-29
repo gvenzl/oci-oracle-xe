@@ -991,7 +991,7 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove unnecessary binaries (see http://yong321.freeshell.org/computer/oraclebin.html#18c)
   rm "${ORACLE_HOME}"/bin/afd*   # ASM Filter Drive components
   rm "${ORACLE_HOME}"/bin/proc   # Pro*C/C++ Precompiler
-  rm "${ORACLE_HOME}"/bin/procob # Pro COBOL Precomipler
+  rm "${ORACLE_HOME}"/bin/procob # Pro COBOL Precompiler
   rm "${ORACLE_HOME}"/bin/orion  # ORacle IO Numbers benchmark tool
   rm "${ORACLE_HOME}"/bin/drda*  # Distributed Relational Database Architecture components
 
@@ -1005,8 +1005,8 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   su -p oracle -c "echo '${ORACLE_HOME}' > ${ORACLE_HOME}/bin/orabaseconfig"
 
   # Remove unnecessary libraries
-  rm "${ORACLE_HOME}"/lib/libra.so    # Recovery appliance
-  rm "${ORACLE_HOME}"/lib/libopc.so   # Oracle public cloud
+  rm "${ORACLE_HOME}"/lib/libra.so    # Recovery Appliance
+  rm "${ORACLE_HOME}"/lib/libopc.so   # Oracle Public Cloud
   rm "${ORACLE_HOME}"/lib/libosbws.so # Oracle Secure Backup Cloud Module
 
   # Remove not needed packages

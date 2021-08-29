@@ -308,6 +308,30 @@ The regular image strives to balance between the functionality required by most 
 * The `network/tools` directory has been remove (`$ORACLE_HOME/network/tools`)
 * The `Oracle Process Manager and Notification` directory has been removed (`$ORACLE_HOME/opmn`)
 
+##### Database binaries
+
+The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
+
+* `$ORACLE_HOME/bin/afd*` (ASM Filter Drive components)
+* `$ORACLE_HOME}/bin/proc` (Pro\*C/C++ Precompiler)
+* `$ORACLE_HOME/bin/procob` (Pro COBOL Precompiler)
+* `$ORACLE_HOME/bin/orion` (ORacle IO Numbers benchmark tool)
+* `$ORACLE_HOME/bin/drda*` (Distributed Relational Database Architecture components)
+
+The following binaries have been replaces by shell scripts with static output:
+
+* `orabase`
+* `orabasehome`
+* `orabaseconfig`
+
+##### Database libraries
+
+The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
+
+* `$ORACLE_HOME/lib/libra.so` (Recovery Appliance)
+* `$ORACLE_HOME/lib/libopc.so` (Oracle Public Cloud)
+* `$ORACLE_HOME/lib/libosbws.so` (Oracle Secure Backup Cloud Module)
+
 #### Database settings
 
 * The `DEFAULT` profile has the following set:
@@ -349,6 +373,19 @@ The slim images aims for smallest possible image size with only the Oracle Datab
 * The `deinstall` directory has been removed (`$ORACLE_HOME/deinstall`)
 * The `Oracle Database Provider for Distributed Relational Database Architecture (DRDA)` has been removed (`$ORACLE_HOME/drdaas`)
 * `Perl` has been removed (`$ORACLE_HOME/perl`)
+
+##### Database binaries
+
+The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
+
+* `$ORACLE_HOME/bin/rman` (Oracle Recovery Manager)
+* `$ORACLE_HOME/bin/wrap` (PL/SQL Wrapper)
+
+##### Database libraries
+
+The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
+
+* `$ORACLE_HOME/lib/asm*` (Oracle Automatic Storage Management)
 
 ## 11g XE
 
