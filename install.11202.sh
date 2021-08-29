@@ -164,7 +164,7 @@ EXTPROC_CONNECTION_DATA =
 " > "${ORACLE_HOME}/network/admin/tnsnames.ora"
 
 # sqlnet.ora
-echo "NAME.DIRECTORY_PATH= (EZCONNECT, TNSNAMES)" > "${ORACLE_HOME}"/network/admin/sqlnet.ora
+echo "NAMES.DIRECTORY_PATH = (EZCONNECT, TNSNAMES)" > "${ORACLE_HOME}"/network/admin/sqlnet.ora
 
 chown -R oracle:dba "${ORACLE_HOME}"/network/admin
 
@@ -240,6 +240,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
      -- Exit on any errors
      WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+     -- Disable shared servers (enables faster shutdown)
+     ALTER SYSTEM SET SHARED_SERVERS=0;
 
      -- Disable password profile checks
      ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED PASSWORD_LIFE_TIME UNLIMITED;
@@ -557,11 +560,10 @@ rm "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/dpdump/dp.log
 rm "${ORACLE_HOME}"/config/log/*
 
 # Remove diag files
-rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/lck/*
-rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/metadata/*
-rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/trace/"${ORACLE_SID}"_*
-rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/lck/*
-rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/metadata/*
+rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/lck/*
+rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/metadata/*
+rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/trace/"${ORACLE_SID}"_*
+rm -r "${ORACLE_BASE}"/diag/tnslsnr/*
 rm -r "${ORACLE_BASE}"/oradiag_oracle/*
 
 # Remove additional files for REGULAR and SLIM builds

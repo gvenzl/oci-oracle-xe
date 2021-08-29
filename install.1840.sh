@@ -63,9 +63,9 @@ fi;
 # (used by the entrypoint script, not the database itself)
 microdnf -y install unzip gzip
 
-################################
-###### Install Database ########
-################################
+##############################################
+###### Install and configure Database ########
+##############################################
 
 echo "BUILDER: installing database binaries"
 
@@ -79,11 +79,22 @@ usermod -d ${ORACLE_BASE} oracle
 sed -i "s/LISTENER_PORT=/LISTENER_PORT=1521/g" /etc/sysconfig/oracle-xe-18c.conf
 sed -i "s/SKIP_VALIDATIONS=false/SKIP_VALIDATIONS=true/g" /etc/sysconfig/oracle-xe-18c.conf
 
+# Disable netca to avoid "No IP address found" issue
+mv "${ORACLE_HOME}"/bin/netca "${ORACLE_HOME}"/bin/netca.bak
+echo "exit 0" > "${ORACLE_HOME}"/bin/netca
+chmod a+x "${ORACLE_HOME}"/bin/netca
+
 echo "BUILDER: configuring database"
 
 # Set random password
 ORACLE_PASSWORD=$(date '+%s' | sha256sum | base64 | head -c 8)
 (echo "${ORACLE_PASSWORD}"; echo "${ORACLE_PASSWORD}";) | /etc/init.d/oracle-xe-18c configure 
+
+# Stop unconfigured listener
+su -p oracle -c "lsnrctl stop"
+
+# Re-enable netca
+mv "${ORACLE_HOME}"/bin/netca.bak "${ORACLE_HOME}"/bin/netca
 
 echo "BUILDER: post config database steps"
 
@@ -138,9 +149,12 @@ EXTPROC_CONNECTION_DATA =
 " > "${ORACLE_HOME}"/network/admin/tnsnames.ora
 
 # sqlnet.ora
-echo "NAME.DIRECTORY_PATH= (EZCONNECT, TNSNAMES)" > "${ORACLE_HOME}"/network/admin/sqlnet.ora
+echo "NAMES.DIRECTORY_PATH = (EZCONNECT, TNSNAMES)" > "${ORACLE_HOME}"/network/admin/sqlnet.ora
 
 chown -R oracle:dba "${ORACLE_HOME}"/network/admin
+
+# Start listener
+su -p oracle -c "lsnrctl start"
 
 ####################
 ### bash_profile ###
@@ -244,6 +258,9 @@ EOF
      -- Deactivate Intel's Math Kernel Libraries
      -- Like with every underscore parameter, DO NOT SET THIS PARAMETER EVER UNLESS YOU KNOW WHAT THE HECK YOU ARE DOING!
      ALTER SYSTEM SET "_dmm_blas_library"='libora_netlib.so' SCOPE=SPFILE;
+
+     -- Disable shared servers (enables faster shutdown)
+     ALTER SYSTEM SET SHARED_SERVERS=0;
 
      -------------------------------------
      -- Disable password profile checks --
@@ -885,14 +902,17 @@ rm    "${ORACLE_BASE}"/cfgtoollogs/netca/*
 rm -r "${ORACLE_BASE}"/cfgtoollogs/sqlpatch/*
 rm    "${ORACLE_BASE}"/oraInventory/logs/*
 rm    "${ORACLE_HOME}"/cfgtoollogs/oui/*
+rm -r "${ORACLE_HOME}"/log/*
 
 # Remove diag files
-rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/lck/*
-rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/metadata/*
-rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/trace/"${ORACLE_SID}"_*
-rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/trace/drc"${ORACLE_SID}".log
-rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/lck/*
-rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/metadata/*
+rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/lck/*
+rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/metadata/*
+rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/trace/"${ORACLE_SID}"_*
+rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/trace/drc"${ORACLE_SID}".log
+rm -r "${ORACLE_BASE}"/diag/tnslsnr/*
+
+# TODO: clean up os files
+# /var/log/lastlog
 
 # Remove additional files for NOMRAL and SLIM builds
 if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
@@ -968,6 +988,27 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove opmn directory
   rm -r "${ORACLE_HOME}"/opmn
 
+  # Remove unnecessary binaries (see http://yong321.freeshell.org/computer/oraclebin.html#18c)
+  rm "${ORACLE_HOME}"/bin/afd*   # ASM Filter Drive components
+  rm "${ORACLE_HOME}"/bin/proc   # Pro*C/C++ Precompiler
+  rm "${ORACLE_HOME}"/bin/procob # Pro COBOL Precompiler
+  rm "${ORACLE_HOME}"/bin/orion  # ORacle IO Numbers benchmark tool
+  rm "${ORACLE_HOME}"/bin/drda*  # Distributed Relational Database Architecture components
+
+  # Replace `orabase` with static path shell script
+  su -p oracle -c "echo '${ORACLE_BASE}' > ${ORACLE_HOME}/bin/orabase"
+
+  # Replace `orabasehome` with static path shell script
+  su -p oracle -c "echo '${ORACLE_HOME}' > ${ORACLE_HOME}/bin/orabasehome"
+
+  # Replace `orabaseconfig` with static path shell script
+  su -p oracle -c "echo '${ORACLE_HOME}' > ${ORACLE_HOME}/bin/orabaseconfig"
+
+  # Remove unnecessary libraries
+  rm "${ORACLE_HOME}"/lib/libra.so    # Recovery Appliance
+  rm "${ORACLE_HOME}"/lib/libopc.so   # Oracle Public Cloud
+  rm "${ORACLE_HOME}"/lib/libosbws.so # Oracle Secure Backup Cloud Module
+
   # Remove not needed packages
   # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
   rpm -e --nodeps glibc-devel glibc-headers kernel-headers libpkgconf libxcrypt-devel \
@@ -1035,7 +1076,12 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     # Remove Perl
     rm -r "${ORACLE_HOME}"/perl
 
-    # TODO
+    # Remove unnecessary binaries
+    rm "${ORACLE_HOME}"/bin/rman # Oracle Recovery Manager
+    rm "${ORACLE_HOME}"/bin/wrap # PL/SQL Wrapper
+
+    # Remove unnecessary libraries
+    rm "${ORACLE_HOME}"/lib/asm* # Oracle Automatic Storage Management
 
   fi;
 

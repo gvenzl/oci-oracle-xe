@@ -38,6 +38,16 @@ Reset database `SYS` and `SYSTEM` passwords:
 docker exec <container name|id> resetPassword <your password>
 ```
 
+# Users of these images
+
+We are proud of the following users of these images:
+
+* [Liquibase](https://www.liquibase.org/) [[`c6a31c0`](https://github.com/liquibase/liquibase-test-harness/commit/c6a31c0c54c1aa798839a2ef55ef6eb2363ea48f)]
+* [Quarkus](https://quarkus.io/) [[`9a63a58`](https://github.com/quarkusio/quarkus/commit/9a63a58a6740fa1d5e3cc7912f89522dd78cee85)]
+* [Testcontainers](https://www.testcontainers.org/) [[`99b91b8`](https://github.com/testcontainers/testcontainers-java/commit/99b91b89b6ee3f8f0e9545e86d9f0744b301db30)]
+
+If you are using these images and would like to be listed as well, please open an [issue on GitHub](https://github.com/gvenzl/oci-oracle-xe/issues) or reach out on [Twitter](https://twitter.com/geraldvenzl).
+
 # How to use this image
 
 ## Subtle differences between versions
@@ -308,11 +318,36 @@ The regular image strives to balance between the functionality required by most 
 * The `network/tools` directory has been remove (`$ORACLE_HOME/network/tools`)
 * The `Oracle Process Manager and Notification` directory has been removed (`$ORACLE_HOME/opmn`)
 
+##### Database binaries
+
+The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
+
+* `$ORACLE_HOME/bin/afd*` (ASM Filter Drive components)
+* `$ORACLE_HOME}/bin/proc` (Pro\*C/C++ Precompiler)
+* `$ORACLE_HOME/bin/procob` (Pro COBOL Precompiler)
+* `$ORACLE_HOME/bin/orion` (ORacle IO Numbers benchmark tool)
+* `$ORACLE_HOME/bin/drda*` (Distributed Relational Database Architecture components)
+
+The following binaries have been replaces by shell scripts with static output:
+
+* `orabase`
+* `orabasehome`
+* `orabaseconfig`
+
+##### Database libraries
+
+The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
+
+* `$ORACLE_HOME/lib/libra.so` (Recovery Appliance)
+* `$ORACLE_HOME/lib/libopc.so` (Oracle Public Cloud)
+* `$ORACLE_HOME/lib/libosbws.so` (Oracle Secure Backup Cloud Module)
+
 #### Database settings
 
 * The `DEFAULT` profile has the following set:
   * `FAILED_LOGIN_ATTEMPTS=UNLIMITED`
   * `PASSWORD_LIFE_TIME=UNLIMITED`
+* `SHARED_SERVERS=0`
 
 #### Operating system
 
@@ -349,6 +384,19 @@ The slim images aims for smallest possible image size with only the Oracle Datab
 * The `Oracle Database Provider for Distributed Relational Database Architecture (DRDA)` has been removed (`$ORACLE_HOME/drdaas`)
 * `Perl` has been removed (`$ORACLE_HOME/perl`)
 
+##### Database binaries
+
+The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
+
+* `$ORACLE_HOME/bin/rman` (Oracle Recovery Manager)
+* `$ORACLE_HOME/bin/wrap` (PL/SQL Wrapper)
+
+##### Database libraries
+
+The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
+
+* `$ORACLE_HOME/lib/asm*` (Oracle Automatic Storage Management)
+
 ## 11g XE
 
 ### Full image flavor (`11-full`)
@@ -379,6 +427,7 @@ The regular image strives to balance between the functionality required by most 
 * The `DEFAULT` profile has the following set:
   * `FAILED_LOGIN_ATTEMPTS=UNLIMITED`
   * `PASSWORD_LIFE_TIME=UNLIMITED`
+* `SHARED_SERVERS=0`
 
 #### Operating system
 

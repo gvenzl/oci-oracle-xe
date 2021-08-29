@@ -25,44 +25,52 @@ set -Eeuo pipefail
 # Ensure all tags are in place
 ./all_tag_images.sh
 
+# Backup images
+read -r -p "Do you want to backup the old images? [Y/n]: " response
+# Default --> "Y"
+response=${response:-Y}
+if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+  ./backup_old_images.sh
+fi;
+
 # Upload images
 echo "Login to Docker Hub:"
 podman login
 
 # Upload latest
 echo "Upload latest"
-podman push gvenzl/oracle-xe:latest          docker.io/gvenzl/oracle-xe:latest
+podman push localhost/gvenzl/oracle-xe:latest          docker.io/gvenzl/oracle-xe:latest
 
 # Upload 18c images
 echo "Upload 18.4.0-full"
-podman push gvenzl/oracle-xe:18.4.0-full     docker.io/gvenzl/oracle-xe:18.4.0-full
+podman push localhost/gvenzl/oracle-xe:18.4.0-full     docker.io/gvenzl/oracle-xe:18.4.0-full
 echo "Upload 18-full"
-podman push gvenzl/oracle-xe:18-full         docker.io/gvenzl/oracle-xe:18-full
+podman push localhost/gvenzl/oracle-xe:18-full         docker.io/gvenzl/oracle-xe:18-full
 echo "Upload full"
-podman push gvenzl/oracle-xe:full            docker.io/gvenzl/oracle-xe:full
+podman push localhost/gvenzl/oracle-xe:full            docker.io/gvenzl/oracle-xe:full
 
 echo "Upload 18.4.0"
-podman push gvenzl/oracle-xe:18.4.0          docker.io/gvenzl/oracle-xe:18.4.0
+podman push localhost/gvenzl/oracle-xe:18.4.0          docker.io/gvenzl/oracle-xe:18.4.0
 echo "Upload 18"
-podman push gvenzl/oracle-xe:18              docker.io/gvenzl/oracle-xe:18
+podman push localhost/gvenzl/oracle-xe:18              docker.io/gvenzl/oracle-xe:18
 
 echo "Upload 18.4.0-slim"
-podman push gvenzl/oracle-xe:18.4.0-slim     docker.io/gvenzl/oracle-xe:18.4.0-slim
+podman push localhost/gvenzl/oracle-xe:18.4.0-slim     docker.io/gvenzl/oracle-xe:18.4.0-slim
 echo "Upload 18-slim"
-podman push gvenzl/oracle-xe:18-slim         docker.io/gvenzl/oracle-xe:18-slim
+podman push localhost/gvenzl/oracle-xe:18-slim         docker.io/gvenzl/oracle-xe:18-slim
 echo "Upload slim"
-podman push gvenzl/oracle-xe:slim            docker.io/gvenzl/oracle-xe:slim
+podman push localhost/gvenzl/oracle-xe:slim            docker.io/gvenzl/oracle-xe:slim
 
 # Upload 11g images
 echo "Upload 11.2.0.2-full"
-podman push gvenzl/oracle-xe:11.2.0.2-full   docker.io/gvenzl/oracle-xe:11.2.0.2-full
+podman push localhost/gvenzl/oracle-xe:11.2.0.2-full   docker.io/gvenzl/oracle-xe:11.2.0.2-full
 echo "Upload 11-full"
-podman push gvenzl/oracle-xe:11-full         docker.io/gvenzl/oracle-xe:11-full
+podman push localhost/gvenzl/oracle-xe:11-full         docker.io/gvenzl/oracle-xe:11-full
 echo "Upload 11.2.0.2"
-podman push gvenzl/oracle-xe:11.2.0.2        docker.io/gvenzl/oracle-xe:11.2.0.2
+podman push localhost/gvenzl/oracle-xe:11.2.0.2        docker.io/gvenzl/oracle-xe:11.2.0.2
 echo "Upload 11"
-podman push gvenzl/oracle-xe:11              docker.io/gvenzl/oracle-xe:11
+podman push localhost/gvenzl/oracle-xe:11              docker.io/gvenzl/oracle-xe:11
 echo "Upload 11.2.0.2-slim"
-podman push gvenzl/oracle-xe:11.2.0.2-slim   docker.io/gvenzl/oracle-xe:11.2.0.2-slim
+podman push localhost/gvenzl/oracle-xe:11.2.0.2-slim   docker.io/gvenzl/oracle-xe:11.2.0.2-slim
 echo "Upload 11-slim"
-podman push gvenzl/oracle-xe:11-slim         docker.io/gvenzl/oracle-xe:11-slim
+podman push localhost/gvenzl/oracle-xe:11-slim         docker.io/gvenzl/oracle-xe:11-slim
