@@ -560,11 +560,10 @@ rm "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/dpdump/dp.log
 rm "${ORACLE_HOME}"/config/log/*
 
 # Remove diag files
-rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/lck/*
-rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/metadata/*
-rm "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/trace/"${ORACLE_SID}"_*
-rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/lck/*
-rm "${ORACLE_BASE}"/diag/tnslsnr/localhost/listener/metadata/*
+rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/lck/*
+rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/metadata/*
+rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/trace/"${ORACLE_SID}"_*
+rm -r "${ORACLE_BASE}"/diag/tnslsnr/*
 rm -r "${ORACLE_BASE}"/oradiag_oracle/*
 
 # Remove additional files for REGULAR and SLIM builds
