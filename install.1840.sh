@@ -988,6 +988,27 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove opmn directory
   rm -r "${ORACLE_HOME}"/opmn
 
+  # Remove unnecessary binaries (see http://yong321.freeshell.org/computer/oraclebin.html#18c)
+  rm "${ORACLE_HOME}"/bin/afd*   # ASM Filter Drive components
+  rm "${ORACLE_HOME}"/bin/proc   # Pro*C/C++ Precompiler
+  rm "${ORACLE_HOME}"/bin/procob # Pro COBOL Precomipler
+  rm "${ORACLE_HOME}"/bin/orion  # ORacle IO Numbers benchmark tool
+  rm "${ORACLE_HOME}"/bin/drda*  # Distributed Relational Database Architecture components
+
+  # Replace `orabase` with static path shell script
+  su -p oracle -c "echo '${ORACLE_BASE}' > ${ORACLE_HOME}/bin/orabase"
+
+  # Replace `orabasehome` with static path shell script
+  su -p oracle -c "echo '${ORACLE_HOME}' > ${ORACLE_HOME}/bin/orabasehome"
+
+  # Replace `orabaseconfig` with static path shell script
+  su -p oracle -c "echo '${ORACLE_HOME}' > ${ORACLE_HOME}/bin/orabaseconfig"
+
+  # Remove unnecessary libraries
+  rm "${ORACLE_HOME}"/lib/libra.so    # Recovery appliance
+  rm "${ORACLE_HOME}"/lib/libopc.so   # Oracle public cloud
+  rm "${ORACLE_HOME}"/lib/libosbws.so # Oracle Secure Backup Cloud Module
+
   # Remove not needed packages
   # Use rpm instad of microdnf to allow removing packages regardless of their dependencies
   rpm -e --nodeps glibc-devel glibc-headers kernel-headers libpkgconf libxcrypt-devel \
@@ -1055,7 +1076,12 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     # Remove Perl
     rm -r "${ORACLE_HOME}"/perl
 
-    # TODO
+    # Remove unnecessary binaries
+    rm "${ORACLE_HOME}"/bin/rman # Oracle Recovery Manager
+    rm "${ORACLE_HOME}"/bin/wrap # PL/SQL Wrapper
+
+    # Remove unnecessary libraries
+    rm "${ORACLE_HOME}"/lib/asm* # Oracle Automatic Storage Management
 
   fi;
 
