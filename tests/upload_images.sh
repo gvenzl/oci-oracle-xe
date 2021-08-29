@@ -25,6 +25,14 @@ set -Eeuo pipefail
 # Ensure all tags are in place
 ./all_tag_images.sh
 
+# Backup images
+read -r -p "Do you want to backup the old images? [Y/n]: " response
+# Default --> "Y"
+response=${response:-Y}
+if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+  ./backup_old_images.sh
+fi;
+
 # Upload images
 echo "Login to Docker Hub:"
 podman login
