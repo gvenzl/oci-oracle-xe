@@ -635,13 +635,13 @@ fi;
 # Unfortunately microdnf does not automatically uninstall dependencies that have been
 # installed with a package, so if you were to uninstall just util-linux, for example,
 # it does not automatically also remove gzip and cracklib again.
-microdnf -y remove bc libtirpc libnsl2 libfdisk libutempter cracklib cracklib-dicts \
-                   libpwquality hwdata libibverbs libnl3 pciutils pciutils-libs \
-                   rdma-core pam  dbus-libs dbus-tools pam dbus-common \
-                   dbus-daemon libpcap iptables-libs libseccomp kmod-libs acl \
-                   device-mapper device-mapper-libs cryptsetup-libs \
-                   elfutils-default-yama-scope elfutils-libs systemd-pam systemd dbus \
-                   procps-ng net-tools util-linux
+microdnf -y remove acl bc cracklib cracklib-dicts cryptsetup-libs \
+                   dbus dbus-common dbus-daemon dbus-libs dbus-tools \
+                   device-mapper device-mapper-libs elfutils-default-yama-scope \
+                   elfutils-libs hwdata ibpwquality iptables-libs kmod-libs libfdisk \
+                   libibverbs libnl3 libnsl2 libpcap libseccomp libtirpc libutempter \
+                   net-tools pam pam pciutils pciutils-libs procps-ng rdma-core \
+                   systemd systemd-pam util-linux
 
 # Remove dnf cache
 microdnf clean all
