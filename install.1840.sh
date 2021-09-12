@@ -840,6 +840,9 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    exit;
 EOF
 
+# Stop listener
+su -p oracle -c "lsnrctl stop"
+
 ###############################
 ### Compress Database files ###
 ###############################
