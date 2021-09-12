@@ -638,7 +638,7 @@ fi;
 microdnf -y remove acl bc cracklib cracklib-dicts cryptsetup-libs \
                    dbus dbus-common dbus-daemon dbus-libs dbus-tools \
                    device-mapper device-mapper-libs elfutils-default-yama-scope \
-                   elfutils-libs hwdata ibpwquality iptables-libs kmod-libs libfdisk \
+                   elfutils-libs hwdata libpwquality iptables-libs kmod-libs libfdisk \
                    libibverbs libnl3 libnsl2 libpcap libseccomp libtirpc libutempter \
                    net-tools pam pam pciutils pciutils-libs procps-ng rdma-core \
                    systemd systemd-pam util-linux
