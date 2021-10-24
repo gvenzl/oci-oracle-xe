@@ -15,19 +15,19 @@ Oracle Database Express Edition Container / Docker images.
 
 # Quick Start
 
-Run a new database container:
+Run a new database container (data is removed when container is removed, but kept throughout container restarts):
 
 ```shell
 docker run -d -p 1521:1521 -e ORACLE_PASSWORD=<your password> gvenzl/oracle-xe
 ```
 
-Run a new persistent **18c** database container:
+Run a new persistent database container (data is kept throughout container lifecycles):
 
 ```shell
 docker run -d -p 1521:1521 -e ORACLE_PASSWORD=<your password> -v oracle-volume:/opt/oracle/oradata gvenzl/oracle-xe
 ```
 
-Run a new persistent **11g R2** database container:
+Run a new persistent **11g R2** database container (volume path differs in 11g R2):
 
 ```shell
 docker run -d -p 1521:1521 -e ORACLE_PASSWORD=<your password> -v oracle-volume:/u01/app/oracle/oradata gvenzl/oracle-xe:11
