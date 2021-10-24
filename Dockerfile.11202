@@ -41,6 +41,8 @@ FROM oraclelinux:8-slim
 ARG BUILD_MODE
 
 ENV ORACLE_BASE=/u01/app/oracle \
+    ORACLE_BASE_CONFIG=/u01/app/oracle/product/11.2.0/xe \
+    ORACLE_BASE_HOME=/u01/app/oracle/product/11.2.0/xe \
     ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe \
     ORACLE_SID=XE \
     PATH=${PATH}:/u01/app/oracle/product/11.2.0/xe/bin:/u01/app/oracle

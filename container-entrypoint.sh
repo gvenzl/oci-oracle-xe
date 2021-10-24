@@ -140,11 +140,11 @@ function create_dbconfig() {
 
   mkdir -p "${ORACLE_BASE}/oradata/dbconfig/${ORACLE_SID}"
 
-  mv "${ORACLE_HOME}"/dbs/spfile"${ORACLE_SID}".ora "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/
-  mv "${ORACLE_HOME}"/dbs/orapw"${ORACLE_SID}" "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/
-  mv "${ORACLE_HOME}"/network/admin/listener.ora "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/
-  mv "${ORACLE_HOME}"/network/admin/tnsnames.ora "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/
-  mv "${ORACLE_HOME}"/network/admin/sqlnet.ora "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/
+  mv "${ORACLE_BASE_CONFIG}"/dbs/spfile"${ORACLE_SID}".ora "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/
+  mv "${ORACLE_BASE_CONFIG}"/dbs/orapw"${ORACLE_SID}"      "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/
+  mv "${ORACLE_BASE_HOME}"/network/admin/listener.ora      "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/
+  mv "${ORACLE_BASE_HOME}"/network/admin/tnsnames.ora      "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/
+  mv "${ORACLE_BASE_HOME}"/network/admin/sqlnet.ora        "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/
   
   sym_link_dbconfig
 }
@@ -152,48 +152,48 @@ function create_dbconfig() {
 # Remove the existing config files inside the image
 function remove_config_files()  {
   
-  if [ -f "${ORACLE_HOME}"/dbs/spfile"${ORACLE_SID}".ora ]; then
-    rm "${ORACLE_HOME}"/dbs/spfile"${ORACLE_SID}".ora
+  if [ -f "${ORACLE_BASE_CONFIG}"/dbs/spfile"${ORACLE_SID}".ora ]; then
+    rm "${ORACLE_BASE_CONFIG}"/dbs/spfile"${ORACLE_SID}".ora
   fi;
 
-  if [ -f "${ORACLE_HOME}"/dbs/orapw"${ORACLE_SID}" ]; then
-    rm "${ORACLE_HOME}"/dbs/orapw"${ORACLE_SID}"
+  if [ -f "${ORACLE_BASE_CONFIG}"/dbs/orapw"${ORACLE_SID}" ]; then
+    rm "${ORACLE_BASE_CONFIG}"/dbs/orapw"${ORACLE_SID}"
   fi;
 
-  if [ -f "${ORACLE_HOME}"/network/admin/listener.ora ]; then
-    rm "${ORACLE_HOME}"/network/admin/listener.ora
+  if [ -f "${ORACLE_BASE_HOME}"/network/admin/listener.ora ]; then
+    rm "${ORACLE_BASE_HOME}"/network/admin/listener.ora
   fi;
 
-  if [ -f "${ORACLE_HOME}"/network/admin/tnsnames.ora ]; then
-    rm "${ORACLE_HOME}"/network/admin/tnsnames.ora
+  if [ -f "${ORACLE_BASE_HOME}"/network/admin/tnsnames.ora ]; then
+    rm "${ORACLE_BASE_HOME}"/network/admin/tnsnames.ora
   fi;
 
-  if [ -f "${ORACLE_HOME}"/network/admin/sqlnet.ora ]; then
-    rm "${ORACLE_HOME}"/network/admin/sqlnet.ora
+  if [ -f "${ORACLE_BASE_HOME}"/network/admin/sqlnet.ora ]; then
+    rm "${ORACLE_BASE_HOME}"/network/admin/sqlnet.ora
   fi;
 }
 
 # Create symbolic links to dbconfig files
 function sym_link_dbconfig() {
 
-  if [ ! -L "${ORACLE_HOME}"/dbs/spfile"${ORACLE_SID}".ora ]; then
-    ln -s "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/spfile"${ORACLE_SID}".ora "${ORACLE_HOME}"/dbs/spfile"${ORACLE_SID}".ora
+  if [ ! -L "${ORACLE_BASE_CONFIG}"/dbs/spfile"${ORACLE_SID}".ora ]; then
+    ln -s "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/spfile"${ORACLE_SID}".ora "${ORACLE_BASE_CONFIG}"/dbs/spfile"${ORACLE_SID}".ora
   fi;
   
-  if [ ! -L "${ORACLE_HOME}"/dbs/orapw"${ORACLE_SID}" ]; then
-    ln -s "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/orapw"${ORACLE_SID}" "${ORACLE_HOME}"/dbs/orapw"${ORACLE_SID}"
+  if [ ! -L "${ORACLE_BASE_CONFIG}"/dbs/orapw"${ORACLE_SID}" ]; then
+    ln -s "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/orapw"${ORACLE_SID}" "${ORACLE_BASE_CONFIG}"/dbs/orapw"${ORACLE_SID}"
   fi;
   
-  if [ ! -L "${ORACLE_HOME}"/network/admin/listener.ora ]; then
-    ln -s "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/listener.ora "${ORACLE_HOME}"/network/admin/listener.ora
+  if [ ! -L "${ORACLE_BASE_HOME}"/network/admin/listener.ora ]; then
+    ln -s "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/listener.ora "${ORACLE_BASE_HOME}"/network/admin/listener.ora
   fi;
 
-  if [ ! -L "${ORACLE_HOME}"/network/admin/tnsnames.ora ]; then
-    ln -s "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/tnsnames.ora "${ORACLE_HOME}"/network/admin/tnsnames.ora
+  if [ ! -L "${ORACLE_BASE_HOME}"/network/admin/tnsnames.ora ]; then
+    ln -s "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/tnsnames.ora "${ORACLE_BASE_HOME}"/network/admin/tnsnames.ora
   fi;
 
-  if [ ! -L "${ORACLE_HOME}"/network/admin/sqlnet.ora ]; then
-    ln -s "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/sqlnet.ora "${ORACLE_HOME}"/network/admin/sqlnet.ora
+  if [ ! -L "${ORACLE_BASE_HOME}"/network/admin/sqlnet.ora ]; then
+    ln -s "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/sqlnet.ora "${ORACLE_BASE_HOME}"/network/admin/sqlnet.ora
   fi;
 
 }

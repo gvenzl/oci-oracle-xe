@@ -22,5 +22,9 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
+# 11g is quickest to build and to verify whether something went wrong, leave it first
 ./build_Dockerfile_11202.sh
+
+# In order of newest to latest
+./build_cokerfile_2130.sh
 ./build_Dockerfile_1840.sh

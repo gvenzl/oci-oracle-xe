@@ -270,6 +270,20 @@ The execution order and implications are the same as with the [Initialization sc
 | Regular | [None]    | A well-balanced image between image size and functionality. Recommended for most use cases. | Recommended for most use cases.                                                                        |
 | Full    | `-full`   | An image containing all functionality as provided by the Oracle Database installation.      | Best for extensions and/or customizations.                                                             |
 
+## 21c XE
+
+### Full image flavor (`21-full`)
+
+The full image provides an Oracle Database XE installation "as is", meaning as provided by the RPM install file.
+A couple of modifications have been performed to make the installation more suitable for running inside a container.
+
+#### Database settings
+
+* `DBMS_XDB.SETLISTENERLOCALACCESS(FALSE)`
+* `COMMON_USER_PREFIX=''`
+* `LOCAL_LISTENER=''`
+* An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
+
 ## 18c XE
 
 ### Full image flavor (`18-full`)
@@ -280,9 +294,9 @@ A couple of modifications have been performed to make the installation more suit
 #### Database settings
 
 * `DBMS_XDB.SETLISTENERLOCALACCESS(FALSE)`
-* An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
-* `LOCAL_LISTENER=''`
 * `COMMON_USER_PREFIX=''`
+* `LOCAL_LISTENER=''`
+* An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
 
 ### Regular image flavor (`18`)
 

@@ -1,8 +1,8 @@
 #!/bin/bash
-# Since: April, 2021
+# Since: September, 2021
 # Author: gvenzl
-# Name: tag_images_11202.sh
-# Description: Tag all 11g images
+# Name: build_Dockerfile_2130.sh
+# Description: Build test scripts for Oracle DB XE 21.3.0
 #
 # Copyright 2021 Gerald Venzl
 #
@@ -22,7 +22,12 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-# Tag 11g images
-podman tag gvenzl/oracle-xe:11.2.0.2-full gvenzl/oracle-xe:11-full
-podman tag gvenzl/oracle-xe:11.2.0.2 gvenzl/oracle-xe:11
-podman tag gvenzl/oracle-xe:11.2.0.2-slim gvenzl/oracle-xe:11-slim
+CURRENT_DIR=${PWD}
+
+cd ../
+
+echo "TEST: Building 21.3.0 FULL image"
+./buildContainerImage.sh -v 21.3.0 -f
+echo "DONE: Building 18.4.0 FULL image"
+
+cd "${CURRENT_DIR}"
