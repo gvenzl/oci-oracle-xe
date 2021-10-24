@@ -1,8 +1,8 @@
 #!/bin/bash
-# Since: April, 2021
+# Since: September, 2021
 # Author: gvenzl
-# Name: tag_images_11202.sh
-# Description: Tag all 11g images
+# Name: tag_images_2130.sh
+# Description: Tag all 21c images
 #
 # Copyright 2021 Gerald Venzl
 #
@@ -22,7 +22,11 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-# Tag 11g images
-podman tag gvenzl/oracle-xe:11.2.0.2-full gvenzl/oracle-xe:11-full
-podman tag gvenzl/oracle-xe:11.2.0.2 gvenzl/oracle-xe:11
-podman tag gvenzl/oracle-xe:11.2.0.2-slim gvenzl/oracle-xe:11-slim
+# Tag 18c images
+podman tag gvenzl/oracle-xe:21.3.0-full gvenzl/oracle-xe:21-full
+podman tag gvenzl/oracle-xe:21.3.0-full gvenzl/oracle-xe:full
+
+podman tag gvenzl/oracle-xe:21.3.0 gvenzl/oracle-xe:21
+
+podman tag gvenzl/oracle-xe:21.3.0-slim gvenzl/oracle-xe:21-slim
+podman tag gvenzl/oracle-xe:21.3.0-slim gvenzl/oracle-xe:slim

@@ -22,5 +22,6 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-./test_container_11202.sh
+./test_container_2130.sh
 ./test_container_1840.sh
+./test_container_11202.sh

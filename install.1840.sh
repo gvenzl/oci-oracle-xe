@@ -840,6 +840,9 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    exit;
 EOF
 
+# Stop listener
+su -p oracle -c "lsnrctl stop"
+
 ###############################
 ### Compress Database files ###
 ###############################
@@ -1089,13 +1092,14 @@ fi;
 
 # Remove installation dependencies
 # Use rpm instead of microdnf to allow removing packages regardless of dependencies specified by the Oracle XE RPM
-rpm -e --nodeps dbus-libs libtirpc diffutils libnsl2 dbus-tools dbus-common dbus-daemon \
-                libpcap iptables-libs libseccomp libfdisk xz lm_sensors-libs libutempter \
-                kmod-libs cracklib cracklib-dicts libpwquality pam util-linux findutils acl \
-                device-mapper device-mapper-libs cryptsetup-libs elfutils-default-yama-scope \
-                elfutils-libs systemd-pam systemd dbus smartmontools ksh sysstat procps-ng \
-                binutils file make bc net-tools hostname hwdata pciutils-libs pciutils \
-                rdma-core libibverbs libnl3
+rpm -e --nodeps acl bc binutils cracklib cracklib-dicts cryptsetup-libs \
+                dbus dbus-common dbus-daemon dbus-libs dbus-tools \
+                device-mapper device-mapper-libs diffutils elfutils-default-yama-scope \
+                elfutils-libs file findutils hostname hwdata iptables-libs kmod-libs \
+                ksh libfdisk libibverbs libnl3 libnsl2 libpcap libpwquality libseccomp \
+                libtirpc libutempter lm_sensors-libs make net-tools pam \
+                pciutils pciutils-libs procps-ng rdma-core smartmontools sysstat \
+                systemd systemd-pam util-linux xz
 
 rm /etc/sysctl.conf.rpmsave
 

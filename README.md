@@ -42,8 +42,17 @@ docker exec <container name|id> resetPassword <your password>
 
 We are proud of the following users of these images:
 
+* [Airbyte](https://airbyte.io/) [[`6e53a57`](https://github.com/airbytehq/airbyte/commit/6e53a574e3d7f4c4885336c4e3205c051ee74ed6)]
+* [Apache Spark](https://spark.apache.org/) [[`e03afc9`](https://github.com/apache/spark/commit/e03afc906fd87b0354783b438fa9f7e36231b778)]
+* [Eclipse Vert.x](https://vertx.io/) [[`ffedbce`](https://github.com/eclipse-vertx/vertx-sql-client/commit/ffedbce6f91425ce603d47da6290ac30e19fd2e5)]
+* [Flowable](https://www.flowable.com/open-source/) [[`18c751f`](https://github.com/flowable/flowable-engine/commit/18c751fb369a74b71abc203f0b4ace151a96e862)]
+* [GeoTools](https://geotools.org/) [[`f922f0b`](https://github.com/geotools/geotools/commit/f922f0bdd19e32b9648ad644af2a1eed75417964)]
+* [Hibernate Search](https://hibernate.org/search/) [[`173f0b7`](https://github.com/hibernate/hibernate-search/commit/173f0b703defee81b6600c693d4d30b87a6ade41)]
 * [Liquibase](https://www.liquibase.org/) [[`c6a31c0`](https://github.com/liquibase/liquibase-test-harness/commit/c6a31c0c54c1aa798839a2ef55ef6eb2363ea48f)]
+* [Micronaut Data](https://github.com/micronaut-projects/micronaut-data) [[`ddf11c1`](https://github.com/micronaut-projects/micronaut-data/commit/ddf11c1e8a7a27a1f6765cc5e1c1c3d3f74b475f)]
 * [Quarkus](https://quarkus.io/) [[`9a63a58`](https://github.com/quarkusio/quarkus/commit/9a63a58a6740fa1d5e3cc7912f89522dd78cee85)]
+* [Rucio by CERN](https://rucio.cern.ch/) [[`80dffbb`](https://github.com/rucio/rucio/commit/80dffbb09f58a9f30d2a9a4c3297e8ed22a78963)]
+* [SchemaCrawler](https://www.schemacrawler.com/) [[`08d9b87`](https://github.com/schemacrawler/SchemaCrawler/commit/08d9b87c280bf23e405bea6265abf01448fa71d3)]
 * [Testcontainers](https://www.testcontainers.org/) [[`99b91b8`](https://github.com/testcontainers/testcontainers-java/commit/99b91b89b6ee3f8f0e9545e86d9f0744b301db30)]
 
 If you are using these images and would like to be listed as well, please open an [issue on GitHub](https://github.com/gvenzl/oci-oracle-xe/issues) or reach out on [Twitter](https://twitter.com/geraldvenzl).
@@ -53,7 +62,7 @@ If you are using these images and would like to be listed as well, please open a
 ## Subtle differences between versions
 
 The 11gR2 (11.2.0.2) Oracle Database version stores the database data files under `/u01/app/oracle/oradata/XE`.  
-**A volume for 11gR2 has to be pointed at `/u01/app/oradata`!**
+**A volume for 11gR2 has to be pointed at `/u01/app/oracle/oradata`!**
 
 ## Environment variables
 
@@ -270,6 +279,20 @@ The execution order and implications are the same as with the [Initialization sc
 | Regular | [None]    | A well-balanced image between image size and functionality. Recommended for most use cases. | Recommended for most use cases.                                                                        |
 | Full    | `-full`   | An image containing all functionality as provided by the Oracle Database installation.      | Best for extensions and/or customizations.                                                             |
 
+## 21c XE
+
+### Full image flavor (`21-full`)
+
+The full image provides an Oracle Database XE installation "as is", meaning as provided by the RPM install file.
+A couple of modifications have been performed to make the installation more suitable for running inside a container.
+
+#### Database settings
+
+* `DBMS_XDB.SETLISTENERLOCALACCESS(FALSE)`
+* `COMMON_USER_PREFIX=''`
+* `LOCAL_LISTENER=''`
+* An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
+
 ## 18c XE
 
 ### Full image flavor (`18-full`)
@@ -280,9 +303,9 @@ A couple of modifications have been performed to make the installation more suit
 #### Database settings
 
 * `DBMS_XDB.SETLISTENERLOCALACCESS(FALSE)`
-* An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
-* `LOCAL_LISTENER=''`
 * `COMMON_USER_PREFIX=''`
+* `LOCAL_LISTENER=''`
+* An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
 
 ### Regular image flavor (`18`)
 
