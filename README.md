@@ -53,7 +53,7 @@ If you are using these images and would like to be listed as well, please open a
 ## Subtle differences between versions
 
 The 11gR2 (11.2.0.2) Oracle Database version stores the database data files under `/u01/app/oracle/oradata/XE`.  
-**A volume for 11gR2 has to be pointed at `/u01/app/oradata`!**
+**A volume for 11gR2 has to be pointed at `/u01/app/oracle/oradata`!**
 
 ## Environment variables
 
