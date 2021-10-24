@@ -75,9 +75,9 @@ This variable is mandatory for the first container startup and specifies the pas
 ### `ORACLE_RANDOM_PASSWORD`
 This is an optional variable. Set this variable to a non-empty value, like `yes`, to generate a random initial password for the `SYS` and `SYSTEM` users. The generated password will be printed to stdout (`ORACLE PASSWORD FOR SYS AND SYSTEM: ...`).
 
-### `ORACLE_DATABASE` (for 18c only)
+### `ORACLE_DATABASE` (for 18c and onwards)
 This is an optional variable. Set this variable to a non-empty string to create a new pluggable database with the name specified in this variable.  
-**Note:** this variable is only supported for Oracle Database XE 18c as 11g does not support pluggable databases.  
+**Note:** this variable is only supported for Oracle Database XE 18c and onwards; 11g does not support pluggable databases.  
 **Note:** creating a new database will add to the initial container startup time. If you do not want that additional startup time, use the already existing `XEPDB1` database instead.
 
 ### `APP_USER`
