@@ -871,10 +871,6 @@ chown oracle:dba "${ORACLE_BASE}"/*.sh \
 chmod u+x "${ORACLE_BASE}"/*.sh \
           "${ORACLE_BASE}"/resetPassword
 
-# TODO: relink Oracle binaries
-# Multimedia: ord/im/lib/env_ordim.mk
-# Java JIT (JOT) compiler:  make -f $ORACLE_HOME/rdbms/lib/ins_rdbms.mk jox_off_static ioracle
-
 #########################
 ####### Cleanup #########
 #########################
@@ -892,28 +888,31 @@ rm -r /var/log/oracle-database-xe-21c
 rm -r /tmp/*
 
 # # Remove SYS audit directories and files created during install
-# rm -r "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/adump/*
-# rm -r "${ORACLE_BASE}"/audit/"${ORACLE_SID}"/*
-# 
-# # Remove Data Pump log file
-# rm "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/dpdump/dp.log
-# 
-# # Remove Oracle DB install logs
-# rm    "${ORACLE_BASE}"/cfgtoollogs/dbca/XE/*
-# rm    "${ORACLE_BASE}"/cfgtoollogs/netca/*
-# rm -r "${ORACLE_BASE}"/cfgtoollogs/sqlpatch/*
-# rm    "${ORACLE_BASE}"/oraInventory/logs/*
-# rm    "${ORACLE_HOME}"/cfgtoollogs/oui/*
-# rm -r "${ORACLE_HOME}"/log/*
-# 
-# # Remove diag files
-# rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/lck/*
-# rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/metadata/*
-# rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/trace/"${ORACLE_SID}"_*
-# rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/trace/drc"${ORACLE_SID}".log
-# rm -r "${ORACLE_BASE}"/diag/tnslsnr/*
-# 
-# # TODO: clean up os files
+rm -r "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/adump/*
+rm -r "${ORACLE_BASE}"/audit/"${ORACLE_SID}"/*
+
+# Remove Data Pump log file
+rm "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/dpdump/dp.log
+
+# Remove Oracle DB install logs
+rm    "${ORACLE_BASE}"/cfgtoollogs/dbca/XE/*
+rm    "${ORACLE_BASE}"/cfgtoollogs/netca/*
+rm    "${ORACLE_BASE}"/cfgtoollogs/roohctl/*
+rm -r "${ORACLE_BASE_HOME}"/cfgtoollogs/sqlpatch/*
+rm    "${ORACLE_BASE}"/oraInventory/logs/*
+rm -r "${ORACLE_BASE_HOME}"/log/*
+rm -r "${ORACLE_BASE_HOME}"/rdbms/log/*
+
+# Remove diag files
+rm -r "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/incident/*
+rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/lck/*
+rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/metadata/*
+rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/trace/"${ORACLE_SID}"_*
+rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/stage/*
+rm -r "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/trace/cdmp_*
+rm -r "${ORACLE_BASE}"/diag/tnslsnr/*
+
+# TODO: clean up os files
 # # /var/log/lastlog
 # 
 # # Remove additional files for NOMRAL and SLIM builds

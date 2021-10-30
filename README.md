@@ -15,19 +15,19 @@ Oracle Database Express Edition Container / Docker images.
 
 # Quick Start
 
-Run a new database container:
+Run a new database container (data is removed when container is removed, but kept throughout container restarts):
 
 ```shell
 docker run -d -p 1521:1521 -e ORACLE_PASSWORD=<your password> gvenzl/oracle-xe
 ```
 
-Run a new persistent **18c** database container:
+Run a new persistent database container (data is kept throughout container lifecycles):
 
 ```shell
 docker run -d -p 1521:1521 -e ORACLE_PASSWORD=<your password> -v oracle-volume:/opt/oracle/oradata gvenzl/oracle-xe
 ```
 
-Run a new persistent **11g R2** database container:
+Run a new persistent **11g R2** database container (volume path differs in 11g R2):
 
 ```shell
 docker run -d -p 1521:1521 -e ORACLE_PASSWORD=<your password> -v oracle-volume:/u01/app/oracle/oradata gvenzl/oracle-xe:11
@@ -49,6 +49,7 @@ We are proud of the following users of these images:
 * [Flowable](https://www.flowable.com/open-source/) [[`18c751f`](https://github.com/flowable/flowable-engine/commit/18c751fb369a74b71abc203f0b4ace151a96e862)]
 * [GeoTools](https://geotools.org/) [[`f922f0b`](https://github.com/geotools/geotools/commit/f922f0bdd19e32b9648ad644af2a1eed75417964)]
 * [Hibernate Search](https://hibernate.org/search/) [[`173f0b7`](https://github.com/hibernate/hibernate-search/commit/173f0b703defee81b6600c693d4d30b87a6ade41)]
+* [jOOQ](https://www.jooq.org/) [[`#35`](https://github.com/gvenzl/oci-oracle-xe/issues/35)]
 * [Liquibase](https://www.liquibase.org/) [[`c6a31c0`](https://github.com/liquibase/liquibase-test-harness/commit/c6a31c0c54c1aa798839a2ef55ef6eb2363ea48f)]
 * [Micronaut Data](https://github.com/micronaut-projects/micronaut-data) [[`ddf11c1`](https://github.com/micronaut-projects/micronaut-data/commit/ddf11c1e8a7a27a1f6765cc5e1c1c3d3f74b475f)]
 * [Quarkus](https://quarkus.io/) [[`9a63a58`](https://github.com/quarkusio/quarkus/commit/9a63a58a6740fa1d5e3cc7912f89522dd78cee85)]
@@ -75,9 +76,9 @@ This variable is mandatory for the first container startup and specifies the pas
 ### `ORACLE_RANDOM_PASSWORD`
 This is an optional variable. Set this variable to a non-empty value, like `yes`, to generate a random initial password for the `SYS` and `SYSTEM` users. The generated password will be printed to stdout (`ORACLE PASSWORD FOR SYS AND SYSTEM: ...`).
 
-### `ORACLE_DATABASE` (for 18c only)
+### `ORACLE_DATABASE` (for 18c and onwards)
 This is an optional variable. Set this variable to a non-empty string to create a new pluggable database with the name specified in this variable.  
-**Note:** this variable is only supported for Oracle Database XE 18c as 11g does not support pluggable databases.  
+**Note:** this variable is only supported for Oracle Database XE 18c and onwards; 11g does not support pluggable databases.  
 **Note:** creating a new database will add to the initial container startup time. If you do not want that additional startup time, use the already existing `XEPDB1` database instead.
 
 ### `APP_USER`
