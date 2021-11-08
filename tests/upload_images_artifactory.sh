@@ -30,13 +30,24 @@ podman login gvenzl.jfrog.io
 echo "Upload latest"
 podman push gvenzl/oracle-xe:latest          gvenzl.jfrog.io/docker/oracle-xe:latest
 
+# Upload 21c images
+echo "Upload 21.3.0-full"
+podman push gvenzl/oracle-xe:21.3.0-full     gvenzl.jfrog.io/docker/oracle-xe:21.3.0-full
+echo "Upload 21-full"
+podman push gvenzl/oracle-xe:21-full         gvenzl.jfrog.io/docker/oracle-xe:21-full
+echo "Upload full"
+podman push gvenzl/oracle-xe:full            gvenzl.jfrog.io/docker/oracle-xe:full
+
+echo "Upload 21.3.0"
+podman push gvenzl/oracle-xe:21.3.0          gvenzl.jfrog.io/docker/oracle-xe:21.3.0
+echo "Upload 21"
+podman push gvenzl/oracle-xe:21              gvenzl.jfrog.io/docker/oracle-xe:21
+
 # Upload 18c images
 echo "Upload 18.4.0-full"
 podman push gvenzl/oracle-xe:18.4.0-full     gvenzl.jfrog.io/docker/oracle-xe:18.4.0-full
 echo "Upload 18-full"
 podman push gvenzl/oracle-xe:18-full         gvenzl.jfrog.io/docker/oracle-xe:18-full
-echo "Upload full"
-podman push gvenzl/oracle-xe:full            gvenzl.jfrog.io/docker/oracle-xe:full
 
 echo "Upload 18.4.0"
 podman push gvenzl/oracle-xe:18.4.0          gvenzl.jfrog.io/docker/oracle-xe:18.4.0
