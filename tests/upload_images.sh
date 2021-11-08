@@ -41,13 +41,24 @@ podman login
 echo "Upload latest"
 podman push localhost/gvenzl/oracle-xe:latest          docker.io/gvenzl/oracle-xe:latest
 
+# Upload 21c images
+echo "Upload 21.3.0-full"
+podman push localhost/gvenzl/oracle-xe:21.3.0-full     docker.io/gvenzl/oracle-xe:21.3.0-full
+echo "Upload 21-full"
+podman push localhost/gvenzl/oracle-xe:21-full         docker.io/gvenzl/oracle-xe:21-full
+echo "Upload full"
+podman push localhost/gvenzl/oracle-xe:full            docker.io/gvenzl/oracle-xe:full
+
+echo "Upload 21.3.0"
+podman push localhost/gvenzl/oracle-xe:21.3.0          docker.io/gvenzl/oracle-xe:21.3.0
+echo "Upload 21"
+podman push localhost/gvenzl/oracle-xe:21              docker.io/gvenzl/oracle-xe:21
+
 # Upload 18c images
 echo "Upload 18.4.0-full"
 podman push localhost/gvenzl/oracle-xe:18.4.0-full     docker.io/gvenzl/oracle-xe:18.4.0-full
 echo "Upload 18-full"
 podman push localhost/gvenzl/oracle-xe:18-full         docker.io/gvenzl/oracle-xe:18-full
-echo "Upload full"
-podman push localhost/gvenzl/oracle-xe:full            docker.io/gvenzl/oracle-xe:full
 
 echo "Upload 18.4.0"
 podman push localhost/gvenzl/oracle-xe:18.4.0          docker.io/gvenzl/oracle-xe:18.4.0
