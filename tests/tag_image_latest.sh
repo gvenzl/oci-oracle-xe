@@ -23,4 +23,4 @@
 set -Eeuo pipefail
 
 # Tag latest image
-podman tag gvenzl/oracle-xe:18.4.0 gvenzl/oracle-xe:latest
+podman tag gvenzl/oracle-xe:21.3.0 gvenzl/oracle-xe:latest

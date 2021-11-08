@@ -28,6 +28,10 @@ cd ../
 
 echo "TEST: Building 21.3.0 FULL image"
 ./buildContainerImage.sh -v 21.3.0 -f
-echo "DONE: Building 18.4.0 FULL image"
+echo "DONE: Building 21.3.0 FULL image"
+
+echo "TEST: Building 21.3.0 REGULAR image"
+./buildContainerImage.sh -v 21.3.0
+echo "DONE: Building 21.3.0 REGULAR image"
 
 cd "${CURRENT_DIR}"

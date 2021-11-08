@@ -15,7 +15,7 @@ Oracle Database Express Edition Container / Docker images.
 
 # Quick Start
 
-Run a new database container (data is removed when container is removed, but kept throughout container restarts):
+Run a new database container (data is removed when the container is removed, but kept throughout container restarts):
 
 ```shell
 docker run -d -p 1521:1521 -e ORACLE_PASSWORD=<your password> gvenzl/oracle-xe
@@ -116,6 +116,16 @@ The images can be used as a [Service Container](https://docs.github.com/en/actio
           --health-timeout 5s
           --health-retries 10
 ```
+
+# Image flavors
+
+| Flavor  | Extension | Description                                                                                 | Use cases                                                                                              |
+| --------| --------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------|
+| Slim    | `-slim`   | An image focussed on smallest possible image size instead of additional functionality.      | Wherever small images sizes are important but advanced functionality of Oracle Database is not needed. |
+| Regular | [None]    | A well-balanced image between image size and functionality. Recommended for most use cases. | Recommended for most use cases.                                                                        |
+| Full    | `-full`   | An image containing all functionality as provided by the Oracle Database installation.      | Best for extensions and/or customizations.                                                             |
+
+For a full list of changes that have been made to the Oracle Database and OS installation in each individual image flavor, please see [ImageDetails.md](https://github.com/gvenzl/oci-oracle-xe/blob/main/ImageDetails.md).
 
 ## Container secrets
 
@@ -273,213 +283,6 @@ The execution order and implications are the same as with the [Initialization sc
 
 ***Warning:*** files placed in `/container-entrypoint-startdb.d` are always executed after the database in a container is started, including pre-created databases. Use this mechanism only if you wish to perform a certain task always after the database has been (re)started by the container.
 
-# Image flavors
+# Feedback
 
-| Flavor  | Extension | Description                                                                                 | Use cases                                                                                              |
-| --------| --------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------|
-| Slim    | `-slim`   | An image focussed on smallest possible image size instead of additional functionality.      | Wherever small images sizes are important but advanced functionality of Oracle Database is not needed. |
-| Regular | [None]    | A well-balanced image between image size and functionality. Recommended for most use cases. | Recommended for most use cases.                                                                        |
-| Full    | `-full`   | An image containing all functionality as provided by the Oracle Database installation.      | Best for extensions and/or customizations.                                                             |
-
-## 21c XE
-
-### Full image flavor (`21-full`)
-
-The full image provides an Oracle Database XE installation "as is", meaning as provided by the RPM install file.
-A couple of modifications have been performed to make the installation more suitable for running inside a container.
-
-#### Database settings
-
-* `DBMS_XDB.SETLISTENERLOCALACCESS(FALSE)`
-* `COMMON_USER_PREFIX=''`
-* `LOCAL_LISTENER=''`
-* An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
-
-## 18c XE
-
-### Full image flavor (`18-full`)
-
-The full image provides an Oracle Database XE installation "as is", meaning as provided by the RPM install file.
-A couple of modifications have been performed to make the installation more suitable for running inside a container.
-
-#### Database settings
-
-* `DBMS_XDB.SETLISTENERLOCALACCESS(FALSE)`
-* `COMMON_USER_PREFIX=''`
-* `LOCAL_LISTENER=''`
-* An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
-
-### Regular image flavor (`18`)
-
-The regular image strives to balance between the functionality required by most users and image size. It has all customizations that the full image has and removes additional components to further decrease the image size:
-
-#### Database components
-
-* The `HR` schema has been removed
-* `Oracle Workspace Manager` has been removed
-* `Oracle Multimedia` has been removed
-* `Oracle Database Java Packages` have been removed
-* `Oracle XDK` has been removed (`$ORACLE_HOME/xdk`)
-* `JServer JAVA Virtual Machine` has been removed
-* `Oracle OLAP API` has been removed
-* `OLAP Analytic Workspace` has been removed
-* `Oracle PGX` has been removed (`$ORACLE_HOME/md/property_graph`)
-* `OPatch` utility has been removed (`$ORACLE_HOME/OPatch`)
-* `QOpatch` utility has been removed (`$ORACLE_HOME/QOpatch`)
-* `Oracle Database Assistants` have been removed (`$ORACLE_HOME/assistants`)
-* `Oracle Database Migration Assistant for Unicode` has been removed (`$ORACLE_HOME/dmu`)
-* The `inventory` directory has been removed (`$ORACLE_HOME/inventory`)
-* `JDBC` drivers have been removed (`$ORACLE_HOME/jdbc`, `$ORACLE_HOME/jlib`)
-* `Universal Connection Pool` driver has been removed (`$ORACLE_HOME/ucp`)
-* `Intel Math Kernel` libraries have been removed (`$ORACLE_HOME/lib/libmkl_*`)
-* Zip files in lib/ have been removed (`$ORACLE_HOME/lib/*.zip`)
-* Jar files in lib/ have been removed (`$ORACLE_HOME/lib/*.jar`)
-* Additional Java libraries have been removed (`$ORACLE_HOME/rdbms/jlib`)
-* The `Cluster Ready Services` directory has been removed (`$ORACLE_HOME/crs`)
-* The `Cluster Verification Utility` directory has been removed (`$ORACLE_HOME/cv`)
-* The `install` directory has been removed (`$ORACLE_HOME/install`)
-* The `Oracle Universal installer` has been removed (`$ORACLE_HOME/oui`)
-* The `network/jlib` directory has been remove (`$ORACLE_HOME/network/jlib`)
-* The `network/tools` directory has been remove (`$ORACLE_HOME/network/tools`)
-* The `Oracle Process Manager and Notification` directory has been removed (`$ORACLE_HOME/opmn`)
-
-##### Database binaries
-
-The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
-
-* `$ORACLE_HOME/bin/afd*` (ASM Filter Drive components)
-* `$ORACLE_HOME}/bin/proc` (Pro\*C/C++ Precompiler)
-* `$ORACLE_HOME/bin/procob` (Pro COBOL Precompiler)
-* `$ORACLE_HOME/bin/orion` (ORacle IO Numbers benchmark tool)
-* `$ORACLE_HOME/bin/drda*` (Distributed Relational Database Architecture components)
-
-The following binaries have been replaces by shell scripts with static output:
-
-* `orabase`
-* `orabasehome`
-* `orabaseconfig`
-
-##### Database libraries
-
-The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
-
-* `$ORACLE_HOME/lib/libra.so` (Recovery Appliance)
-* `$ORACLE_HOME/lib/libopc.so` (Oracle Public Cloud)
-* `$ORACLE_HOME/lib/libosbws.so` (Oracle Secure Backup Cloud Module)
-
-#### Database settings
-
-* The `DEFAULT` profile has the following set:
-  * `FAILED_LOGIN_ATTEMPTS=UNLIMITED`
-  * `PASSWORD_LIFE_TIME=UNLIMITED`
-* `SHARED_SERVERS=0`
-
-#### Operating system
-
-* The following Linux packages are not installed: 
-  * `glibc-devel`
-  * `glibc-headers`
-  * `kernel-headers`
-  * `libpkgconf`
-  * `libxcrypt-devel`
-  * `pkgconf`
-  * `pkgconf-m4`
-  * `pkgconf-pkg-config`
-
-### Slim image flavor (`18-slim`)
-
-The slim images aims for smallest possible image size with only the Oracle Database relational components. It has all customizations that the regular image has and removes all non-relational components (where possible) to further decrease the image size:
-
-#### Database components
-
-* `Oracle Text` has been uninstalled and removed (`$ORACLE_HOME/ctx`)
-* The demo samples directory has been removed (`$ORACLE_HOME/demo`)
-* `ODBC` driver samples have been removed (`$ORACLE_HOME/odbc`)
-* `TNS` demo samples have been removed (`$ORACLE_HOME/network/admin/samples`)
-* `NLS LBuilder` directory has been removed (`$ORACLE_HOME/nls/lbuilder`)
-* The hs directory has been removed (`$ORACLE_HOME/hs`)
-* The `precomp` directory has been removed (`$ORACLE_HOME/precomp`)
-* The `rdbms/public` directory has been removed (`$ORACLE_HOME/rdbms/public`)
-* The `rdbms/xml` directory has been removed (`$ORACLE_HOME/rdbms/xml`)
-* `Oracle Spatial` has been uninstalled and removed (`$ORACLE_HOME/md`)
-* The `ord` directory has been removed (`$ORACLE_HOME/ord`)
-* The `ordim` directory has been removed (`$ORACLE_HOME/ordim`)
-* `Oracle R` has been removed (`$ORACLE_HOME/R`)
-* The `deinstall` directory has been removed (`$ORACLE_HOME/deinstall`)
-* The `Oracle Database Provider for Distributed Relational Database Architecture (DRDA)` has been removed (`$ORACLE_HOME/drdaas`)
-* `Perl` has been removed (`$ORACLE_HOME/perl`)
-
-##### Database binaries
-
-The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
-
-* `$ORACLE_HOME/bin/rman` (Oracle Recovery Manager)
-* `$ORACLE_HOME/bin/wrap` (PL/SQL Wrapper)
-
-##### Database libraries
-
-The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
-
-* `$ORACLE_HOME/lib/asm*` (Oracle Automatic Storage Management)
-
-## 11g XE
-
-### Full image flavor (`11-full`)
-
-The full image provides an Oracle Database XE installation "as is", meaning as provided by the RPM install file.
-A couple of modifications have been performed to make the installation more suitable for running inside a container.
-
-#### Database settings
-
-* Automatic Memory Management has been disables (`MEMORY_TARGET`)
-* `DBMS_XDB.SETLISTENERLOCALACCESS()` has been set to `FALSE`
-* An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
-* The `REDO` logs have been located into `$ORACLE_BASE/oradata/$ORACLE_SID/`
-* The fast recovery area has been removed (`DB_RECOVERY_FILE_DEST=''`)
-
-### Regular image flavor (`11`)
-
-The regular image strives to balance between the functionality required by most users and image size. It has all customizations that the full image has and removes additional components to further decrease the image size:
-
-#### Database components
-
-* Oracle APEX has been removed (you can download and install the latest and greatest from [apex.oracle.com](https://apex.oracle.com)
-* The `HR` schema has been removed
-* `JDBC` drivers have been removed (`$ORACLE_HOME/jdbc`, `$ORACLE_HOME/jlib`)
-
-#### Database settings
-
-* The `DEFAULT` profile has the following set:
-  * `FAILED_LOGIN_ATTEMPTS=UNLIMITED`
-  * `PASSWORD_LIFE_TIME=UNLIMITED`
-* `SHARED_SERVERS=0`
-
-#### Operating system
-
-* The following Linux packages are not installed:
-  * `binutils`
-  * `gcc`
-  * `glibc`
-  * `make`
-
-### Slim image flavor (`11-slim`)
-
-The slim images aims for smallest possible image size with only the Oracle Database relational components. It has all customizations that the regular image has and removes all non-relational components (where possible) to further decrease the image size:
-
-#### Database components
-
-* `Oracle Text` has been uninstalled and removed (`$ORACLE_HOME/ctx`)
-* `XML DB` has been uninstalled
-* `XDK` has been removed (`$ORACLE_HOME/xdk`)
-* `Oracle Spatial` has been uninstalled and removed (`$ORACLE_HOME/md`)
-* The demo samples directory has been removed (`$ORACLE_HOME/demo`)
-* `ODBC` driver samples have been removed (`$ORACLE_HOME/odbc`)
-* `TNS` demo samples have been removed (`$ORACLE_HOME/network/admin/samples`)
-* `NLS` demo samples have been removed (`$ORACLE_HOME/nls/demo`)
-* The hs directory has been removed (`$ORACLE_HOME/hs`)
-* The ldap directory has been removed (`$ORACLE_HOME/ldap`)
-* The precomp directory has been removed (`$ORACLE_HOME/precomp`)
-* The rdbms/demo directory has been removed (`$ORACLE_HOME/rdbms/demo`)
-* The rdbms/jlib directory has been removed (`$ORACLE_HOME/rdbms/jlib`)
-* The rdbms/public directory has been removed (`$ORACLE_HOME/rdbms/public`)
-* The rdbms/xml directory has been removed (`$ORACLE_HOME/rdbms/xml`)
+If you have questions or constructive feedback about these images, please file a ticket over at [github.com/gvenzl/oci-oracle-xe](https://github.com/gvenzl/oci-oracle-xe/issues).
