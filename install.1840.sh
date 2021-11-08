@@ -999,13 +999,13 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm "${ORACLE_HOME}"/bin/drda*  # Distributed Relational Database Architecture components
 
   # Replace `orabase` with static path shell script
-  su -p oracle -c "echo '${ORACLE_BASE}' > ${ORACLE_HOME}/bin/orabase"
+  su -p oracle -c "echo 'echo ${ORACLE_BASE}' > ${ORACLE_HOME}/bin/orabase"
 
   # Replace `orabasehome` with static path shell script
-  su -p oracle -c "echo '${ORACLE_HOME}' > ${ORACLE_HOME}/bin/orabasehome"
+  su -p oracle -c "echo 'echo ${ORACLE_HOME}' > ${ORACLE_HOME}/bin/orabasehome"
 
   # Replace `orabaseconfig` with static path shell script
-  su -p oracle -c "echo '${ORACLE_HOME}' > ${ORACLE_HOME}/bin/orabaseconfig"
+  su -p oracle -c "echo 'echo ${ORACLE_HOME}' > ${ORACLE_HOME}/bin/orabaseconfig"
 
   # Remove unnecessary libraries
   rm "${ORACLE_HOME}"/lib/libra.so    # Recovery Appliance
