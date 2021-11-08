@@ -28,5 +28,5 @@ podman tag gvenzl/oracle-xe:21.3.0-full gvenzl/oracle-xe:full
 
 podman tag gvenzl/oracle-xe:21.3.0 gvenzl/oracle-xe:21
 
-podman tag gvenzl/oracle-xe:21.3.0-slim gvenzl/oracle-xe:21-slim
-podman tag gvenzl/oracle-xe:21.3.0-slim gvenzl/oracle-xe:slim
+# podman tag gvenzl/oracle-xe:21.3.0-slim gvenzl/oracle-xe:21-slim
+# podman tag gvenzl/oracle-xe:21.3.0-slim gvenzl/oracle-xe:slim

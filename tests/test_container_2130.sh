@@ -32,9 +32,9 @@ runContainerTest "21.3.0 FULL image" "2130-full" "gvenzl/oracle-xe:21.3.0-full"
 runContainerTest "21 FULL image" "21-full" "gvenzl/oracle-xe:21-full"
 runContainerTest "FULL image" "full" "gvenzl/oracle-xe:full"
 
-#runContainerTest "18.4.0 REGULAR image" "1840" "gvenzl/oracle-xe:18.4.0"
-#runContainerTest "18 REGULAR image" "18" "gvenzl/oracle-xe:18"
-#runContainerTest "REGULAR image" "latest" "gvenzl/oracle-xe"
+runContainerTest "21.3.0 REGULAR image" "2130" "gvenzl/oracle-xe:21.3.0"
+runContainerTest "21 REGULAR image" "21" "gvenzl/oracle-xe:21"
+runContainerTest "REGULAR image" "latest" "gvenzl/oracle-xe"
 
 #runContainerTest "18.4.0 SLIM image" "1840-slim" "gvenzl/oracle-xe:18.4.0-slim"
 #runContainerTest "18 SLIM image" "18-slim" "gvenzl/oracle-xe:18-slim"
