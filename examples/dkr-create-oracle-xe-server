@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Variables used for the script
+
 if [ ! -f `which pwgen` ]; then
   echo "You must have pwgen on your machine to run this script"
   exit 1
