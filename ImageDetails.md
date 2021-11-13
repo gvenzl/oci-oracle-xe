@@ -18,6 +18,10 @@ A couple of modifications have been performed to make the installation more suit
 * `DISABLE_OOB=ON` in `sqlnet.ora` (see https://github.com/gvenzl/oci-oracle-xe/issues/43)
 * `BREAK_POLL_SKIP=1000` in `sqlnet.ora` (see https://github.com/gvenzl/oci-oracle-xe/issues/43)
 
+#### Operating system
+
+* `/var/log/lastlog` has been cleaned
+
 ### Regular image flavor (`21`)
 
 The regular image strives to balance between the functionality required by most users and image size. It has all customizations that the full image has and removes additional components to further decrease the image size:
@@ -109,6 +113,10 @@ A couple of modifications have been performed to make the installation more suit
 * `COMMON_USER_PREFIX=''`
 * `LOCAL_LISTENER=''`
 * An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
+
+#### Operating system
+
+* `/var/log/lastlog` has been cleaned
 
 ### Regular image flavor (`18`)
 
@@ -237,6 +245,10 @@ A couple of modifications have been performed to make the installation more suit
 * An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
 * The `REDO` logs have been located into `$ORACLE_BASE/oradata/$ORACLE_SID/`
 * The fast recovery area has been removed (`DB_RECOVERY_FILE_DEST=''`)
+
+#### Operating system
+
+* `/var/log/lastlog` has been cleaned
 
 ### Regular image flavor (`11`)
 

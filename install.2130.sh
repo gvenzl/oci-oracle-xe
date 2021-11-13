@@ -1077,3 +1077,6 @@ rpm -e --nodeps acl bc binutils cracklib cracklib-dicts cryptsetup-libs \
 
 # Remove dnf cache
 microdnf clean all
+
+# Clean lastlog
+echo "" > /var/log/lastlog
