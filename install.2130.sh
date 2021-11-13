@@ -964,10 +964,12 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm -r "${ORACLE_HOME}"/python
 
   # Remove unnecessary binaries (see http://yong321.freeshell.org/computer/oraclebin.html#21c)
-  rm "${ORACLE_HOME}"/bin/afd*   # ASM Filter Drive components
-  rm "${ORACLE_HOME}"/bin/proc   # Pro*C/C++ Precompiler
-  rm "${ORACLE_HOME}"/bin/procob # Pro COBOL Precompiler
-  rm "${ORACLE_HOME}"/bin/orion  # ORacle IO Numbers benchmark tool
+  rm "${ORACLE_HOME}"/bin/afd*        # ASM Filter Drive components
+  rm "${ORACLE_HOME}"/bin/proc        # Pro*C/C++ Precompiler
+  rm "${ORACLE_HOME}"/bin/procob      # Pro COBOL Precompiler
+  rm "${ORACLE_HOME}"/bin/orion       # ORacle IO Numbers benchmark tool
+  rm "${ORACLE_HOME}"/bin/oms_daemon  # Oracle Memory Speed (PMEM support) daemon
+  rm "${ORACLE_HOME}"/bin/omsfscmds   # Oracle Memory Speed command line utility
 
   # Replace `orabase` with static path shell script
   su -p oracle -c "echo 'echo ${ORACLE_BASE}' > ${ORACLE_HOME}/bin/orabase"

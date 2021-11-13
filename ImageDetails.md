@@ -58,6 +58,9 @@ The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
 * `$ORACLE_HOME}/bin/proc` (Pro\*C/C++ Precompiler)
 * `$ORACLE_HOME/bin/procob` (Pro COBOL Precompiler)
 * `$ORACLE_HOME/bin/orion` (ORacle IO Numbers benchmark tool)
+* `$ORACLE_HOME/bin/oms_daemon` (Oracle Memory Speed (PMEM support) daemon)
+* `$ORACLE_HOME/bin/omsfscmds` (Oracle Memory Speed (PMEM support) command line utility)
+
 
 The following binaries have been replaced by shell scripts with static output:
 
