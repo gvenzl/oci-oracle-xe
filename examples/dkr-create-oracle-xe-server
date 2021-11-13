@@ -5,6 +5,18 @@ if [ ! -f `which pwgen` ]; then
   exit 1
 fi
 
+if [ -z "$DKR_HOST_PORT" ]; then
+  echo "You must provide docker host port"
+  exit 1
+fi
+
+
+if [ -z "$DKR_CNT_NAME" ]; then
+  echo "You must provide dockercontainer name"
+  exit 1
+fi
+
+
 CMG_COMMAND=docker
 DKR_IMAGE="gvenzl/oracle-xe"
 DKR_HOST_PORT=$1
@@ -14,25 +26,15 @@ DKR_ORA_USER_APP=DAAPPUSER
 DKR_ORA_PW=`pwgen -1 16 | tr -d '\n'`
 DKR_ORA_PW_APP=`pwgen -1 16 | tr -d '\n'`
 
-echo "Docker Image ...............:'$DKR_IMAGE'"
-echo "Docker User ................:'$DKR_ORA_USER_APP'"
-echo "Docker Password ............:'$DKR_ORA_PW'"
-echo "Docker Password (app) ......:'$DKR_ORA_PW_APP'"
-echo "Docker Volume Name..........:'$DKR_DATA_PATH'"
-echo "Docker Host Port ...........:'$DKR_HOST_PORT'"
-echo "Docker Container Name ......:'$DKR_CNT_NAME'"
+echo "Docker Image ............................ :'$DKR_IMAGE'"
+echo "Database (SYS AND SYSTEM) User Password . :'$DKR_ORA_PW'"
+echo "Database Application User ............... :'$DKR_ORA_USER_APP'"
+echo "Database Application User Password ...... :'$DKR_ORA_PW_APP'"
+echo "Docker Volume Name ...................... :'$DKR_DATA_PATH'"
+echo "Docker Host Port ........................ :'$DKR_HOST_PORT'"
+echo "Docker Container Name ................... :'$DKR_CNT_NAME'"
 
 
-if [ -z "$DKR_HOST_PORT" ]; then
-  echo "You must provide docker host port"
-  exit 1
-fi
-
-
-if [ -z "$DKR_CNT_NAME" ]; then
-  echo "You must provide container name"
-  exit 1
-fi
 
 $CMG_COMMAND run --name $DKR_CNT_NAME \
   -p $DKR_HOST_PORT:1521 \
@@ -45,4 +47,4 @@ $CMG_COMMAND run --name $DKR_CNT_NAME \
 echo "Waiting for container '$DKR_CNT_NAME' to start ... " 
 sleep 10
 
-echo "Oracle Container '$DKR_CNT_NAME' has been started on port '$DKR_HOST_PORT' with initial password '$DKR_ORA_PW'"
+echo "Docker Container '$DKR_CNT_NAME' has been started on port '$DKR_HOST_PORT'"
