@@ -72,6 +72,7 @@ The following binaries have been replaced by shell scripts with static output:
 
 The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
 
+* `$ORACLE_HOME/lib/libmle.so` (Multilingual Engine)
 * `$ORACLE_HOME/lib/libopc.so` (Oracle Public Cloud)
 * `$ORACLE_HOME/lib/libosbws.so` (Oracle Secure Backup Cloud Module)
 * `$ORACLE_HOME/lib/libra.so` (Recovery Appliance)

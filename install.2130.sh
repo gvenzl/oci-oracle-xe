@@ -981,6 +981,7 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   su -p oracle -c "echo 'echo ${ORACLE_BASE_CONFIG}' > ${ORACLE_HOME}/bin/orabaseconfig"
 
   # Remove unnecessary libraries
+  rm "${ORACLE_HOME}"/lib/libmle.so   # Multilingual Engine
   rm "${ORACLE_HOME}"/lib/libopc.so   # Oracle Public Cloud
   rm "${ORACLE_HOME}"/lib/libosbws.so # Oracle Secure Backup Cloud Module
   rm "${ORACLE_HOME}"/lib/libra.so    # Recovery Appliance
