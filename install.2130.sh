@@ -149,7 +149,12 @@ EXTPROC_CONNECTION_DATA =
 " > "${ORACLE_BASE_HOME}"/network/admin/tnsnames.ora
 
 # sqlnet.ora
-echo "NAMES.DIRECTORY_PATH = (EZCONNECT, TNSNAMES)" > "${ORACLE_BASE_HOME}"/network/admin/sqlnet.ora
+echo \
+"NAMES.DIRECTORY_PATH = (EZCONNECT, TNSNAMES)
+# See https://github.com/gvenzl/oci-oracle-xe/issues/43
+DISABLE_OOB=ON
+BREAK_POLL_SKIP=1000
+" > "${ORACLE_BASE_HOME}"/network/admin/sqlnet.ora
 
 chown -R oracle:dba "${ORACLE_BASE_HOME}"/network/admin
 
