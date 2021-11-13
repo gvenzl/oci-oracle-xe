@@ -26,5 +26,5 @@ set -Eeuo pipefail
 ./build_Dockerfile_11202.sh
 
 # In order of newest to latest
-./build_cokerfile_2130.sh
+./build_Dockerfile_2130.sh
 ./build_Dockerfile_1840.sh
