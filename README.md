@@ -123,6 +123,23 @@ The images can be used as a [Service Container](https://docs.github.com/en/actio
           --health-retries 10
 ```
 
+After your service is created, you can connect to it via the following properties:
+
+* Host: `localhost` or `127.0.0.1`
+* Port: `1521`
+* Service name: `XEPDB1`
+* Database App User: `my_user`
+* Database App Password: `my_password_which_I_really_should_change`
+
+If you amend the variables above, here is some more useful info:
+
+* Ports: you can access the port dynamically via `${{ job.services.oracle.ports[1521] }}`. This is helpful when you do not want to specify a given port via `- 1521/tcp` instead of `- 1521:1521`.  Note that the `oracle` refers to the service name in the yaml file. If you call your service differently, you will also have to change `oracle` here to that other service name.
+* Database Admin User: `system`
+* Database Admin User Password: `$ORACLE_PASSWORD`
+* Database App User: `$APP_USER`
+* Database App User Password: `$APP_USER_PASSWORD`
+* Example JDBC connect string with dynamic port allocation: `jdbc:oracle:thin:@localhost:${{ job.services.oracle.ports[1521] }}/XEPDB1`
+
 # Image flavors
 
 | Flavor  | Extension | Description                                                                                 | Use cases                                                                                              |
