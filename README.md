@@ -16,6 +16,10 @@ Oracle Database Express Edition Container / Docker images.
 
 # Quick Start
 
+## Examples
+[Examples Folder](./examples)
+
+
 Run a new database container (data is removed when the container is removed, but kept throughout container restarts):
 
 ```shell
@@ -57,6 +61,7 @@ We are proud of the following users of these images:
 * [Rucio by CERN](https://rucio.cern.ch/) [[`80dffbb`](https://github.com/rucio/rucio/commit/80dffbb09f58a9f30d2a9a4c3297e8ed22a78963)]
 * [SchemaCrawler](https://www.schemacrawler.com/) [[`08d9b87`](https://github.com/schemacrawler/SchemaCrawler/commit/08d9b87c280bf23e405bea6265abf01448fa71d3)]
 * [Testcontainers](https://www.testcontainers.org/) [[`99b91b8`](https://github.com/testcontainers/testcontainers-java/commit/99b91b89b6ee3f8f0e9545e86d9f0744b301db30)]
+* [utPLSQL](http://utplsql.org/) [[`8080604`](https://github.com/utPLSQL/utPLSQL/commit/8080604df0256ab2202c9f64bb67671d55c63710#diff-6ac3f79fc25d95cd1e3d51da53a4b21b939437392578a35ae8cd6d5366ca5485)]
 
 If you are using these images and would like to be listed as well, please open an [issue on GitHub](https://github.com/gvenzl/oci-oracle-xe/issues) or reach out on [Twitter](https://twitter.com/geraldvenzl).
 
@@ -117,6 +122,23 @@ The images can be used as a [Service Container](https://docs.github.com/en/actio
           --health-timeout 5s
           --health-retries 10
 ```
+
+After your service is created, you can connect to it via the following properties:
+
+* Host: `localhost` or `127.0.0.1`
+* Port: `1521`
+* Service name: `XEPDB1`
+* Database App User: `my_user`
+* Database App Password: `my_password_which_I_really_should_change`
+
+If you amend the variables above, here is some more useful info:
+
+* Ports: you can access the port dynamically via `${{ job.services.oracle.ports[1521] }}`. This is helpful when you do not want to specify a given port via `- 1521/tcp` instead of `- 1521:1521`.  Note that the `oracle` refers to the service name in the yaml file. If you call your service differently, you will also have to change `oracle` here to that other service name.
+* Database Admin User: `system`
+* Database Admin User Password: `$ORACLE_PASSWORD`
+* Database App User: `$APP_USER`
+* Database App User Password: `$APP_USER_PASSWORD`
+* Example JDBC connect string with dynamic port allocation: `jdbc:oracle:thin:@localhost:${{ job.services.oracle.ports[1521] }}/XEPDB1`
 
 # Image flavors
 

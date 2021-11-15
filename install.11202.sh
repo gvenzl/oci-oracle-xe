@@ -645,3 +645,6 @@ microdnf -y remove acl bc cracklib cracklib-dicts cryptsetup-libs \
 
 # Remove dnf cache
 microdnf clean all
+
+# Clean lastlog
+echo "" > /var/log/lastlog

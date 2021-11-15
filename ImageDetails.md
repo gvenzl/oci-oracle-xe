@@ -15,6 +15,12 @@ A couple of modifications have been performed to make the installation more suit
 * `COMMON_USER_PREFIX=''`
 * `LOCAL_LISTENER=''`
 * An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
+* `DISABLE_OOB=ON` in `sqlnet.ora` (see https://github.com/gvenzl/oci-oracle-xe/issues/43)
+* `BREAK_POLL_SKIP=1000` in `sqlnet.ora` (see https://github.com/gvenzl/oci-oracle-xe/issues/43)
+
+#### Operating system
+
+* `/var/log/lastlog` has been cleaned
 
 ### Regular image flavor (`21`)
 
@@ -56,6 +62,9 @@ The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
 * `$ORACLE_HOME}/bin/proc` (Pro\*C/C++ Precompiler)
 * `$ORACLE_HOME/bin/procob` (Pro COBOL Precompiler)
 * `$ORACLE_HOME/bin/orion` (ORacle IO Numbers benchmark tool)
+* `$ORACLE_HOME/bin/oms_daemon` (Oracle Memory Speed (PMEM support) daemon)
+* `$ORACLE_HOME/bin/omsfscmds` (Oracle Memory Speed (PMEM support) command line utility)
+
 
 The following binaries have been replaced by shell scripts with static output:
 
@@ -67,6 +76,7 @@ The following binaries have been replaced by shell scripts with static output:
 
 The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
 
+* `$ORACLE_HOME/lib/libmle.so` (Multilingual Engine)
 * `$ORACLE_HOME/lib/libopc.so` (Oracle Public Cloud)
 * `$ORACLE_HOME/lib/libosbws.so` (Oracle Secure Backup Cloud Module)
 * `$ORACLE_HOME/lib/libra.so` (Recovery Appliance)
@@ -103,6 +113,10 @@ A couple of modifications have been performed to make the installation more suit
 * `COMMON_USER_PREFIX=''`
 * `LOCAL_LISTENER=''`
 * An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
+
+#### Operating system
+
+* `/var/log/lastlog` has been cleaned
 
 ### Regular image flavor (`18`)
 
@@ -231,6 +245,10 @@ A couple of modifications have been performed to make the installation more suit
 * An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
 * The `REDO` logs have been located into `$ORACLE_BASE/oradata/$ORACLE_SID/`
 * The fast recovery area has been removed (`DB_RECOVERY_FILE_DEST=''`)
+
+#### Operating system
+
+* `/var/log/lastlog` has been cleaned
 
 ### Regular image flavor (`11`)
 

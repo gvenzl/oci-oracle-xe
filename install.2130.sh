@@ -149,7 +149,12 @@ EXTPROC_CONNECTION_DATA =
 " > "${ORACLE_BASE_HOME}"/network/admin/tnsnames.ora
 
 # sqlnet.ora
-echo "NAMES.DIRECTORY_PATH = (EZCONNECT, TNSNAMES)" > "${ORACLE_BASE_HOME}"/network/admin/sqlnet.ora
+echo \
+"NAMES.DIRECTORY_PATH = (EZCONNECT, TNSNAMES)
+# See https://github.com/gvenzl/oci-oracle-xe/issues/43
+DISABLE_OOB=ON
+BREAK_POLL_SKIP=1000
+" > "${ORACLE_BASE_HOME}"/network/admin/sqlnet.ora
 
 chown -R oracle:dba "${ORACLE_BASE_HOME}"/network/admin
 
@@ -959,10 +964,12 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm -r "${ORACLE_HOME}"/python
 
   # Remove unnecessary binaries (see http://yong321.freeshell.org/computer/oraclebin.html#21c)
-  rm "${ORACLE_HOME}"/bin/afd*   # ASM Filter Drive components
-  rm "${ORACLE_HOME}"/bin/proc   # Pro*C/C++ Precompiler
-  rm "${ORACLE_HOME}"/bin/procob # Pro COBOL Precompiler
-  rm "${ORACLE_HOME}"/bin/orion  # ORacle IO Numbers benchmark tool
+  rm "${ORACLE_HOME}"/bin/afd*        # ASM Filter Drive components
+  rm "${ORACLE_HOME}"/bin/proc        # Pro*C/C++ Precompiler
+  rm "${ORACLE_HOME}"/bin/procob      # Pro COBOL Precompiler
+  rm "${ORACLE_HOME}"/bin/orion       # ORacle IO Numbers benchmark tool
+  rm "${ORACLE_HOME}"/bin/oms_daemon  # Oracle Memory Speed (PMEM support) daemon
+  rm "${ORACLE_HOME}"/bin/omsfscmds   # Oracle Memory Speed command line utility
 
   # Replace `orabase` with static path shell script
   su -p oracle -c "echo 'echo ${ORACLE_BASE}' > ${ORACLE_HOME}/bin/orabase"
@@ -974,6 +981,7 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   su -p oracle -c "echo 'echo ${ORACLE_BASE_CONFIG}' > ${ORACLE_HOME}/bin/orabaseconfig"
 
   # Remove unnecessary libraries
+  rm "${ORACLE_HOME}"/lib/libmle.so   # Multilingual Engine
   rm "${ORACLE_HOME}"/lib/libopc.so   # Oracle Public Cloud
   rm "${ORACLE_HOME}"/lib/libosbws.so # Oracle Secure Backup Cloud Module
   rm "${ORACLE_HOME}"/lib/libra.so    # Recovery Appliance
@@ -1069,3 +1077,6 @@ rpm -e --nodeps acl bc binutils cracklib cracklib-dicts cryptsetup-libs \
 
 # Remove dnf cache
 microdnf clean all
+
+# Clean lastlog
+echo "" > /var/log/lastlog

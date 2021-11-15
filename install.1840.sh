@@ -1105,3 +1105,6 @@ rm /etc/sysctl.conf.rpmsave
 
 # Remove dnf cache
 microdnf clean all
+
+# Clean lastlog
+echo "" > /var/log/lastlog
