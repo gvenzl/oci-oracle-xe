@@ -1094,12 +1094,11 @@ fi;
 # Use rpm instead of microdnf to allow removing packages regardless of dependencies specified by the Oracle XE RPM
 rpm -e --nodeps acl bc binutils cracklib cracklib-dicts cryptsetup-libs \
                 dbus dbus-common dbus-daemon dbus-libs dbus-tools \
-                device-mapper device-mapper-libs diffutils elfutils-default-yama-scope \
-                elfutils-libs file findutils hostname hwdata iptables-libs kmod-libs \
-                ksh libfdisk libibverbs libnl3 libnsl2 libpcap libpwquality libseccomp \
-                libtirpc libutempter lm_sensors-libs make net-tools pam \
-                pciutils pciutils-libs procps-ng rdma-core smartmontools sysstat \
-                systemd systemd-pam util-linux xz
+                device-mapper device-mapper-libs diffutils \
+                elfutils-default-yama-scope elfutils-libs file findutils hostname \
+                kmod-libs ksh libfdisk libnsl2 libpwquality libseccomp libtirpc \
+                libutempter lm_sensors-libs make net-tools pam procps-ng smartmontools \
+                sysstat systemd systemd-pam util-linux xz
 
 rm /etc/sysctl.conf.rpmsave
 
