@@ -260,6 +260,7 @@ The slim images aims for smallest possible image size with only the Oracle Datab
 
 The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
 
+* `$ORACLE_HOME/bin/ORE` (Oracle R Enterprise)
 * `$ORACLE_HOME/bin/rman` (Oracle Recovery Manager)
 * `$ORACLE_HOME/bin/wrap` (PL/SQL Wrapper)
 
@@ -268,6 +269,7 @@ The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
 The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
 
 * `$ORACLE_HOME/lib/asm*` (Oracle Automatic Storage Management)
+* `$ORACLE_HOME/lib/ore.so` (Oracle R Enterprise)
 
 ## 11g XE
 
