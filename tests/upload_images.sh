@@ -22,6 +22,11 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
+# Log into Docker Hub before anything else so that one does not have to
+# wait for the backup to be finished)
+echo "Login to Docker Hub:"
+podman login
+
 # Ensure all tags are in place
 ./all_tag_images.sh
 
@@ -34,9 +39,6 @@ if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
 fi;
 
 # Upload images
-echo "Login to Docker Hub:"
-podman login
-
 # Upload latest
 echo "Upload latest"
 podman push localhost/gvenzl/oracle-xe:latest          docker.io/gvenzl/oracle-xe:latest
