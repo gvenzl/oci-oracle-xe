@@ -34,4 +34,8 @@ echo "TEST: Building 21.3.0 REGULAR image"
 ./buildContainerImage.sh -v 21.3.0
 echo "DONE: Building 21.3.0 REGULAR image"
 
+echo "TEST: Building 21.3.0 SLIM image"
+./buildContainerImage.sh -v 21.3.0 -s
+echo "DONE: Building 21.3.0 SLIM image"
+
 cd "${CURRENT_DIR}"
