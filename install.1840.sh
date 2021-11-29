@@ -34,9 +34,7 @@ CDB_SYSAUX_SIZE=480
 PDB_SYSAUX_SIZE=342
 CDB_SYSTEM_SIZE=840
 PDB_SYSTEM_SIZE=255
-if [ "${BUILD_MODE}" == "FULL" ]; then
-  REDO_SIZE=50
-elif [ "${BUILD_MODE}" == "REGULAR" ]; then
+if [ "${BUILD_MODE}" == "REGULAR" ]; then
   REDO_SIZE=20
   USERS_SIZE=10
 #  CDB_SYSAUX_SIZE=464
@@ -182,30 +180,6 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
    -- Disable common_user_prefix (needed for OS authenticated user)
    ALTER SYSTEM SET COMMON_USER_PREFIX='' SCOPE=SPFILE;
-
-   -- Remove original redo logs from fast_recovery_area and create new ones
-   ALTER DATABASE ADD LOGFILE GROUP 4 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo04.log') SIZE ${REDO_SIZE}m;
-   ALTER DATABASE ADD LOGFILE GROUP 5 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo05.log') SIZE ${REDO_SIZE}m;
-   ALTER DATABASE ADD LOGFILE GROUP 6 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo06.log') SIZE ${REDO_SIZE}m;
-   ALTER SYSTEM SWITCH LOGFILE;
-   ALTER SYSTEM SWITCH LOGFILE;
-   ALTER SYSTEM SWITCH LOGFILE;
-   ALTER SYSTEM CHECKPOINT;
-   ALTER DATABASE DROP LOGFILE GROUP 1;
-   ALTER DATABASE DROP LOGFILE GROUP 2;
-   ALTER DATABASE DROP LOGFILE GROUP 3;
-   HOST rm ${ORACLE_BASE}/oradata/${ORACLE_SID}/redo03.log
-   ALTER DATABASE ADD LOGFILE GROUP 1 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo01.log') SIZE ${REDO_SIZE}m REUSE;
-   ALTER DATABASE ADD LOGFILE GROUP 2 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo02.log') SIZE ${REDO_SIZE}m REUSE;
-   ALTER SYSTEM SWITCH LOGFILE;
-   ALTER SYSTEM SWITCH LOGFILE;
-   ALTER SYSTEM CHECKPOINT;
-   ALTER DATABASE DROP LOGFILE GROUP 4;
-   HOST rm ${ORACLE_BASE}/oradata/${ORACLE_SID}/redo04.log
-   ALTER DATABASE DROP LOGFILE GROUP 5;
-   HOST rm ${ORACLE_BASE}/oradata/${ORACLE_SID}/redo05.log
-   ALTER DATABASE DROP LOGFILE GROUP 6;
-   HOST rm ${ORACLE_BASE}/oradata/${ORACLE_SID}/redo06.log
 
    -- Disable controlfile splitbrain check
    -- Like with every underscore parameter, DO NOT SET THIS PARAMETER EVER UNLESS YOU KNOW WHAT THE HECK YOU ARE DOING!
@@ -803,6 +777,36 @@ EOF
      -- Drop temporary UNDO tablespace
      DROP TABLESPACE UNDO_TMP INCLUDING CONTENTS AND DATAFILES;
 
+     ---------------------------------
+     -- Shrink REDO log files
+     ---------------------------------
+
+     ALTER SESSION SET CONTAINER=CDB\$ROOT;
+
+     -- Remove original redo logs and create new ones
+     ALTER DATABASE ADD LOGFILE GROUP 4 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo04.log') SIZE ${REDO_SIZE}m;
+     ALTER DATABASE ADD LOGFILE GROUP 5 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo05.log') SIZE ${REDO_SIZE}m;
+     ALTER DATABASE ADD LOGFILE GROUP 6 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo06.log') SIZE ${REDO_SIZE}m;
+     ALTER SYSTEM SWITCH LOGFILE;
+     ALTER SYSTEM SWITCH LOGFILE;
+     ALTER SYSTEM SWITCH LOGFILE;
+     ALTER SYSTEM CHECKPOINT;
+     ALTER DATABASE DROP LOGFILE GROUP 1;
+     ALTER DATABASE DROP LOGFILE GROUP 2;
+     ALTER DATABASE DROP LOGFILE GROUP 3;
+     HOST rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo03.log
+     ALTER DATABASE ADD LOGFILE GROUP 1 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo01.log') SIZE ${REDO_SIZE}m REUSE;
+     ALTER DATABASE ADD LOGFILE GROUP 2 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo02.log') SIZE ${REDO_SIZE}m REUSE;
+     ALTER SYSTEM SWITCH LOGFILE;
+     ALTER SYSTEM SWITCH LOGFILE;
+     ALTER SYSTEM CHECKPOINT;
+     ALTER DATABASE DROP LOGFILE GROUP 4;
+     HOST rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo04.log
+     ALTER DATABASE DROP LOGFILE GROUP 5;
+     HOST rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo05.log
+     ALTER DATABASE DROP LOGFILE GROUP 6;
+     HOST rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo06.log
+
      exit;
 EOF
 
@@ -1065,7 +1069,6 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
     # Remove Oracle R
     rm -r "${ORACLE_HOME}"/R
-    rm "${ORACLE_HOME}"/bin/ORE
 
     # Remove deinstall directory
     rm -r "${ORACLE_HOME}"/deinstall
@@ -1080,11 +1083,13 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     rm -r "${ORACLE_HOME}"/perl
 
     # Remove unnecessary binaries
+    rm "${ORACLE_HOME}"/bin/ORE
     rm "${ORACLE_HOME}"/bin/rman # Oracle Recovery Manager
     rm "${ORACLE_HOME}"/bin/wrap # PL/SQL Wrapper
 
     # Remove unnecessary libraries
     rm "${ORACLE_HOME}"/lib/asm* # Oracle Automatic Storage Management
+    rm "${ORACLE_HOME}"/lib/ore.so
 
   fi;
 
@@ -1094,12 +1099,11 @@ fi;
 # Use rpm instead of microdnf to allow removing packages regardless of dependencies specified by the Oracle XE RPM
 rpm -e --nodeps acl bc binutils cracklib cracklib-dicts cryptsetup-libs \
                 dbus dbus-common dbus-daemon dbus-libs dbus-tools \
-                device-mapper device-mapper-libs diffutils elfutils-default-yama-scope \
-                elfutils-libs file findutils hostname hwdata iptables-libs kmod-libs \
-                ksh libfdisk libibverbs libnl3 libnsl2 libpcap libpwquality libseccomp \
-                libtirpc libutempter lm_sensors-libs make net-tools pam \
-                pciutils pciutils-libs procps-ng rdma-core smartmontools sysstat \
-                systemd systemd-pam util-linux xz
+                device-mapper device-mapper-libs diffutils \
+                elfutils-default-yama-scope elfutils-libs file findutils hostname \
+                kmod-libs ksh libfdisk libnsl2 libpwquality libseccomp libtirpc \
+                libutempter lm_sensors-libs make net-tools pam procps-ng smartmontools \
+                sysstat systemd systemd-pam util-linux xz
 
 rm /etc/sysctl.conf.rpmsave
 

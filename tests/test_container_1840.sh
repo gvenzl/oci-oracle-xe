@@ -36,7 +36,6 @@ runContainerTest "18 REGULAR image" "18" "gvenzl/oracle-xe:18"
 
 runContainerTest "18.4.0 SLIM image" "1840-slim" "gvenzl/oracle-xe:18.4.0-slim"
 runContainerTest "18 SLIM image" "18-slim" "gvenzl/oracle-xe:18-slim"
-runContainerTest "SLIM image" "slim" "gvenzl/oracle-xe:slim"
 
 
 #################################

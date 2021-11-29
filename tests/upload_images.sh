@@ -22,6 +22,11 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
+# Log into Docker Hub before anything else so that one does not have to
+# wait for the backup to be finished)
+echo "Login to Docker Hub:"
+podman login
+
 # Ensure all tags are in place
 ./all_tag_images.sh
 
@@ -34,9 +39,6 @@ if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
 fi;
 
 # Upload images
-echo "Login to Docker Hub:"
-podman login
-
 # Upload latest
 echo "Upload latest"
 podman push localhost/gvenzl/oracle-xe:latest          docker.io/gvenzl/oracle-xe:latest
@@ -54,6 +56,14 @@ podman push localhost/gvenzl/oracle-xe:21.3.0          docker.io/gvenzl/oracle-x
 echo "Upload 21"
 podman push localhost/gvenzl/oracle-xe:21              docker.io/gvenzl/oracle-xe:21
 
+echo "Upload 21.3.0-slim"
+podman push localhost/gvenzl/oracle-xe:21.3.0-slim     docker.io/gvenzl/oracle-xe:21.3.0-slim
+echo "Upload 21-slim"
+podman push localhost/gvenzl/oracle-xe:21-slim         docker.io/gvenzl/oracle-xe:21-slim
+echo "Upload slim"
+podman push localhost/gvenzl/oracle-xe:slim            docker.io/gvenzl/oracle-xe:slim
+
+
 # Upload 18c images
 echo "Upload 18.4.0-full"
 podman push localhost/gvenzl/oracle-xe:18.4.0-full     docker.io/gvenzl/oracle-xe:18.4.0-full
@@ -69,8 +79,6 @@ echo "Upload 18.4.0-slim"
 podman push localhost/gvenzl/oracle-xe:18.4.0-slim     docker.io/gvenzl/oracle-xe:18.4.0-slim
 echo "Upload 18-slim"
 podman push localhost/gvenzl/oracle-xe:18-slim         docker.io/gvenzl/oracle-xe:18-slim
-echo "Upload slim"
-podman push localhost/gvenzl/oracle-xe:slim            docker.io/gvenzl/oracle-xe:slim
 
 # Upload 11g images
 echo "Upload 11.2.0.2-full"

@@ -32,9 +32,7 @@ echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 # Set data file sizes
 SYSTEM_SIZE=353
 SYSAUX_SIZE=610
-if [ "${BUILD_MODE}" == "FULL" ]; then
-  REDO_SIZE=50
-elif [ "${BUILD_MODE}" == "REGULAR" ]; then
+if [ "${BUILD_MODE}" == "REGULAR" ]; then
   REDO_SIZE=20
   USERS_SIZE=10
 elif [ "${BUILD_MODE}" == "SLIM" ]; then
@@ -192,16 +190,20 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Enable remote HTTP access
    EXEC DBMS_XDB.SETLISTENERLOCALACCESS(FALSE);
 
+   -- Setup healthcheck user
+   CREATE USER OPS\$ORACLE IDENTIFIED EXTERNALLY;
+   GRANT CONNECT, SELECT_CATALOG_ROLE TO OPS\$ORACLE;
+
    -- Remove original redo logs from fast_recovery_area and create new ones
-   ALTER DATABASE ADD LOGFILE GROUP 3 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo03.log') SIZE ${REDO_SIZE}m;
-   ALTER DATABASE ADD LOGFILE GROUP 4 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo04.log') SIZE ${REDO_SIZE}m;
+   ALTER DATABASE ADD LOGFILE GROUP 3 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo03.log') SIZE 50m;
+   ALTER DATABASE ADD LOGFILE GROUP 4 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo04.log') SIZE 50m;
    ALTER SYSTEM SWITCH LOGFILE;
    ALTER SYSTEM SWITCH LOGFILE;
    ALTER SYSTEM CHECKPOINT;
    ALTER DATABASE DROP LOGFILE GROUP 1;
    ALTER DATABASE DROP LOGFILE GROUP 2;
-   ALTER DATABASE ADD LOGFILE GROUP 1 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo01.log') SIZE ${REDO_SIZE}m;
-   ALTER DATABASE ADD LOGFILE GROUP 2 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo02.log') SIZE ${REDO_SIZE}m;
+   ALTER DATABASE ADD LOGFILE GROUP 1 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo01.log') SIZE 50m;
+   ALTER DATABASE ADD LOGFILE GROUP 2 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo02.log') SIZE 50m;
    ALTER SYSTEM SWITCH LOGFILE;
    ALTER SYSTEM SWITCH LOGFILE;
    ALTER SYSTEM CHECKPOINT;
@@ -213,18 +215,13 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    ALTER SYSTEM SET DB_RECOVERY_FILE_DEST_SIZE=1;
    HOST rm -r "${ORACLE_BASE}"/fast_recovery_area
 
-   -- Setup healthcheck user
-   CREATE USER OPS\$ORACLE IDENTIFIED EXTERNALLY;
-   GRANT CONNECT, SELECT_CATALOG_ROLE TO OPS\$ORACLE;
+   -- Non-managed (OMF) redo logs aren't deleted automatically (REDO GROUP 3 and 4 above)
+   -- Need to be deleted manually
+   HOST rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo03.log
+   HOST rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo04.log
 
-   exit;
+     exit;
 EOF
-
-# Non-managed (OMF) redo logs aren't deleted automatically (REDO GROUP 3 and 4 above)
-# Need to be deleted manually
-
-rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo03.log
-rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo04.log
 
 ###################################
 ######## FULL INSTALL DONE ########
@@ -478,10 +475,35 @@ EOF
      -- Drop temporary UNDO tablespace
      DROP TABLESPACE UNDO_TMP INCLUDING CONTENTS AND DATAFILES;
 
+     ---------------------------------
+     -- Shrink REDO log files
+     ---------------------------------
+
+     -- Remove original redo logs from fast_recovery_area and create new ones
+     ALTER DATABASE ADD LOGFILE GROUP 3 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo03.log') SIZE ${REDO_SIZE}m;
+     ALTER DATABASE ADD LOGFILE GROUP 4 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo04.log') SIZE ${REDO_SIZE}m;
+     ALTER SYSTEM SWITCH LOGFILE;
+     ALTER SYSTEM SWITCH LOGFILE;
+     ALTER SYSTEM CHECKPOINT;
+     ALTER DATABASE DROP LOGFILE GROUP 1;
+     ALTER DATABASE DROP LOGFILE GROUP 2;
+     ALTER DATABASE ADD LOGFILE GROUP 1 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo01.log') SIZE ${REDO_SIZE}m REUSE;
+     ALTER DATABASE ADD LOGFILE GROUP 2 ('${ORACLE_BASE}/oradata/${ORACLE_SID}/redo02.log') SIZE ${REDO_SIZE}m REUSE;
+     ALTER SYSTEM SWITCH LOGFILE;
+     ALTER SYSTEM SWITCH LOGFILE;
+     ALTER SYSTEM CHECKPOINT;
+     ALTER DATABASE DROP LOGFILE GROUP 3;
+     ALTER DATABASE DROP LOGFILE GROUP 4;
+
+     -- Non-managed (OMF) redo logs aren't deleted automatically (REDO GROUP 3 and 4 above)
+     -- Need to be deleted manually
+     HOST rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo03.log
+     HOST rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo04.log
+
      exit;
 EOF
 
-# create or replace directory XMLDIR as '${ORACLE_HOME}/rdbms/xml';
+  #TODO: create or replace directory XMLDIR as '${ORACLE_HOME}/rdbms/xml';
 
 fi;
 
@@ -635,13 +657,12 @@ fi;
 # Unfortunately microdnf does not automatically uninstall dependencies that have been
 # installed with a package, so if you were to uninstall just util-linux, for example,
 # it does not automatically also remove gzip and cracklib again.
-microdnf -y remove acl bc cracklib cracklib-dicts cryptsetup-libs \
-                   dbus dbus-common dbus-daemon dbus-libs dbus-tools \
-                   device-mapper device-mapper-libs elfutils-default-yama-scope \
-                   elfutils-libs hwdata libpwquality iptables-libs kmod-libs libfdisk \
-                   libibverbs libnl3 libnsl2 libpcap libseccomp libtirpc libutempter \
-                   net-tools pam pam pciutils pciutils-libs procps-ng rdma-core \
-                   systemd systemd-pam util-linux
+rpm -e --nodeps acl bc cracklib cracklib-dicts cryptsetup-libs \
+                dbus dbus-common dbus-daemon dbus-libs dbus-tools \
+                device-mapper device-mapper-libs elfutils-default-yama-scope \
+                elfutils-libs libpwquality kmod-libs libfdisk libnsl2 libseccomp \
+                libtirpc libutempter net-tools pam pam procps-ng \
+                systemd systemd-pam util-linux
 
 # Remove dnf cache
 microdnf clean all

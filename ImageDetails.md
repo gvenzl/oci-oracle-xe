@@ -100,6 +100,44 @@ The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
   * `pkgconf-m4`
   * `pkgconf-pkg-config`
 
+### Slim image flavor (`21-slim`)
+
+The slim images aims for smallest possible image size with only the Oracle Database relational components. It has all customizations that the regular image has and removes all non-relational components (where possible) to further decrease the image size:
+
+#### Database components
+
+* `Oracle Text` has been uninstalled and removed (`$ORACLE_HOME/ctx`)
+* `Oracle Spatial` has been uninstalled and removed (`$ORACLE_HOME/md`)
+* `Oracle Locator` has been uninstalled and removed (`$ORACLE_HOME/md`)
+* The demo samples directory has been removed (`$ORACLE_HOME/demo`)
+* `ODBC` driver samples have been removed (`$ORACLE_HOME/odbc`)
+* `TNS` demo samples have been removed (`$ORACLE_HOME/network/admin/samples`)
+* `NLS LBuilder` directory has been removed (`$ORACLE_HOME/nls/lbuilder`)
+* The hs directory has been removed (`$ORACLE_HOME/hs`)
+* The `precomp` directory has been removed (`$ORACLE_HOME/precomp`)
+* The `rdbms/public` directory has been removed (`$ORACLE_HOME/rdbms/public`)
+* The `rdbms/xml` directory has been removed (`$ORACLE_HOME/rdbms/xml`)
+* The `ord` directory has been removed (`$ORACLE_HOME/ord`)
+* `Oracle R` has been removed (`$ORACLE_HOME/R`)
+* The `deinstall` directory has been removed (`$ORACLE_HOME/deinstall`)
+* The `Oracle Universal installer` has been removed (`$ORACLE_HOME/oui`)
+* `Perl` has been removed (`$ORACLE_HOME/perl`)
+
+##### Database binaries
+
+The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
+
+* `$ORACLE_HOME/bin/ORE` (Oracle R Enterprise)
+* `$ORACLE_HOME/bin/rman` (Oracle Recovery Manager)
+* `$ORACLE_HOME/bin/wrap` (PL/SQL Wrapper)
+
+##### Database libraries
+
+The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
+
+* `$ORACLE_HOME/lib/asm*` (Oracle Automatic Storage Management)
+* `$ORACLE_HOME/lib/ore.so` (Oracle R Enterprise)
+
 ## 18c XE
 
 ### Full image flavor (`18-full`)
@@ -222,6 +260,7 @@ The slim images aims for smallest possible image size with only the Oracle Datab
 
 The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
 
+* `$ORACLE_HOME/bin/ORE` (Oracle R Enterprise)
 * `$ORACLE_HOME/bin/rman` (Oracle Recovery Manager)
 * `$ORACLE_HOME/bin/wrap` (PL/SQL Wrapper)
 
@@ -230,6 +269,7 @@ The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
 The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
 
 * `$ORACLE_HOME/lib/asm*` (Oracle Automatic Storage Management)
+* `$ORACLE_HOME/lib/ore.so` (Oracle R Enterprise)
 
 ## 11g XE
 

@@ -36,9 +36,9 @@ runContainerTest "21.3.0 REGULAR image" "2130" "gvenzl/oracle-xe:21.3.0"
 runContainerTest "21 REGULAR image" "21" "gvenzl/oracle-xe:21"
 runContainerTest "REGULAR image" "latest" "gvenzl/oracle-xe"
 
-#runContainerTest "18.4.0 SLIM image" "1840-slim" "gvenzl/oracle-xe:18.4.0-slim"
-#runContainerTest "18 SLIM image" "18-slim" "gvenzl/oracle-xe:18-slim"
-#runContainerTest "SLIM image" "slim" "gvenzl/oracle-xe:slim"
+runContainerTest "21.3.0 SLIM image" "2130-slim" "gvenzl/oracle-xe:21.3.0-slim"
+runContainerTest "21 SLIM image" "21-slim" "gvenzl/oracle-xe:21-slim"
+runContainerTest "SLIM image" "slim" "gvenzl/oracle-xe:slim"
 
 
 #################################
@@ -104,7 +104,7 @@ TEST_NAME="21.3.0 ORACLE_RANDOM_PASSWORD"
 EXPECTED_RESULT="OK"
 
 # Spin up container
-runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:21.3.0-full"
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:21.3.0"
 
 # Let's get the password
 rand_pwd=$(podman logs ${CONTAINER_NAME} | grep "ORACLE PASSWORD FOR SYS AND SYSTEM:" | awk '{ print $7 }')
@@ -155,7 +155,7 @@ APP_USER="test_app_user"
 APP_USER_PASSWORD="MyAppUserPassword"
 
 # Spin up container
-runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:21.3.0-full"
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:21.3.0-slim"
 
 # Test the random password, if it works we will get "OK" back from the SQL statement
 result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_PASSWORD}"@//localhost/XEPDB1 <<EOF
@@ -206,7 +206,7 @@ ORA_PWD="MyTestPassword"
 ORA_PWD_CMD="-e ORACLE_PASSWORD=${ORA_PWD}"
 
 # Spin up container
-runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:21.3.0-full"
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:21.3.0-slim"
 
 # Test the random password, if it works we will get "OK" back from the SQL statement
 result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s sys/"${ORA_PWD}"@//localhost/"${ORACLE_DATABASE}" as sysdba <<EOF
@@ -259,7 +259,7 @@ APP_USER_PASSWORD="ThatAppUserPassword1"
 ORACLE_DATABASE="REGRESSION_TESTS"
 
 # Spin up container
-runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:21.3.0-full"
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:21.3.0"
 
 # Test the random password, if it works we will get "OK" back from the SQL statement
 result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_PASSWORD}"@//localhost/"${ORACLE_DATABASE}" <<EOF
