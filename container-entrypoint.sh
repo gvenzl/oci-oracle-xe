@@ -138,6 +138,26 @@ function create_dbconfig() {
      rm "${ORACLE_BASE}"/"${ORACLE_SID}".zip
   fi;
 
+  # If the host has a large number of CPUs (>= 16), SGA_TARGET needs to be increased (#64)
+  # Set SGA_TARGET to 1.5g which should be enough for at least 64 CPU cores
+  if [ "$(nproc --all)" -ge 16 ]; then
+    echo "CONTAINER: machine has high CPU count: $(nproc --all)"
+    echo "CONTAINER: increasing SGA_TARGET to 1.5GB."
+    sqlplus -s / as sysdba <<EOF
+       -- Exit on any errors
+       WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+       CREATE PFILE='/tmp/pfile.ora' FROM SPFILE;
+       HOST sed -i 's/.*sga_target.*/\*\.sga_target=1500m/g' /tmp/pfile.ora
+       CREATE SPFILE FROM PFILE='/tmp/pfile.ora';
+       HOST rm /tmp/pfile.ora
+
+       exit;
+EOF
+
+    echo "CONTAINER: done increasing SGA_TARGET."
+  fi;
+
   mkdir -p "${ORACLE_BASE}/oradata/dbconfig/${ORACLE_SID}"
 
   mv "${ORACLE_BASE_CONFIG}"/dbs/spfile"${ORACLE_SID}".ora "${ORACLE_BASE}"/oradata/dbconfig/"${ORACLE_SID}"/
