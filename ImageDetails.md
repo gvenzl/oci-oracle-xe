@@ -53,6 +53,7 @@ The regular image strives to balance between the functionality required by most 
 * The `Oracle Process Manager and Notification` directory has been removed (`$ORACLE_HOME/opmn`)
 * The `Oracle Machine Learning 4 Python` directory has been removed (`$ORACLE_HOME/oml4py`)
 * `Python` has been removed (`$ORACLE_HOME/python`)
+* Replay Upgrade has been removed (`pdb_sync$` table cleaned up in `CDB$ROOT`)
 
 ##### Database binaries
 

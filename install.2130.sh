@@ -1560,12 +1560,38 @@ EOF
 
   fi;
 
-  #####################
-  # Shrink data files #
-  #####################
+  #######################################################
+  ################# Shrink data files ###################
+  #######################################################
+
+  #######################################################
+  # Clean additional DB components to shrink data files #
+  #######################################################
+
+  su -p oracle -c "sqlplus -s / as sysdba" <<EOF
+
+     -- Exit on any error
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+     -- Clean pdb_sync\$ table in CDB\$ROOT
+     -- This is part of the REPLAY UPGRADE PDB feature that is not needed in REGULAR and SLIM
+     TRUNCATE TABLE PDB_SYNC\$;
+
+     -- Reinsert initial row to reinitialize replay counter, as found in \$ORACLE_HOME/rdbms/admin/dcore.bsq
+     INSERT INTO pdb_sync\$(scnwrp, scnbas, ctime, name, opcode, flags, replay#)
+        VALUES (0, 0, sysdate, 'PDB\$LASTREPLAY', -1, 0, 0);
+    COMMIT;
+
+    exit;
+
+EOF
+
+  ############################
+  # Shrink actual data files #
+  ############################
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
-     -- Exit on any errors
+     -- Exit on any error
      WHENEVER SQLERROR EXIT SQL.SQLCODE
 
      ----------------------------
