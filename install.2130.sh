@@ -1573,14 +1573,24 @@ EOF
      -- Exit on any error
      WHENEVER SQLERROR EXIT SQL.SQLCODE
 
+     -- Create temporary tablespace to move objects
+     CREATE TABLESPACE builder_temp DATAFILE '/opt/oracle/oradata/XE/builder_temp.dbf' SIZE 100m;
+
+     -- Clean up METASTYLESHEET LOBs sitting at the end of the SYSTEM tablespace
+     ALTER TABLE metastylesheet MOVE LOB(stylesheet) STORE AS (TABLESPACE BUILDER_TEMP);
+     ALTER TABLE metastylesheet MOVE LOB(stylesheet) STORE AS (TABLESPACE SYSTEM);
+
      -- Clean pdb_sync\$ table in CDB\$ROOT
      -- This is part of the REPLAY UPGRADE PDB feature that is not needed in REGULAR and SLIM
-     TRUNCATE TABLE PDB_SYNC\$;
+     TRUNCATE TABLE pdb_sync\$;
 
      -- Reinsert initial row to reinitialize replay counter, as found in \$ORACLE_HOME/rdbms/admin/dcore.bsq
      INSERT INTO pdb_sync\$(scnwrp, scnbas, ctime, name, opcode, flags, replay#)
         VALUES (0, 0, sysdate, 'PDB\$LASTREPLAY', -1, 0, 0);
-    COMMIT;
+     COMMIT;
+
+     -- Drop temporary tablespace
+     DROP TABLESPACE builder_temp INCLUDING CONTENTS AND DATAFILES;
 
     exit;
 
