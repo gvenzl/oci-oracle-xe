@@ -1583,6 +1583,10 @@ EOF
      -- Clean pdb_sync\$ table in CDB\$ROOT
      -- This is part of the REPLAY UPGRADE PDB feature that is not needed in REGULAR and SLIM
      TRUNCATE TABLE pdb_sync\$;
+     ALTER INDEX i_pdbsync4 REBUILD;
+     ALTER INDEX i_pdbsync3 REBUILD;
+     ALTER INDEX i_pdbsync2 REBUILD;
+     ALTER INDEX i_pdbsync1 REBUILD;
 
      -- Reinsert initial row to reinitialize replay counter, as found in \$ORACLE_HOME/rdbms/admin/dcore.bsq
      INSERT INTO pdb_sync\$(scnwrp, scnbas, ctime, name, opcode, flags, replay#)
