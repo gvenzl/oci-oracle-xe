@@ -1593,6 +1593,12 @@ EOF
         VALUES (0, 0, sysdate, 'PDB\$LASTREPLAY', -1, 0, 0);
      COMMIT;
 
+     -- Clean up fed\$binds blocks at the end of SYSTEM tablespace
+     ALTER TABLE fed\$binds MOVE TABLESPACE BUILDER_TEMP;
+     ALTER INDEX i_fed_apps\$ REBUILD;
+     ALTER INDEX i_fed_binds\$ REBUILD;
+     ALTER TABLE fed\$binds MOVE TABLESPACE SYSTEM;
+
      -- Drop temporary tablespace
      DROP TABLESPACE builder_temp INCLUDING CONTENTS AND DATAFILES;
 
