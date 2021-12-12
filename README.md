@@ -55,6 +55,8 @@ We are proud of the following users of these images:
 * [Liquibase](https://www.liquibase.org/) [[`c6a31c0`](https://github.com/liquibase/liquibase-test-harness/commit/c6a31c0c54c1aa798839a2ef55ef6eb2363ea48f)]
 * [Micronaut Data](https://github.com/micronaut-projects/micronaut-data) [[`ddf11c1`](https://github.com/micronaut-projects/micronaut-data/commit/ddf11c1e8a7a27a1f6765cc5e1c1c3d3f74b475f)]
 * [Quarkus](https://quarkus.io/) [[`9a63a58`](https://github.com/quarkusio/quarkus/commit/9a63a58a6740fa1d5e3cc7912f89522dd78cee85)]
+* [Ruby API for Oracle PL/SQL](https://github.com/rsim/ruby-plsql) [[`63baad0`](https://github.com/rsim/ruby-plsql/commit/63baad0b6f8ea0caa4b787f85ffae349dede480a)]
+* [Ruby on Rails ActiveRecord adapter](https://github.com/rsim/oracle-enhanced) [[`afd7a93`](https://github.com/rsim/oracle-enhanced/commit/afd7a93470d1444e1462d0fb4f3d965ef2698384)]
 * [Rucio by CERN](https://rucio.cern.ch/) [[`80dffbb`](https://github.com/rucio/rucio/commit/80dffbb09f58a9f30d2a9a4c3297e8ed22a78963)]
 * [SchemaCrawler](https://www.schemacrawler.com/) [[`08d9b87`](https://github.com/schemacrawler/SchemaCrawler/commit/08d9b87c280bf23e405bea6265abf01448fa71d3)]
 * [Sqitch](https://sqitch.org/) [[`8b38027`](https://github.com/sqitchers/sqitch/commit/8b38027ba2b91ef7fbe59a35a5332d17f0beadb0)]
