@@ -974,8 +974,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove rdbms/jlib
   rm -r "${ORACLE_HOME}"/rdbms/jlib
 
-  # Remove olap
+  # Remove OLAP
   rm -r "${ORACLE_HOME}"/olap
+  rm "${ORACLE_HOME}"/lib/libolapapi18.so
 
   # Remove property graph (standalone component that can be downloaded from the web)
   rm -r "${ORACLE_HOME}"/md/property_graph

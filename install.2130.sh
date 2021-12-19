@@ -1982,8 +1982,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove rdbms/jlib
   rm -r "${ORACLE_HOME}"/rdbms/jlib
 
-  # Remove olap
+  # Remove OLAP
   rm -r "${ORACLE_HOME}"/olap
+  rm "${ORACLE_HOME}"/lib/libolapapi.so
 
   # Remove Cluster Ready Services
   rm -r "${ORACLE_HOME}"/crs

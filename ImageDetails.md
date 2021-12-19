@@ -137,6 +137,7 @@ The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
 The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
 
 * `$ORACLE_HOME/lib/asm*` (Oracle Automatic Storage Management)
+* `$ORACLE_HOME/lib/libolapapi.so` (Oracle OLAP API)
 * `$ORACLE_HOME/lib/ore.so` (Oracle R Enterprise)
 
 ## 18c XE
@@ -211,6 +212,7 @@ The following binaries have been replaced by shell scripts with static output:
 The following libraries have been removed from the `$ORACLE_HOME/lib` directory:
 
 * `$ORACLE_HOME/lib/libra.so` (Recovery Appliance)
+* `$ORACLE_HOME/lib/libolapapi18.so` (Oracle OLAP API)
 * `$ORACLE_HOME/lib/libopc.so` (Oracle Public Cloud)
 * `$ORACLE_HOME/lib/libosbws.so` (Oracle Secure Backup Cloud Module)
 
