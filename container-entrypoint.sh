@@ -140,7 +140,12 @@ function create_dbconfig() {
 
   # If the host has a large number of CPUs (>= 16), SGA_TARGET needs to be increased (#64)
   # Set SGA_TARGET to 1.5g which should be enough for at least 64 CPU cores
-  if [ "$(nproc --all)" -ge 16 ]; then
+  #
+  # Note:
+  # This does not apply to Oracle Database 11g which has a memory limit of 1 GB and fails
+  # to start with the following error if more memory is configured:
+  #   ORA-47500: XE edition memory parameter invalid or not specified
+  if [[ "$ORACLE_VERSION" != "11.2."* ]] && (( "$(nproc --all)" >= 16 )); then
     echo "CONTAINER: machine has high CPU count: $(nproc --all)"
     echo "CONTAINER: increasing SGA_TARGET to 1.5GB."
     sqlplus -s / as sysdba <<EOF
