@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
 # Variables used for the script
 
-if [ ! -f `which pwgen` ]; then
-  echo "You must have pwgen on your machine to run this script"
+if ! command -v pwgen &> /dev/null; then
+  echo "You must have pwgen installed on your machine to run this script."
   exit 1
 fi
+
+CMG_COMMAND=docker
+DKR_IMAGE="gvenzl/oracle-xe"
+DKR_HOST_PORT=$1
+DKR_CNT_NAME=$2
+DKR_DATA_PATH=dbcxe-$DKR_CNT_NAME-dvol
+DKR_ORA_USER_APP=DAAPPUSER
+DKR_ORA_PW=$(pwgen -1 16 | tr -d '\n')
+DKR_ORA_PW_APP=$(pwgen -1 16 | tr -d '\n')
 
 if [ -z "$DKR_HOST_PORT" ]; then
   echo "You must provide docker host port"
@@ -17,15 +26,6 @@ if [ -z "$DKR_CNT_NAME" ]; then
   exit 1
 fi
 
-
-CMG_COMMAND=docker
-DKR_IMAGE="gvenzl/oracle-xe"
-DKR_HOST_PORT=$1
-DKR_CNT_NAME=$2
-DKR_DATA_PATH=dbcxe-$DKR_CNT_NAME-dvol
-DKR_ORA_USER_APP=DAAPPUSER
-DKR_ORA_PW=`pwgen -1 16 | tr -d '\n'`
-DKR_ORA_PW_APP=`pwgen -1 16 | tr -d '\n'`
 
 echo "Docker Image ............................ :'$DKR_IMAGE'"
 echo "Database (SYS AND SYSTEM) User Password . :'$DKR_ORA_PW'"

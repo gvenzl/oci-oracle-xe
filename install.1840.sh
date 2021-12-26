@@ -37,10 +37,12 @@ PDB_SYSTEM_SIZE=255
 if [ "${BUILD_MODE}" == "REGULAR" ]; then
   REDO_SIZE=20
   USERS_SIZE=10
+  CDB_TEMP_SIZE=10
 #  CDB_SYSAUX_SIZE=464
 elif [ "${BUILD_MODE}" == "SLIM" ]; then
   REDO_SIZE=10
   USERS_SIZE=2
+  CDB_TEMP_SIZE=2
 #  CDB_SYSAUX_SIZE=464
 fi;
 
@@ -657,6 +659,7 @@ EOF
      --------------------------
 
      ALTER TABLESPACE TEMP SHRINK SPACE;
+     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp01.dbf' RESIZE ${CDB_TEMP_SIZE}M;
      ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp01.dbf'
      AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
@@ -971,8 +974,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove rdbms/jlib
   rm -r "${ORACLE_HOME}"/rdbms/jlib
 
-  # Remove olap
+  # Remove OLAP
   rm -r "${ORACLE_HOME}"/olap
+  rm "${ORACLE_HOME}"/lib/libolapapi18.so
 
   # Remove property graph (standalone component that can be downloaded from the web)
   rm -r "${ORACLE_HOME}"/md/property_graph

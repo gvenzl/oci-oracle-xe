@@ -32,15 +32,17 @@ echo "BUILDER: BUILD_MODE=${BUILD_MODE}"
 # Set data file sizes
 CDB_SYSAUX_SIZE=560
 PDB_SYSAUX_SIZE=330
-CDB_SYSTEM_SIZE=1330
+CDB_SYSTEM_SIZE=875
 PDB_SYSTEM_SIZE=272
 if [ "${BUILD_MODE}" == "REGULAR" ]; then
   REDO_SIZE=20
   USERS_SIZE=10
+  CDB_TEMP_SIZE=10
 elif [ "${BUILD_MODE}" == "SLIM" ]; then
   REDO_SIZE=10
   USERS_SIZE=2
   CDB_SYSAUX_SIZE=560
+  CDB_TEMP_SIZE=2
 fi;
 
 echo "BUILDER: Installing OS dependencies"
@@ -1560,12 +1562,58 @@ EOF
 
   fi;
 
-  #####################
-  # Shrink data files #
-  #####################
+  #######################################################
+  ################# Shrink data files ###################
+  #######################################################
+
+  #######################################################
+  # Clean additional DB components to shrink data files #
+  #######################################################
+
+  su -p oracle -c "sqlplus -s / as sysdba" <<EOF
+
+     -- Exit on any error
+     WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+     -- Create temporary tablespace to move objects
+     CREATE TABLESPACE builder_temp DATAFILE '/opt/oracle/oradata/XE/builder_temp.dbf' SIZE 100m;
+
+     -- Clean up METASTYLESHEET LOBs sitting at the end of the SYSTEM tablespace
+     ALTER TABLE metastylesheet MOVE LOB(stylesheet) STORE AS (TABLESPACE BUILDER_TEMP);
+     ALTER TABLE metastylesheet MOVE LOB(stylesheet) STORE AS (TABLESPACE SYSTEM);
+
+     -- Clean pdb_sync\$ table in CDB\$ROOT
+     -- This is part of the REPLAY UPGRADE PDB feature that is not needed in REGULAR and SLIM
+     TRUNCATE TABLE pdb_sync\$;
+     ALTER INDEX i_pdbsync4 REBUILD;
+     ALTER INDEX i_pdbsync3 REBUILD;
+     ALTER INDEX i_pdbsync2 REBUILD;
+     ALTER INDEX i_pdbsync1 REBUILD;
+
+     -- Reinsert initial row to reinitialize replay counter, as found in \$ORACLE_HOME/rdbms/admin/dcore.bsq
+     INSERT INTO pdb_sync\$(scnwrp, scnbas, ctime, name, opcode, flags, replay#)
+        VALUES (0, 0, sysdate, 'PDB\$LASTREPLAY', -1, 0, 0);
+     COMMIT;
+
+     -- Clean up fed\$binds blocks at the end of SYSTEM tablespace
+     ALTER TABLE fed\$binds MOVE TABLESPACE BUILDER_TEMP;
+     ALTER INDEX i_fed_apps\$ REBUILD;
+     ALTER INDEX i_fed_binds\$ REBUILD;
+     ALTER TABLE fed\$binds MOVE TABLESPACE SYSTEM;
+
+     -- Drop temporary tablespace
+     DROP TABLESPACE builder_temp INCLUDING CONTENTS AND DATAFILES;
+
+    exit;
+
+EOF
+
+  ############################
+  # Shrink actual data files #
+  ############################
   su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
-     -- Exit on any errors
+     -- Exit on any error
      WHENEVER SQLERROR EXIT SQL.SQLCODE
 
      ----------------------------
@@ -1626,6 +1674,7 @@ EOF
      --------------------------
 
      ALTER TABLESPACE TEMP SHRINK SPACE;
+     ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp01.dbf' RESIZE ${CDB_TEMP_SIZE}M;
      ALTER DATABASE TEMPFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/temp01.dbf'
      AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
@@ -1933,8 +1982,9 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove rdbms/jlib
   rm -r "${ORACLE_HOME}"/rdbms/jlib
 
-  # Remove olap
+  # Remove OLAP
   rm -r "${ORACLE_HOME}"/olap
+  rm "${ORACLE_HOME}"/lib/libolapapi.so
 
   # Remove Cluster Ready Services
   rm -r "${ORACLE_HOME}"/crs
