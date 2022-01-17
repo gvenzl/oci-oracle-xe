@@ -348,6 +348,34 @@ EOF
 
 }
 
+# Check minimum memory requirements
+function check_minimum_memory {
+
+  # Check for cgroup v2
+  if [ -f /sys/fs/cgroup/cgroup.controllers ]; then
+    container_memory=$(< /sys/fs/cgroup/memory.max)
+  else
+    container_memory=$(< /sys/fs/cgroup/memory/memory.limit_in_bytes)
+  fi;
+
+  # Check whether memory is not set to "max", i.e. unlimited and
+  # prevent integer overflow by checking whether container has
+  # less than double digit GB of RAM.
+  if [[ ${container_memory} != "max" && ${#container_memory} -lt 11 ]]; then
+    # Check memory per version
+    # 11.2 >= 1 GB
+    # 18c+ >= 2 GB
+    if [[ ( "$ORACLE_VERSION" != "11.2."* && ${container_memory} -lt 1073741824 ) ||
+          ( ${container_memory} -lt 2147483648 ) ]]; then
+      echo "The container has not enough memory available to run Oracle Database XE."
+      echo "There are currently only $((container_memory/1024/1024)) MB available inside the container."
+      echo "Please increase the amount of memory for the container."
+      exit 1;
+    fi;
+  fi;
+
+}
+
 ###########################
 ###########################
 ######### M A I N #########
@@ -361,6 +389,9 @@ echo "CONTAINER: starting up..."
 
 # Setup all required environment variables
 setup_env_vars
+
+# Check for minimum memory requirements
+check_minimum_memory
 
 # If database does not yet exist, create directory structure
 if [ -z "${DATABASE_ALREADY_EXISTS:-}" ]; then

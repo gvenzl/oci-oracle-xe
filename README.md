@@ -62,7 +62,10 @@ We are proud of the following users of these images:
 * [Sqitch](https://sqitch.org/) [[`8b38027`](https://github.com/sqitchers/sqitch/commit/8b38027ba2b91ef7fbe59a35a5332d17f0beadb0)]
 * [Testcontainers](https://www.testcontainers.org/) [[`99b91b8`](https://github.com/testcontainers/testcontainers-java/commit/99b91b89b6ee3f8f0e9545e86d9f0744b301db30)]
 * [Upscheme](https://upscheme.org/) [[`954650a`](https://github.com/aimeos/upscheme/commit/954650afc92273f73bc1276aa0bd2f4253987c4f)]
-* [utPLSQL](http://utplsql.org/) [[`8080604`](https://github.com/utPLSQL/utPLSQL/commit/8080604df0256ab2202c9f64bb67671d55c63710#diff-6ac3f79fc25d95cd1e3d51da53a4b21b939437392578a35ae8cd6d5366ca5485)]
+* [utPLSQL](http://utplsql.org/) [[`327110f`](https://github.com/utPLSQL/utPLSQL/commit/327110f8e77d195aa515f796ad732ea8538e1b82)]
+  * [utPLSQL-maven-plugin](https://github.com/utPLSQL/utPLSQL-maven-plugin/) [[`4d8deeb`](https://github.com/utPLSQL/utPLSQL-maven-plugin/commit/4d8deeb7f107a52913d6320080b972318e753b0e)]
+  * [utPLSQL-java-api](https://github.com/utPLSQL/utPLSQL-java-api) [[`a4a0eb5`](https://github.com/utPLSQL/utPLSQL-java-api/commit/a4a0eb505e0c699c9da9add0a423b618c29723c1)]
+  * [utPLSQL-demo-project](https://github.com/utPLSQL/utPLSQL-demo-project/) [[`99463f0`](https://github.com/utPLSQL/utPLSQL-demo-project/commit/99463f0035c4517a0b42a6ea6a55840c82828e86)]
 
 If you are using these images and would like to be listed as well, please open an [issue on GitHub](https://github.com/gvenzl/oci-oracle-xe/issues) or reach out on [Twitter](https://twitter.com/geraldvenzl).
 
