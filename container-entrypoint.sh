@@ -138,22 +138,40 @@ function create_dbconfig() {
      rm "${ORACLE_BASE}"/"${ORACLE_SID}".zip
   fi;
 
-  # If the host has a large number of CPUs (>= 16), SGA_TARGET needs to be increased (#64)
-  # Set SGA_TARGET to 1.5g which should be enough for at least 64 CPU cores
+  # If the host has a large number of CPUs (>= 32), SGA_TARGET needs to be increased (#64)
   #
   # Note: This does not apply to Oracle Database 11g XE which has a memory limit of 1 GB
   # and does not require that much additional memory for a larger CPU count.
   # 11g XE fails to start with the following error if more than 1 GB memory is configured:
   #   ORA-47500: XE edition memory parameter invalid or not specified
-  if [[ "$ORACLE_VERSION" != "11.2."* ]] && (( "$(nproc --all)" >= 16 )); then
+  if [[ "$ORACLE_VERSION" != "11.2."* ]] && (( "$(nproc --all)" >= 32 )); then
     echo "CONTAINER: machine has high CPU count: $(nproc --all)"
-    echo "CONTAINER: increasing SGA_TARGET to 1.5GB."
+    #
+    # 16 = 640  MB
+    # 24 = 816  MB
+    # 32 = 992  MB
+    # 48 = 1344 MB
+    # 64 = 1696 MB
+    #
+    if   (( "$(nproc --all)" = 32 )); then
+      SGA_MEMORY="1100";
+      PGA_MEMORY="400";
+    elif (( "$(nproc --all)" <= 48 )); then
+      SGA_MEMORY="1500";
+      PGA_MEMORY="400";
+    else
+      SGA_MEMORY="1800";
+      PGA_MEMORY="200";
+    fi;
+
+    echo "CONTAINER: increasing SGA_TARGET to ${SGA_MEMORY}MB."
     sqlplus -s / as sysdba <<EOF
        -- Exit on any errors
        WHENEVER SQLERROR EXIT SQL.SQLCODE
 
        CREATE PFILE='/tmp/pfile.ora' FROM SPFILE;
-       HOST sed -i 's/.*sga_target.*/\*\.sga_target=1500m/g' /tmp/pfile.ora
+       HOST sed -i 's/\*\.sga_target.*/\*\.sga_target=${SGA_MEMORY}m/g' /tmp/pfile.ora
+       HOST sed -i 's/\*\.pga_aggregate_target.*/\*\.pga_aggregate_target=${PGA_MEMORY}m/g' /tmp/pfile.ora
        CREATE SPFILE FROM PFILE='/tmp/pfile.ora';
        HOST rm /tmp/pfile.ora
 
