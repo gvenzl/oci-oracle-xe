@@ -103,7 +103,7 @@ The images can be used as a [Service Container](https://docs.github.com/en/actio
 ```yaml
     services:
 
-      # Oracle service
+      # Oracle service (label used to access the service container)
       oracle:
 
         # Docker Hub image (feel free to change the tag "latest" to any other available one)
@@ -129,7 +129,9 @@ The images can be used as a [Service Container](https://docs.github.com/en/actio
 
 After your service is created, you can connect to it via the following properties:
 
-* Host: `localhost` or `127.0.0.1`
+* Hostname:
+  * `oracle` (from within another container)
+  * `localhost` or `127.0.0.1` (from the host directly)
 * Port: `1521`
 * Service name: `XEPDB1`
 * Database App User: `my_user`
