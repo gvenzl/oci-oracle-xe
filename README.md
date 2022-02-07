@@ -103,7 +103,7 @@ The images can be used as a [Service Container](https://docs.github.com/en/actio
 ```yaml
     services:
 
-      # Oracle service
+      # Oracle service (label used to access the service container)
       oracle:
 
         # Docker Hub image (feel free to change the tag "latest" to any other available one)
@@ -129,7 +129,9 @@ The images can be used as a [Service Container](https://docs.github.com/en/actio
 
 After your service is created, you can connect to it via the following properties:
 
-* Host: `localhost` or `127.0.0.1`
+* Hostname:
+  * `oracle` (from within another container)
+  * `localhost` or `127.0.0.1` (from the host directly)
 * Port: `1521`
 * Service name: `XEPDB1`
 * Database App User: `my_user`
@@ -167,6 +169,12 @@ This mechanism is supported for:
 * `APP_USER_PASSWORD`
 * `ORACLE_PASSWORD`
 * `ORACLE_DATABASE`
+
+**Note**: there is a significant difference in how containerization technologies handle secrets. For more information on that topic, please consult the official containerization technology documentation:
+
+* [Docker](https://docs.docker.com/engine/swarm/secrets/)
+* [Podman](https://www.redhat.com/sysadmin/new-podman-secrets-command)
+* [Kubernetes](https://kubernetes.io/docs/concepts/configuration/secret/)
 
 ## Initialization scripts
 If you would like to perform additional initialization of the database running in a container, you can add one or more `*.sql`, `*.sql.gz`, `*.sql.zip` or `*.sh` files under `/container-entrypoint-initdb.d` (creating the directory if necessary). After the database setup is completed, these files will be executed automatically in alphabetical order.
@@ -217,7 +225,7 @@ rm install.sql
 As the execution happens in alphabetical order, numbering the files will guarantee the execution order. A new container started up with `/home/gvenzl/init_scripts` pointing to `/container-entrypoint-initdb.d` will then execute the files above:
 
 ```shell
-podman run --name test \
+docker run --name test \
 >          -p 1521:1521 \
 >          -e ORACLE_RANDOM_PASSWORD="y" \
 >          -v /home/gvenzl/init_scripts:/container-entrypoint-initdb.d \
