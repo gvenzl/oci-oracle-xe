@@ -92,7 +92,7 @@ This is an optional variable. Set this variable to a non-empty string to create 
 **Note:** creating a new database will add to the initial container startup time. If you do not want that additional startup time, use the already existing `XEPDB1` database instead.
 
 ### `APP_USER`
-This is an optional variable. Set this variable to a non-empty string to create a new database schema user with the name specified in this variable. The user will be created in the default `XEPDB1` pluggable database. If `ORACLE_DATABASE` has been specified, the user will also be created in that pluggable database. This variable requires `APP_USER_PASSWORD` or `APP_USER_PASSWORD_FILE` to be specified as well.
+This is an optional variable. Set this variable to a non-empty string to create a new database schema user with the name specified in this variable. For 18c and onwards, the user will be created in the default `XEPDB1` pluggable database. If `ORACLE_DATABASE` has been specified, the user will also be created in that pluggable database. This variable requires `APP_USER_PASSWORD` or `APP_USER_PASSWORD_FILE` to be specified as well.
 
 ### `APP_USER_PASSWORD`
 This is an optional variable. Set this variable to a non-empty string to define a password for the database schema user specified by `APP_USER`. This variable requires `APP_USER` to be specified as well.
