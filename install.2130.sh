@@ -1887,12 +1887,15 @@ echo "BUILDER: install operational files"
 # Move operational files to ${ORACLE_BASE}
 mv /install/*.sh "${ORACLE_BASE}"/
 mv /install/resetPassword "${ORACLE_BASE}"/
+mv /install/createAppUser "${ORACLE_BASE}"/
 
 chown oracle:dba "${ORACLE_BASE}"/*.sh \
-                 "${ORACLE_BASE}"/resetPassword
+                 "${ORACLE_BASE}"/resetPassword \
+                 "${ORACLE_BASE}"/createAppUser
 
 chmod u+x "${ORACLE_BASE}"/*.sh \
-          "${ORACLE_BASE}"/resetPassword
+          "${ORACLE_BASE}"/resetPassword \
+          "${ORACLE_BASE}"/createAppUser
 
 #########################
 ####### Cleanup #########
