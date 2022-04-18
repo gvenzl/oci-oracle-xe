@@ -50,7 +50,9 @@ We are proud of the following users of these images:
 * [Eclipse Vert.x](https://vertx.io/) [[`ffedbce`](https://github.com/eclipse-vertx/vertx-sql-client/commit/ffedbce6f91425ce603d47da6290ac30e19fd2e5)]
 * [Flowable](https://www.flowable.com/open-source/) [[`18c751f`](https://github.com/flowable/flowable-engine/commit/18c751fb369a74b71abc203f0b4ace151a96e862)]
 * [GeoTools](https://geotools.org/) [[`f922f0b`](https://github.com/geotools/geotools/commit/f922f0bdd19e32b9648ad644af2a1eed75417964)]
-* [Hibernate Search](https://hibernate.org/search/) [[`173f0b7`](https://github.com/hibernate/hibernate-search/commit/173f0b703defee81b6600c693d4d30b87a6ade41)]
+* [Hibernate](https://hibernate.org/orm/) [[`43d2274`](https://github.com/hibernate/hibernate-orm/commit/43d2274573ca2658d1b5bc5706f8097c090ae9c1)]
+  * [Hibernate Reactive](https://hibernate.org/reactive/) [[`7de7d79`](https://github.com/hibernate/hibernate-reactive/commit/7de7d793793fec0c06c7dad857a14274353eb639)]
+  * [Hibernate Search](https://hibernate.org/search/) [[`173f0b7`](https://github.com/hibernate/hibernate-search/commit/173f0b703defee81b6600c693d4d30b87a6ade41)]
 * [jOOQ](https://www.jooq.org/) [[`#35`](https://github.com/gvenzl/oci-oracle-xe/issues/35)]
 * [Liquibase](https://www.liquibase.org/) [[`c6a31c0`](https://github.com/liquibase/liquibase-test-harness/commit/c6a31c0c54c1aa798839a2ef55ef6eb2363ea48f)]
 * [Micronaut Data](https://github.com/micronaut-projects/micronaut-data) [[`ddf11c1`](https://github.com/micronaut-projects/micronaut-data/commit/ddf11c1e8a7a27a1f6765cc5e1c1c3d3f74b475f)]
@@ -59,6 +61,7 @@ We are proud of the following users of these images:
 * [Ruby on Rails ActiveRecord adapter](https://github.com/rsim/oracle-enhanced) [[`afd7a93`](https://github.com/rsim/oracle-enhanced/commit/afd7a93470d1444e1462d0fb4f3d965ef2698384)]
 * [Rucio by CERN](https://rucio.cern.ch/) [[`80dffbb`](https://github.com/rucio/rucio/commit/80dffbb09f58a9f30d2a9a4c3297e8ed22a78963)]
 * [SchemaCrawler](https://www.schemacrawler.com/) [[`08d9b87`](https://github.com/schemacrawler/SchemaCrawler/commit/08d9b87c280bf23e405bea6265abf01448fa71d3)]
+* [Spring Data JDBC](https://spring.io/projects/spring-data) [[`baee76a`](https://github.com/spring-projects/spring-data-relational/commit/baee76a46d22d6281c7b8d3b8f6e6cdfe23b79cc)]
 * [Sqitch](https://sqitch.org/) [[`8b38027`](https://github.com/sqitchers/sqitch/commit/8b38027ba2b91ef7fbe59a35a5332d17f0beadb0)]
 * [Testcontainers](https://www.testcontainers.org/) [[`99b91b8`](https://github.com/testcontainers/testcontainers-java/commit/99b91b89b6ee3f8f0e9545e86d9f0744b301db30)]
 * [Upscheme](https://upscheme.org/) [[`954650a`](https://github.com/aimeos/upscheme/commit/954650afc92273f73bc1276aa0bd2f4253987c4f)]
@@ -66,6 +69,7 @@ We are proud of the following users of these images:
   * [utPLSQL-maven-plugin](https://github.com/utPLSQL/utPLSQL-maven-plugin/) [[`4d8deeb`](https://github.com/utPLSQL/utPLSQL-maven-plugin/commit/4d8deeb7f107a52913d6320080b972318e753b0e)]
   * [utPLSQL-java-api](https://github.com/utPLSQL/utPLSQL-java-api) [[`a4a0eb5`](https://github.com/utPLSQL/utPLSQL-java-api/commit/a4a0eb505e0c699c9da9add0a423b618c29723c1)]
   * [utPLSQL-demo-project](https://github.com/utPLSQL/utPLSQL-demo-project/) [[`99463f0`](https://github.com/utPLSQL/utPLSQL-demo-project/commit/99463f0035c4517a0b42a6ea6a55840c82828e86)]
+* [XWiki](https://www.xwiki.org/) [[`e677893`](https://github.com/xwiki/xwiki-platform/commit/e6778930b6dd1c966ac000e4cd4ad6dcd85d9314)]
 
 If you are using these images and would like to be listed as well, please open an [issue on GitHub](https://github.com/gvenzl/oci-oracle-xe/issues) or reach out on [Twitter](https://twitter.com/geraldvenzl).
 
