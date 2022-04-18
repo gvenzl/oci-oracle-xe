@@ -328,44 +328,6 @@ EOF
   unset RANDOM_PDBADIN_PASSWORD
 }
 
-# Create schema user for the application to use
-function create_app_user {
-
-  # Check whether the user needs to be in a PDB or not
-  ALTER_SESSION_CMD="ALTER SESSION SET CONTAINER=XEPDB1;"
-  if [[ "${ORACLE_VERSION}" = "11.2"* ]]; then
-    ALTER_SESSION_CMD="";
-  fi;
-
-  echo "CONTAINER: Creating database application user."
-
-  sqlplus -s / as sysdba <<EOF
-     -- Exit on any errors
-     WHENEVER SQLERROR EXIT SQL.SQLCODE
-
-     ${ALTER_SESSION_CMD}
-
-     CREATE USER ${APP_USER} IDENTIFIED BY "${APP_USER_PASSWORD}" QUOTA UNLIMITED ON USERS;
-     GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE MATERIALIZED VIEW, CREATE SYNONYM TO ${APP_USER};
-     exit;
-EOF
-
-  # If ORACLE_DATABASE is specified, create user also in app PDB (only applicable >=18c)
-  if [ -n "${ORACLE_DATABASE:-}" ]; then
-    sqlplus -s / as sysdba <<EOF
-       -- Exit on any errors
-       WHENEVER SQLERROR EXIT SQL.SQLCODE
-
-       ALTER SESSION SET CONTAINER=${ORACLE_DATABASE};
-
-       CREATE USER ${APP_USER} IDENTIFIED BY "${APP_USER_PASSWORD}" QUOTA UNLIMITED ON USERS;
-       GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE MATERIALIZED VIEW, CREATE SYNONYM TO ${APP_USER};
-       exit;
-EOF
-  fi;
-
-}
-
 # Check minimum memory requirements
 function check_minimum_memory {
 
@@ -471,7 +433,12 @@ if healthcheck.sh; then
     # Check whether app user should be created
     # setup_env_vars has already validated environment variables
     if [ -n "${APP_USER:-}" ]; then
-      create_app_user
+      # Create app user for default database
+      ./createAppUser "${APP_USER}" "${APP_USER_PASSWORD}"
+        # If ORACLE_DATABASE is specified, also create user in app PDB (only applicable >=18c)
+      if [ -n "${ORACLE_DATABASE:-}" ]; then
+        ./createAppUser "${APP_USER}" "${APP_USER_PASSWORD}" "${ORACLE_DATABASE}"
+      fi;
     fi;
 
     # Running custom database initialization scripts

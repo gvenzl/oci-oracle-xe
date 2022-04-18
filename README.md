@@ -156,6 +156,25 @@ If you amend the variables above, here is some more useful info:
 
 For a full list of changes that have been made to the Oracle Database and OS installation in each individual image flavor, please see [ImageDetails.md](https://github.com/gvenzl/oci-oracle-xe/blob/main/ImageDetails.md).
 
+## Database users
+
+The image provides a built-in command `createAppUser` to create additional Oracle Database users with standard privileges. The same command is also executed when the `$APP_USER` environment variable is specified. If you need just one additional database user for your application, the `APP_USER` environment variable is the best approach. However, if you need multiple users, you can execute the command for each individual user directly:
+
+```shell
+Usage:
+  createAppUser APP_USER APP_USER_PASSWORD [TARGET_PDB]
+
+  APP_USER:          the user name of the new user
+  APP_USER_PASSWORD: the password for that user
+  TARGET_PDB:        the target pluggable database the user should be created in, default XEPDB1 (ignored for 11g R2)
+```
+
+Example:
+
+```shell
+docker exec <container name|id> createAppUser <your app user> <your app user password> [<your target PDB>]
+```
+
 ## Container secrets
 
 As an alternative to passing sensitive information via environment variables, `_FILE` may be appended to some of the previously listed environment variables, causing the initialization script to load the values for those variables from files present in the container. In particular, this can be used to load passwords from Container/Docker secrets stored in `/run/secrets/<secret_name>` files. For example:

@@ -3,7 +3,10 @@
 # Since: April, 2022
 # Author: gvenzl
 # Name: createAppUser
-# Description: Creates the user in the XEPDB1 database
+# Description: Creates a new database user.
+#              Parameter 1: the user name
+#              Parameter 2: the user password
+#              Parameter 3: the target PDB to create the user in, default: XEPDB1 (ignored for 11gR2)
 #
 # Copyright 2022 Gerald Venzl
 #
@@ -23,17 +26,21 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
+# Parameters
 APP_USER="${1}"
 APP_USER_PASSWORD="${2}"
+TARGET_PDB="${3:-XEPDB1}"
 
+# Prepare container switch statement to create user in PDB.
+ALTER_SESSION_CMD="ALTER SESSION SET CONTAINER=${TARGET_PDB};"
+
+# 11g XE does not support PDBs, set container switch statement to empty string.
 ORACLE_VERSION=$(sqlplus -version | grep "Release" | awk '{ print $3 }')
-
-# Check whether the user needs to be in a PDB or not
-ALTER_SESSION_CMD="ALTER SESSION SET CONTAINER=XEPDB1;"
 if [[ "${ORACLE_VERSION}" = "11.2"* ]]; then
    ALTER_SESSION_CMD="";
 fi;
 
+# Create new user in target PDB
 sqlplus -s / as sysdba << EOF
    -- Exit on any errors
    WHENEVER SQLERROR EXIT SQL.SQLCODE
