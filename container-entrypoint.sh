@@ -153,7 +153,7 @@ function create_dbconfig() {
     # 48 = 1344 MB
     # 64 = 1696 MB
     #
-    if   (( "$(nproc --all)" = 32 )); then
+    if   (( "$(nproc --all)" == 32 )); then
       SGA_MEMORY="1100";
       PGA_MEMORY="400";
     elif (( "$(nproc --all)" <= 48 )); then
