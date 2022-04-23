@@ -162,7 +162,7 @@ For a full list of changes that have been made to the Oracle Database and OS ins
 
 ## Database users
 
-The image provides a built-in command `createAppUser` to create additional Oracle Database users with standard privileges. The same command is also executed when the `$APP_USER` environment variable is specified. If you need just one additional database user for your application, the `APP_USER` environment variable is the best approach. However, if you need multiple users, you can execute the command for each individual user directly:
+The image provides a built-in command `createAppUser` to create additional Oracle Database users with standard privileges. The same command is also executed when the `APP_USER` environment variable is specified. If you need just one additional database user for your application, the `APP_USER` environment variable is the best approach. However, if you need multiple users, you can execute the command for each individual user directly:
 
 ```shell
 Usage:
@@ -178,6 +178,8 @@ Example:
 ```shell
 docker exec <container name|id> createAppUser <your app user> <your app user password> [<your target PDB>]
 ```
+
+The command can also be invoked inside initialization and/or startup scripts.
 
 ## Container secrets
 
