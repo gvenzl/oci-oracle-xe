@@ -872,12 +872,15 @@ echo "BUILDER: install operational files"
 # Move operational files to ${ORACLE_BASE}
 mv /install/*.sh "${ORACLE_BASE}"/
 mv /install/resetPassword "${ORACLE_BASE}"/
+mv /install/createAppUser "${ORACLE_BASE}"/
 
 chown oracle:dba "${ORACLE_BASE}"/*.sh \
-                 "${ORACLE_BASE}"/resetPassword
+                 "${ORACLE_BASE}"/resetPassword \
+                 "${ORACLE_BASE}"/createAppUser
 
 chmod u+x "${ORACLE_BASE}"/*.sh \
-          "${ORACLE_BASE}"/resetPassword
+          "${ORACLE_BASE}"/resetPassword \
+          "${ORACLE_BASE}"/createAppUser
 
 # TODO: relink Oracle binaries
 # Multimedia: ord/im/lib/env_ordim.mk
@@ -1101,13 +1104,12 @@ fi;
 
 # Remove installation dependencies
 # Use rpm instead of microdnf to allow removing packages regardless of dependencies specified by the Oracle XE RPM
-rpm -e --nodeps acl bc binutils cracklib cracklib-dicts cryptsetup-libs \
-                dbus dbus-common dbus-daemon dbus-libs dbus-tools \
-                device-mapper device-mapper-libs diffutils \
+rpm -e --nodeps acl bc binutils cryptsetup-libs dbus dbus-common dbus-daemon \
+                dbus-libs dbus-tools device-mapper device-mapper-libs diffutils \
                 elfutils-default-yama-scope elfutils-libs file findutils hostname \
-                kmod-libs ksh libfdisk libnsl2 libpwquality libseccomp libtirpc \
-                libutempter lm_sensors-libs make net-tools pam procps-ng smartmontools \
-                sysstat systemd systemd-pam util-linux xz
+                kmod-libs ksh libfdisk libseccomp libutempter lm_sensors-libs \
+                make net-tools procps-ng smartmontools sysstat systemd \
+                systemd-pam util-linux xz
 
 rm /etc/sysctl.conf.rpmsave
 

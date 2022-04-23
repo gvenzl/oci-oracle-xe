@@ -546,12 +546,15 @@ echo "BUILDER: install operational files"
 # Move operational files to ${ORACLE_BASE}
 mv /install/*.sh "${ORACLE_BASE}"/
 mv /install/resetPassword "${ORACLE_BASE}"/
+mv /install/createAppUser "${ORACLE_BASE}"/
 
 chown oracle:dba "${ORACLE_BASE}"/*.sh \
-                 "${ORACLE_BASE}"/resetPassword
+                 "${ORACLE_BASE}"/resetPassword \
+                 "${ORACLE_BASE}"/createAppUser
 
 chmod u+x "${ORACLE_BASE}"/*.sh \
-          "${ORACLE_BASE}"/resetPassword
+          "${ORACLE_BASE}"/resetPassword \
+          "${ORACLE_BASE}"/createAppUser
 
 #########################
 ####### Cleanup #########
@@ -656,12 +659,11 @@ fi;
 # Remove build packages
 # Unfortunately microdnf does not automatically uninstall dependencies that have been
 # installed with a package, so if you were to uninstall just util-linux, for example,
-# it does not automatically also remove gzip and cracklib again.
-rpm -e --nodeps acl bc cracklib cracklib-dicts cryptsetup-libs \
-                dbus dbus-common dbus-daemon dbus-libs dbus-tools \
-                device-mapper device-mapper-libs elfutils-default-yama-scope \
-                elfutils-libs libpwquality kmod-libs libfdisk libnsl2 libseccomp \
-                libtirpc libutempter net-tools pam pam procps-ng \
+# it does not automatically also remove gzip again.
+rpm -e --nodeps acl bc cryptsetup-libs dbus dbus-common dbus-daemon dbus-libs \
+                dbus-tools device-mapper device-mapper-libs \
+                elfutils-default-yama-scope elfutils-libs kmod-libs libfdisk \
+                libseccomp libutempter net-tools procps-ng \
                 systemd systemd-pam util-linux
 
 # Remove dnf cache

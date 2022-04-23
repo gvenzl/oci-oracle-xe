@@ -1,0 +1,53 @@
+#!/bin/bash
+#
+# Since: April, 2022
+# Author: gvenzl
+# Name: createAppUser
+# Description: Creates a new database user.
+#              Parameter 1: the user name
+#              Parameter 2: the user password
+#              Parameter 3: the target PDB to create the user in, default: XEPDB1 (ignored for 11gR2)
+#
+# Copyright 2022 Gerald Venzl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Exit on errors
+# Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+set -Eeuo pipefail
+
+# Parameters
+APP_USER="${1}"
+APP_USER_PASSWORD="${2}"
+TARGET_PDB="${3:-XEPDB1}"
+
+# Prepare container switch statement to create user in PDB.
+ALTER_SESSION_CMD="ALTER SESSION SET CONTAINER=${TARGET_PDB};"
+
+# 11g XE does not support PDBs, set container switch statement to empty string.
+ORACLE_VERSION=$(sqlplus -version | grep "Release" | awk '{ print $3 }')
+if [[ "${ORACLE_VERSION}" = "11.2"* ]]; then
+   ALTER_SESSION_CMD="";
+fi;
+
+# Create new user in target PDB
+sqlplus -s / as sysdba << EOF
+   -- Exit on any errors
+   WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+   ${ALTER_SESSION_CMD}
+
+   CREATE USER ${APP_USER} IDENTIFIED BY "${APP_USER_PASSWORD}" QUOTA UNLIMITED ON USERS;
+   GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE MATERIALIZED VIEW, CREATE SYNONYM TO ${APP_USER};
+   exit;
+EOF
