@@ -184,6 +184,18 @@ export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
 " >> "${ORACLE_BASE}"/.bash_profile
 chown oracle:dba "${ORACLE_BASE}"/.bash_profile
 
+# Create entrypoint folders (#108)
+#
+# Certain tools like GitLab CI do not allow for volumes, instead a user has to copy
+# files into the folders. However, as these folders are under / and the container user
+# is `oracle`, they can no longer create these folders.
+# Instead we provide them here already so that these folks can start putting files into
+# them directly, if they have to.
+
+mkdir /container-entrypoint-initdb.d
+mkdir /container-entrypoint-startdb.d
+chown oracle:dba /container-entrypoint*
+
 # Perform further Database setup operations
 echo "BUILDER: changing database configuration and parameters for all images"
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
