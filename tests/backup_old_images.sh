@@ -49,10 +49,25 @@ podman pull docker.io/gvenzl/oracle-xe:21.3.0
 podman tag  docker.io/gvenzl/oracle-xe:21.3.0 docker.io/gvenzl/oracle-xe:21.3.0-backup
 podman rmi  docker.io/gvenzl/oracle-xe:21.3.0
 
-echo "Backup 18"
+echo "Backup 21"
 podman pull docker.io/gvenzl/oracle-xe:21
 podman tag  docker.io/gvenzl/oracle-xe:21 docker.io/gvenzl/oracle-xe:21-backup
 podman rmi  docker.io/gvenzl/oracle-xe:21
+
+echo "Backup 21.3.0-slim"
+podman pull docker.io/gvenzl/oracle-xe:21.3.0-slim
+podman tag  docker.io/gvenzl/oracle-xe:21.3.0-slim docker.io/gvenzl/oracle-xe:21.3.0-slim-backup
+podman rmi  docker.io/gvenzl/oracle-xe:21.3.0-slim
+
+echo "Backup 21-slim"
+podman pull docker.io/gvenzl/oracle-xe:21-slim
+podman tag  docker.io/gvenzl/oracle-xe:21-slim docker.io/gvenzl/oracle-xe:21-slim-backup
+podman rmi  docker.io/gvenzl/oracle-xe:21-slim
+
+echo "Backup slim"
+podman pull docker.io/gvenzl/oracle-xe:slim
+podman tag  docker.io/gvenzl/oracle-xe:slim docker.io/gvenzl/oracle-xe:slim-backup
+podman rmi  docker.io/gvenzl/oracle-xe:slim
 
 # Backup 18c images
 echo "Backup 18.4.0-full"
@@ -84,11 +99,6 @@ echo "Backup 18-slim"
 podman pull docker.io/gvenzl/oracle-xe:18-slim
 podman tag  docker.io/gvenzl/oracle-xe:18-slim docker.io/gvenzl/oracle-xe:18-slim-backup
 podman rmi  docker.io/gvenzl/oracle-xe:18-slim
-
-echo "Backup slim"
-podman pull docker.io/gvenzl/oracle-xe:slim
-podman tag  docker.io/gvenzl/oracle-xe:slim docker.io/gvenzl/oracle-xe:slim-backup
-podman rmi  docker.io/gvenzl/oracle-xe:slim
 
 # Backup 11g images
 echo "Backup 11.2.0.2-full"
