@@ -170,6 +170,18 @@ export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
 " >> "${ORACLE_BASE}"/.bash_profile
 chown oracle:dba "${ORACLE_BASE}"/.bash_profile
 
+# Create entrypoint folders (#108)
+#
+# Certain tools like GitLab CI do not allow for volumes, instead a user has to copy
+# files into the folders. However, as these folders are under / and the container user
+# is `oracle`, they can no longer create these folders.
+# Instead we provide them here already so that these folks can start putting files into
+# them directly, if they have to.
+
+mkdir /container-entrypoint-initdb.d
+mkdir /container-entrypoint-startdb.d
+chown oracle:dba /container-entrypoint*
+
 # Perform further Database setup operations
 echo "BUILDER: changing database configuration and parameters for all images"
 su -p oracle -c "sqlplus -s / as sysdba" << EOF
@@ -190,6 +202,18 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Remove local_listener entry (using default 1521)
    ALTER SYSTEM SET LOCAL_LISTENER='';
    
+   -- Explicitly set CPU_COUNT=2 to avoid memory miscalculation (#64)
+   --
+   -- This will cause the CPU_COUNT=2 to be written to the SPFILE and then
+   -- during memory requirement calculation, which happens before the
+   -- hard coding of CPU_COUNT=2, taken as the base input value.
+   -- Otherwise, CPU_COUNT is not present, which means it defaults to 0
+   -- which will cause the memory requirement calculations to look at the available
+   -- CPUs on the system (host instead of container) and derive a wrong value.
+   -- On hosts with many CPUs, this could lead to estimate SGA requirements
+   -- beyond 2GB RAM, which cannot be set on XE.
+   ALTER SYSTEM SET CPU_COUNT=2 SCOPE=SPFILE;
+
    -- Reboot of DB
    SHUTDOWN IMMEDIATE;
    STARTUP;
