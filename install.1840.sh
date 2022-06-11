@@ -195,6 +195,10 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- Enable Tuning and Diag packs
    ALTER SYSTEM SET CONTROL_MANAGEMENT_PACK_ACCESS='DIAGNOSTIC+TUNING' SCOPE=SPFILE;
 
+   -- Disable auditing
+   ALTER SYSTEM SET AUDIT_TRAIL=NONE SCOPE=SPFILE;
+   ALTER SYSTEM SET AUDIT_SYS_OPERATIONS=FALSE SCOPE=SPFILE;
+
    -- Disable common_user_prefix (needed for OS authenticated user)
    ALTER SYSTEM SET COMMON_USER_PREFIX='' SCOPE=SPFILE;
 
