@@ -12,8 +12,12 @@ A couple of modifications have been performed to make the installation more suit
 #### Database settings
 
 * `DBMS_XDB.SETLISTENERLOCALACCESS(FALSE)`
+* `ALTER SYSTEM SET CONTROL_MANAGEMENT_PACK_ACCESS='DIAGNOSTIC+TUNING'` (see https://github.com/gvenzl/oci-oracle-xe/issues/112)
+* `ALTER SYSTEM SET AUDIT_TRAIL=NONE SCOPE=SPFILE;`
+* `ALTER SYSTEM SET AUDIT_SYS_OPERATIONS=FALSE SCOPE=SPFILE;`
 * `COMMON_USER_PREFIX=''`
 * `LOCAL_LISTENER=''`
+* `CPU_COUNT=2` (see https://github.com/gvenzl/oci-oracle-xe/issues/64 and https://github.com/gvenzl/oci-oracle-xe/pull/107)
 * An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
 * `DISABLE_OOB=ON` in `sqlnet.ora` (see https://github.com/gvenzl/oci-oracle-xe/issues/43)
 * `BREAK_POLL_SKIP=1000` in `sqlnet.ora` (see https://github.com/gvenzl/oci-oracle-xe/issues/43)
@@ -150,8 +154,12 @@ A couple of modifications have been performed to make the installation more suit
 #### Database settings
 
 * `DBMS_XDB.SETLISTENERLOCALACCESS(FALSE)`
+* `ALTER SYSTEM SET CONTROL_MANAGEMENT_PACK_ACCESS='DIAGNOSTIC+TUNING'` (see https://github.com/gvenzl/oci-oracle-xe/issues/112)
+* `ALTER SYSTEM SET AUDIT_TRAIL=NONE SCOPE=SPFILE;`
+* `ALTER SYSTEM SET AUDIT_SYS_OPERATIONS=FALSE SCOPE=SPFILE;`
 * `COMMON_USER_PREFIX=''`
 * `LOCAL_LISTENER=''`
+* `CPU_COUNT=2` (see https://github.com/gvenzl/oci-oracle-xe/issues/64 and https://github.com/gvenzl/oci-oracle-xe/pull/107)
 * An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
 
 #### Operating system
@@ -283,7 +291,8 @@ A couple of modifications have been performed to make the installation more suit
 
 #### Database settings
 
-* Automatic Memory Management has been disables (`MEMORY_TARGET`)
+* Automatic Memory Management has been disabled (`MEMORY_TARGET`)
+* `CPU_COUNT=1` (via initial pfile, see https://github.com/gvenzl/oci-oracle-xe/issues/64 and https://github.com/gvenzl/oci-oracle-xe/pull/107)
 * `DBMS_XDB.SETLISTENERLOCALACCESS()` has been set to `FALSE`
 * An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
 * The `REDO` logs have been located into `$ORACLE_BASE/oradata/$ORACLE_SID/`
