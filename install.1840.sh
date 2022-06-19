@@ -167,6 +167,9 @@ echo \
 export ORACLE_HOME=\${ORACLE_BASE}/product/18c/dbhomeXE
 export ORACLE_SID=XE
 export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
+
+# Use UTF-8 by default
+export NLS_LANG=.AL32UTF8
 " >> "${ORACLE_BASE}"/.bash_profile
 chown oracle:dba "${ORACLE_BASE}"/.bash_profile
 
@@ -191,6 +194,13 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
 
    -- Enable remote HTTP access
    EXEC DBMS_XDB.SETLISTENERLOCALACCESS(FALSE);
+
+   -- Enable Tuning and Diag packs
+   ALTER SYSTEM SET CONTROL_MANAGEMENT_PACK_ACCESS='DIAGNOSTIC+TUNING' SCOPE=SPFILE;
+
+   -- Disable auditing
+   ALTER SYSTEM SET AUDIT_TRAIL=NONE SCOPE=SPFILE;
+   ALTER SYSTEM SET AUDIT_SYS_OPERATIONS=FALSE SCOPE=SPFILE;
 
    -- Disable common_user_prefix (needed for OS authenticated user)
    ALTER SYSTEM SET COMMON_USER_PREFIX='' SCOPE=SPFILE;

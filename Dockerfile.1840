@@ -27,7 +27,8 @@ ENV ORACLE_BASE=/opt/oracle \
     ORACLE_BASE_HOME=/opt/oracle/product/18c/dbhomeXE \
     ORACLE_HOME=/opt/oracle/product/18c/dbhomeXE \
     ORACLE_SID=XE \
-    PATH=${PATH}:/opt/oracle/product/18c/dbhomeXE/bin:/opt/oracle
+    PATH=${PATH}:/opt/oracle/product/18c/dbhomeXE/bin:/opt/oracle \
+    NLS_LANG=.AL32UTF8
 
 COPY oracle-database-xe-18c-1.0-1.x86_64.rpm install.1840.sh container-entrypoint.sh resetPassword createAppUser healthcheck.sh /install/
 
