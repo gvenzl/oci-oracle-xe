@@ -27,7 +27,8 @@ ENV ORACLE_BASE=/opt/oracle \
     ORACLE_BASE_HOME=/opt/oracle/homes/OraDBHome21cXE \
     ORACLE_HOME=/opt/oracle/product/21c/dbhomeXE \
     ORACLE_SID=XE \
-    PATH=${PATH}:/opt/oracle/product/21c/dbhomeXE/bin:/opt/oracle
+    PATH=${PATH}:/opt/oracle/product/21c/dbhomeXE/bin:/opt/oracle \
+    NLS_LANG=.AL32UTF8
 
 COPY oracle-database-xe-21c-1.0-1.ol8.x86_64.rpm install.2130.sh container-entrypoint.sh resetPassword createAppUser healthcheck.sh /install/
 

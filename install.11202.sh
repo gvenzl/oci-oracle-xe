@@ -181,6 +181,9 @@ echo \
 export ORACLE_HOME=\${ORACLE_BASE}/product/11.2.0/xe
 export ORACLE_SID=XE
 export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
+
+# Use UTF-8 by default
+export NLS_LANG=.AL32UTF8
 " >> "${ORACLE_BASE}"/.bash_profile
 chown oracle:dba "${ORACLE_BASE}"/.bash_profile
 

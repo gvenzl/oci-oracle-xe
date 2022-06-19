@@ -45,7 +45,8 @@ ENV ORACLE_BASE=/u01/app/oracle \
     ORACLE_BASE_HOME=/u01/app/oracle/product/11.2.0/xe \
     ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe \
     ORACLE_SID=XE \
-    PATH=${PATH}:/u01/app/oracle/product/11.2.0/xe/bin:/u01/app/oracle
+    PATH=${PATH}:/u01/app/oracle/product/11.2.0/xe/bin:/u01/app/oracle \
+    NLS_LANG=.AL32UTF8
     
 COPY oracle-xe-11.2.0-1.0.x86_64.rpm xe.11202.rsp install.11202.sh container-entrypoint.sh resetPassword createAppUser healthcheck.sh /install/
 
