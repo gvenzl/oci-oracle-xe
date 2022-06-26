@@ -435,6 +435,13 @@ else
   exit 1;
 fi;
 
+# Exiting the script without waiting on the tail logs
+if [ "${1:-}" = "--nowait" ]; then
+   # Creating state-file for identifyig container of the prebuiltdb extended image
+   touch "${ORACLE_BASE}/oradata/${ORACLE_SID}/.prebuiltdb"
+   exit;
+fi
+
 tail -f "${ORACLE_BASE}"/diag/rdbms/*/"${ORACLE_SID}"/trace/alert_"${ORACLE_SID}".log &
 childPID=$!
 wait ${childPID}
