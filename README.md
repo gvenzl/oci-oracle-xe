@@ -41,6 +41,14 @@ Reset database `SYS` and `SYSTEM` passwords:
 docker exec <container name|id> resetPassword <your password>
 ```
 
+## Oracle XE on Apple M chips
+Currently, there is no Oracle Database port for ARM chips, hence Oracle XE images cannot run on the new Apple M chips via Docker Desktop.  
+Fortunately, there are other technologies that can spin up `x86_64` software on Apple M chips, such as [colima](https://github.com/abiosoft/colima). To run these Oracle XE images on Apple M hardware, follow these simple steps:
+
+* Install colima ([instructions]())
+* Run `colima start --arch x86_64 --memory 4`
+* Start container as usual
+
 # Users of these images
 
 We are proud of the following users of these images:
