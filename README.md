@@ -45,7 +45,7 @@ docker exec <container name|id> resetPassword <your password>
 Currently, there is no Oracle Database port for ARM chips, hence Oracle XE images cannot run on the new Apple M chips via Docker Desktop.  
 Fortunately, there are other technologies that can spin up `x86_64` software on Apple M chips, such as [colima](https://github.com/abiosoft/colima). To run these Oracle XE images on Apple M hardware, follow these simple steps:
 
-* Install colima ([instructions]())
+* Install colima ([instructions](https://github.com/abiosoft/colima#installation))
 * Run `colima start --arch x86_64 --memory 4`
 * Start container as usual
 
