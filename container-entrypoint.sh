@@ -3,7 +3,8 @@
 # Since: January, 2021
 # Author: gvenzl
 # Name: container-entrypoint.sh
-# Description: The entrypoint script for the container
+# Description: The entrypoint script for the container.
+#              Parameter 1: "--nowait" exits the script instead of tailing the alert.log
 #
 # Copyright 2021 Gerald Venzl
 #
@@ -22,6 +23,8 @@
 # Exit on errors
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
+
+NOWAIT="${1:-}"
 
 # Stop container when SIGINT or SIGTERM is received
 ########### stop database helper function ############
@@ -422,10 +425,6 @@ if healthcheck.sh; then
   echo "#########################"
   echo "DATABASE IS READY TO USE!"
   echo "#########################"
-  echo ""
-  echo "##################################################################"
-  echo "CONTAINER: The following output is now from the alert_${ORACLE_SID}.log file:"
-  echo "##################################################################"
 
 else
   echo "############################################"
@@ -435,6 +434,14 @@ else
   exit 1;
 fi;
 
-tail -f "${ORACLE_BASE}"/diag/rdbms/*/"${ORACLE_SID}"/trace/alert_"${ORACLE_SID}".log &
-childPID=$!
-wait ${childPID}
+if ! [ "${NOWAIT}" == "--nowait" ]; then
+
+  echo ""
+  echo "##################################################################"
+  echo "CONTAINER: The following output is now from the alert_${ORACLE_SID}.log file:"
+  echo "##################################################################"
+
+  tail -f "${ORACLE_BASE}"/diag/rdbms/*/"${ORACLE_SID}"/trace/alert_"${ORACLE_SID}".log &
+  childPID=$!
+  wait ${childPID}
+fi;
