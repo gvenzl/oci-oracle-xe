@@ -41,13 +41,21 @@ Reset database `SYS` and `SYSTEM` passwords:
 docker exec <container name|id> resetPassword <your password>
 ```
 
+## Oracle XE on Apple M chips
+Currently, there is no Oracle Database port for ARM chips, hence Oracle XE images cannot run on the new Apple M chips via Docker Desktop.  
+Fortunately, there are other technologies that can spin up `x86_64` software on Apple M chips, such as [colima](https://github.com/abiosoft/colima). To run these Oracle XE images on Apple M hardware, follow these simple steps:
+
+* Install colima ([instructions]())
+* Run `colima start --arch x86_64 --memory 4`
+* Start container as usual
+
 # Users of these images
 
 We are proud of the following users of these images:
 
 * [Airbyte](https://airbyte.io/) [[`6e53a57`](https://github.com/airbytehq/airbyte/commit/6e53a574e3d7f4c4885336c4e3205c051ee74ed6)]
 * [Apache Spark](https://spark.apache.org/) [[`e03afc9`](https://github.com/apache/spark/commit/e03afc906fd87b0354783b438fa9f7e36231b778)]
-* [Ebean test containers](https://ebean.io/) [[`ae8f1cd`](https://github.com/ebean-orm/ebean-test-containers/commit/ae8f1cd4a3895d552eeb19cee5c75c0f55399512)]
+* [Ebean](https://ebean.io/) [[`ae8f1cd`](https://github.com/ebean-orm/ebean-test-containers/commit/ae8f1cd4a3895d552eeb19cee5c75c0f55399512)]
 * [Eclipse Vert.x](https://vertx.io/) [[`ffedbce`](https://github.com/eclipse-vertx/vertx-sql-client/commit/ffedbce6f91425ce603d47da6290ac30e19fd2e5)]
 * [Flowable](https://www.flowable.com/open-source/) [[`18c751f`](https://github.com/flowable/flowable-engine/commit/18c751fb369a74b71abc203f0b4ace151a96e862)]
 * [GeoTools](https://geotools.org/) [[`f922f0b`](https://github.com/geotools/geotools/commit/f922f0bdd19e32b9648ad644af2a1eed75417964)]
