@@ -33,10 +33,12 @@ ENV ORACLE_BASE=/opt/oracle \
 COPY oracle-database-xe-21c-1.0-1.ol8.x86_64.rpm install.2130.sh container-entrypoint.sh resetPassword createAppUser healthcheck.sh /install/
 
 RUN /install/install.2130.sh "${BUILD_MODE}"
-    
+
 USER oracle
 WORKDIR ${ORACLE_BASE}
 
 HEALTHCHECK CMD "${ORACLE_BASE}"/healthcheck.sh >/dev/null || exit 1
 
 ENTRYPOINT ["container-entrypoint.sh"]
+
+EXPOSE 1521/tcp
