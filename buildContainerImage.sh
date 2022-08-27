@@ -26,6 +26,8 @@ VERSION="21.3.0"
 FLAVOR="REGULAR"
 IMAGE_NAME="gvenzl/oracle-xe"
 SKIP_CHECKSUM="false"
+FASTSTART="false"
+BASE_IMAGE=""
 
 function usage() {
     cat << EOF
@@ -52,7 +54,7 @@ EOF
 
 }
 
-while getopts "hfnsv:io:" optname; do
+while getopts "hfnsv:io:x" optname; do
   case "${optname}" in
     "h")
       usage
@@ -75,6 +77,9 @@ while getopts "hfnsv:io:" optname; do
       ;;
     "o")
       eval "BUILD_OPTS=(${OPTARG})"
+      ;;
+    "x")
+      FASTSTART="true"
       ;;
     "?")
       usage;
@@ -106,17 +111,29 @@ else
   echo "BUILDER: checksum verification ignored"
 fi;
 
+# Set Dockerfile name
+DOCKER_FILE="Dockerfile.${VERSION//./}"
+
+# Give image base tag
 IMAGE_NAME="${IMAGE_NAME}:${VERSION}"
 
+# Add image flavor to the tag (regular has no tag)
 if [ "${FLAVOR}" != "REGULAR" ]; then
   IMAGE_NAME="${IMAGE_NAME}-${FLAVOR,,}"
+fi;
+
+# Add faststart tag to image and set Dockerfile
+if [ "${FASTSTART}" == "true" ]; then
+  BASE_IMAGE="${IMAGE_NAME}"
+  IMAGE_NAME="${IMAGE_NAME}-faststart"
+  DOCKER_FILE="Dockerfile.faststart"
 fi;
 
 echo "BUILDER: building image $IMAGE_NAME"
 
 BUILD_START_TMS=$(date '+%s')
 
-buildah bud -f Dockerfile."${VERSION//./}" -t "${IMAGE_NAME}" --build-arg BUILD_MODE="${FLAVOR}"
+buildah bud -f "$DOCKER_FILE" -t "${IMAGE_NAME}" --build-arg BUILD_MODE="${FLAVOR}" --build-arg BASE_IMAGE="${BASE_IMAGE}"
 
 BUILD_END_TMS=$(date '+%s')
 BUILD_DURATION=$(( BUILD_END_TMS - BUILD_START_TMS ))

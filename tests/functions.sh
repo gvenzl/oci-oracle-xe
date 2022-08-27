@@ -96,6 +96,8 @@ function runContainerTest {
   echo "TEST ${TEST_NAME}: Started"
   echo ""
 
+  TEST_START_TMS=$(date '+%s')
+
   # Run and start container
   podman run -d --name ${CONTAINER_NAME} ${ORA_PWD_CMD} ${APP_USER_CMD} ${APP_USER_PASSWORD_CMD} ${ORACLE_DATABASE_CMD} ${IMAGE} >/dev/null
 
@@ -103,7 +105,11 @@ function runContainerTest {
   if checkDB "${CONTAINER_NAME}"; then
     # Only tear down container if $NO_TEAR_DOWN has NOT been specified
     if [ -z "${NO_TEAR_DOWN:-}" ]; then
-      echo "TEST ${TEST_NAME}: OK";
+
+      TEST_END_TMS=$(date '+%s')
+      TEST_DURATION=$(( TEST_END_TMS - TEST_START_TMS ))
+
+      echo "TEST ${TEST_NAME}: OK (${TEST_DURATION} sec)";
       echo "";
       tear_down_container "${CONTAINER_NAME}"
     fi;

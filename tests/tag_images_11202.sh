@@ -24,5 +24,8 @@ set -Eeuo pipefail
 
 # Tag 11g images
 podman tag gvenzl/oracle-xe:11.2.0.2-full gvenzl/oracle-xe:11-full
+podman tag gvenzl/oracle-xe:11.2.0.2-full-faststart gvenzl/oracle-xe:11-full-faststart
 podman tag gvenzl/oracle-xe:11.2.0.2 gvenzl/oracle-xe:11
+podman tag gvenzl/oracle-xe:11.2.0.2-faststart gvenzl/oracle-xe:11-faststart
 podman tag gvenzl/oracle-xe:11.2.0.2-slim gvenzl/oracle-xe:11-slim
+podman tag gvenzl/oracle-xe:11.2.0.2-slim-faststart gvenzl/oracle-xe:11-slim-faststart
