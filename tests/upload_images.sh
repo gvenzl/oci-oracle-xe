@@ -41,55 +41,98 @@ fi;
 # Upload images
 # Upload latest
 echo "Upload latest"
-podman push localhost/gvenzl/oracle-xe:latest          docker.io/gvenzl/oracle-xe:latest
+podman push localhost/gvenzl/oracle-xe:latest                    docker.io/gvenzl/oracle-xe:latest
+podman push localhost/gvenzl/oracle-xe:latest-faststart          docker.io/gvenzl/oracle-xe:latest-faststart
 
 # Upload 21c images
 echo "Upload 21.3.0-full"
-podman push localhost/gvenzl/oracle-xe:21.3.0-full     docker.io/gvenzl/oracle-xe:21.3.0-full
+podman push localhost/gvenzl/oracle-xe:21.3.0-full               docker.io/gvenzl/oracle-xe:21.3.0-full
+echo "Upload 21.3.0-full-faststart"
+podman push localhost/gvenzl/oracle-xe:21.3.0-full-faststart     docker.io/gvenzl/oracle-xe:21.3.0-full-faststart
 echo "Upload 21-full"
-podman push localhost/gvenzl/oracle-xe:21-full         docker.io/gvenzl/oracle-xe:21-full
+podman push localhost/gvenzl/oracle-xe:21-full                   docker.io/gvenzl/oracle-xe:21-full
+echo "Upload 21-full-faststart"
+podman push localhost/gvenzl/oracle-xe:21-full-faststart         docker.io/gvenzl/oracle-xe:21-full-faststart
 echo "Upload full"
-podman push localhost/gvenzl/oracle-xe:full            docker.io/gvenzl/oracle-xe:full
+podman push localhost/gvenzl/oracle-xe:full                      docker.io/gvenzl/oracle-xe:full
+echo "Upload full-faststart"
+podman push localhost/gvenzl/oracle-xe:full-faststart            docker.io/gvenzl/oracle-xe:full-faststart
 
 echo "Upload 21.3.0"
-podman push localhost/gvenzl/oracle-xe:21.3.0          docker.io/gvenzl/oracle-xe:21.3.0
+podman push localhost/gvenzl/oracle-xe:21.3.0                    docker.io/gvenzl/oracle-xe:21.3.0
+echo "Upload 21.3.0-faststart"
+podman push localhost/gvenzl/oracle-xe:21.3.0-faststart          docker.io/gvenzl/oracle-xe:21.3.0-faststart
 echo "Upload 21"
-podman push localhost/gvenzl/oracle-xe:21              docker.io/gvenzl/oracle-xe:21
+podman push localhost/gvenzl/oracle-xe:21                        docker.io/gvenzl/oracle-xe:21
+echo "Upload 21-faststart"
+podman push localhost/gvenzl/oracle-xe:21-faststart              docker.io/gvenzl/oracle-xe:21-faststart
 
 echo "Upload 21.3.0-slim"
-podman push localhost/gvenzl/oracle-xe:21.3.0-slim     docker.io/gvenzl/oracle-xe:21.3.0-slim
+podman push localhost/gvenzl/oracle-xe:21.3.0-slim               docker.io/gvenzl/oracle-xe:21.3.0-slim
+echo "Upload 21.3.0-slim-faststart"
+podman push localhost/gvenzl/oracle-xe:21.3.0-slim-faststart     docker.io/gvenzl/oracle-xe:21.3.0-slim-faststart
 echo "Upload 21-slim"
-podman push localhost/gvenzl/oracle-xe:21-slim         docker.io/gvenzl/oracle-xe:21-slim
+podman push localhost/gvenzl/oracle-xe:21-slim                   docker.io/gvenzl/oracle-xe:21-slim
+echo "Upload 21-slim-faststart"
+podman push localhost/gvenzl/oracle-xe:21-slim-faststart         docker.io/gvenzl/oracle-xe:21-slim-faststart
 echo "Upload slim"
-podman push localhost/gvenzl/oracle-xe:slim            docker.io/gvenzl/oracle-xe:slim
+podman push localhost/gvenzl/oracle-xe:slim                      docker.io/gvenzl/oracle-xe:slim
+echo "Upload slim-faststart"
+podman push localhost/gvenzl/oracle-xe:slim-faststart            docker.io/gvenzl/oracle-xe:slim-faststart
 
 
 # Upload 18c images
 echo "Upload 18.4.0-full"
-podman push localhost/gvenzl/oracle-xe:18.4.0-full     docker.io/gvenzl/oracle-xe:18.4.0-full
+podman push localhost/gvenzl/oracle-xe:18.4.0-full               docker.io/gvenzl/oracle-xe:18.4.0-full
+echo "Upload 18.4.0-full-faststart"
+podman push localhost/gvenzl/oracle-xe:18.4.0-full-faststart     docker.io/gvenzl/oracle-xe:18.4.0-full-faststart
 echo "Upload 18-full"
-podman push localhost/gvenzl/oracle-xe:18-full         docker.io/gvenzl/oracle-xe:18-full
+podman push localhost/gvenzl/oracle-xe:18-full                   docker.io/gvenzl/oracle-xe:18-full
+echo "Upload 18-full-faststart"
+podman push localhost/gvenzl/oracle-xe:18-full-faststart         docker.io/gvenzl/oracle-xe:18-full-faststart
 
 echo "Upload 18.4.0"
-podman push localhost/gvenzl/oracle-xe:18.4.0          docker.io/gvenzl/oracle-xe:18.4.0
+podman push localhost/gvenzl/oracle-xe:18.4.0                    docker.io/gvenzl/oracle-xe:18.4.0
+echo "Upload 18.4.0-faststart"
+podman push localhost/gvenzl/oracle-xe:18.4.0-faststart          docker.io/gvenzl/oracle-xe:18.4.0-faststart
 echo "Upload 18"
-podman push localhost/gvenzl/oracle-xe:18              docker.io/gvenzl/oracle-xe:18
+podman push localhost/gvenzl/oracle-xe:18                        docker.io/gvenzl/oracle-xe:18
+echo "Upload 18-faststart"
+podman push localhost/gvenzl/oracle-xe:18-faststart              docker.io/gvenzl/oracle-xe:18-faststart
 
 echo "Upload 18.4.0-slim"
-podman push localhost/gvenzl/oracle-xe:18.4.0-slim     docker.io/gvenzl/oracle-xe:18.4.0-slim
+podman push localhost/gvenzl/oracle-xe:18.4.0-slim               docker.io/gvenzl/oracle-xe:18.4.0-slim
+echo "Upload 18.4.0-slim-faststart"
+podman push localhost/gvenzl/oracle-xe:18.4.0-slim-faststart     docker.io/gvenzl/oracle-xe:18.4.0-slim-faststart
 echo "Upload 18-slim"
-podman push localhost/gvenzl/oracle-xe:18-slim         docker.io/gvenzl/oracle-xe:18-slim
+podman push localhost/gvenzl/oracle-xe:18-slim                   docker.io/gvenzl/oracle-xe:18-slim
+echo "Upload 18-slim-faststart"
+podman push localhost/gvenzl/oracle-xe:18-slim-faststart         docker.io/gvenzl/oracle-xe:18-slim-faststart
 
 # Upload 11g images
 echo "Upload 11.2.0.2-full"
-podman push localhost/gvenzl/oracle-xe:11.2.0.2-full   docker.io/gvenzl/oracle-xe:11.2.0.2-full
+podman push localhost/gvenzl/oracle-xe:11.2.0.2-full             docker.io/gvenzl/oracle-xe:11.2.0.2-full
+echo "Upload 11.2.0.2-full-faststart"
+podman push localhost/gvenzl/oracle-xe:11.2.0.2-full-faststart   docker.io/gvenzl/oracle-xe:11.2.0.2-full-faststart
 echo "Upload 11-full"
-podman push localhost/gvenzl/oracle-xe:11-full         docker.io/gvenzl/oracle-xe:11-full
+podman push localhost/gvenzl/oracle-xe:11-full                   docker.io/gvenzl/oracle-xe:11-full
+echo "Upload 11-full-faststart"
+podman push localhost/gvenzl/oracle-xe:11-full-faststart         docker.io/gvenzl/oracle-xe:11-full-faststart
+
 echo "Upload 11.2.0.2"
-podman push localhost/gvenzl/oracle-xe:11.2.0.2        docker.io/gvenzl/oracle-xe:11.2.0.2
+podman push localhost/gvenzl/oracle-xe:11.2.0.2                  docker.io/gvenzl/oracle-xe:11.2.0.2
+echo "Upload 11.2.0.2-faststart"
+podman push localhost/gvenzl/oracle-xe:11.2.0.2-faststart        docker.io/gvenzl/oracle-xe:11.2.0.2-faststart
 echo "Upload 11"
-podman push localhost/gvenzl/oracle-xe:11              docker.io/gvenzl/oracle-xe:11
+podman push localhost/gvenzl/oracle-xe:11                        docker.io/gvenzl/oracle-xe:11
+echo "Upload 11-faststart"
+podman push localhost/gvenzl/oracle-xe:11-faststart              docker.io/gvenzl/oracle-xe:11-faststart
+
 echo "Upload 11.2.0.2-slim"
-podman push localhost/gvenzl/oracle-xe:11.2.0.2-slim   docker.io/gvenzl/oracle-xe:11.2.0.2-slim
+podman push localhost/gvenzl/oracle-xe:11.2.0.2-slim             docker.io/gvenzl/oracle-xe:11.2.0.2-slim
+echo "Upload 11.2.0.2-slim-faststart"
+podman push localhost/gvenzl/oracle-xe:11.2.0.2-slim-faststart   docker.io/gvenzl/oracle-xe:11.2.0.2-slim-faststart
 echo "Upload 11-slim"
-podman push localhost/gvenzl/oracle-xe:11-slim         docker.io/gvenzl/oracle-xe:11-slim
+podman push localhost/gvenzl/oracle-xe:11-slim                   docker.io/gvenzl/oracle-xe:11-slim
+echo "Upload 11-slim-faststart"
+podman push localhost/gvenzl/oracle-xe:11-slim-faststart         docker.io/gvenzl/oracle-xe:11-slim-faststart

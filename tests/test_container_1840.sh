@@ -31,12 +31,20 @@ source ./functions.sh
 runContainerTest "18.4.0 FULL image" "1840-full" "gvenzl/oracle-xe:18.4.0-full"
 runContainerTest "18 FULL image" "18-full" "gvenzl/oracle-xe:18-full"
 
+runContainerTest "18.4.0 FULL FASTSTART image" "1840-full-faststart" "gvenzl/oracle-xe:18.4.0-full-faststart"
+runContainerTest "18 FULL FASTSTART image" "18-full-faststart" "gvenzl/oracle-xe:18-full-faststart"
+
 runContainerTest "18.4.0 REGULAR image" "1840" "gvenzl/oracle-xe:18.4.0"
 runContainerTest "18 REGULAR image" "18" "gvenzl/oracle-xe:18"
+
+runContainerTest "18.4.0 REGULAR FASTSTART image" "1840-faststart" "gvenzl/oracle-xe:18.4.0-faststart"
+runContainerTest "18 REGULAR FASTSTART image" "18-faststart" "gvenzl/oracle-xe:18-faststart"
 
 runContainerTest "18.4.0 SLIM image" "1840-slim" "gvenzl/oracle-xe:18.4.0-slim"
 runContainerTest "18 SLIM image" "18-slim" "gvenzl/oracle-xe:18-slim"
 
+runContainerTest "18.4.0 SLIM FASTSTART image" "1840-slim-faststart" "gvenzl/oracle-xe:18.4.0-slim-faststart"
+runContainerTest "18 SLIM FASTSTART image" "18-slim-faststart" "gvenzl/oracle-xe:18-slim-faststart"
 
 #################################
 ##### Oracle password tests #####
@@ -55,7 +63,7 @@ TEST_NAME="18.4.0 ORACLE_PASSWORD"
 EXPECTED_RESULT="OK"
 
 # Spin up container
-runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:18.4.0"
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:18.4.0-faststart"
 
 # Test password, if it works we will get "OK" back from the SQL statement
 result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s system/"${ORA_PWD}" <<EOF
@@ -101,7 +109,7 @@ TEST_NAME="18.4.0 ORACLE_RANDOM_PASSWORD"
 EXPECTED_RESULT="OK"
 
 # Spin up container
-runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:18.4.0"
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:18.4.0-faststart"
 
 # Let's get the password
 rand_pwd=$(podman logs ${CONTAINER_NAME} | grep "ORACLE PASSWORD FOR SYS AND SYSTEM:" | awk '{ print $7 }')
@@ -152,7 +160,7 @@ APP_USER="test_app_user"
 APP_USER_PASSWORD="MyAppUserPassword"
 
 # Spin up container
-runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:18.4.0"
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:18.4.0-faststart"
 
 # Test the random password, if it works we will get "OK" back from the SQL statement
 result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_PASSWORD}"@//localhost/XEPDB1 <<EOF
@@ -203,7 +211,7 @@ ORA_PWD="MyTestPassword"
 ORA_PWD_CMD="-e ORACLE_PASSWORD=${ORA_PWD}"
 
 # Spin up container
-runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:18.4.0-slim"
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:18.4.0-slim-faststart"
 
 # Test the random password, if it works we will get "OK" back from the SQL statement
 result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s sys/"${ORA_PWD}"@//localhost/"${ORACLE_DATABASE}" as sysdba <<EOF
@@ -256,7 +264,7 @@ APP_USER_PASSWORD="ThatAppUserPassword1"
 ORACLE_DATABASE="REGRESSION_TESTS"
 
 # Spin up container
-runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:18.4.0"
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:18.4.0-full-faststart"
 
 # Test the random password, if it works we will get "OK" back from the SQL statement
 result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_PASSWORD}"@//localhost/"${ORACLE_DATABASE}" <<EOF

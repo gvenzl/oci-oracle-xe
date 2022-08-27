@@ -22,11 +22,16 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-# Tag 18c images
+# Tag 21c images
 podman tag gvenzl/oracle-xe:21.3.0-full gvenzl/oracle-xe:21-full
 podman tag gvenzl/oracle-xe:21.3.0-full gvenzl/oracle-xe:full
+podman tag gvenzl/oracle-xe:21.3.0-full-faststart gvenzl/oracle-xe:21-full-faststart
+podman tag gvenzl/oracle-xe:21.3.0-full-faststart gvenzl/oracle-xe:full-faststart
 
 podman tag gvenzl/oracle-xe:21.3.0 gvenzl/oracle-xe:21
+podman tag gvenzl/oracle-xe:21.3.0-faststart gvenzl/oracle-xe:21-faststart
 
 podman tag gvenzl/oracle-xe:21.3.0-slim gvenzl/oracle-xe:21-slim
 podman tag gvenzl/oracle-xe:21.3.0-slim gvenzl/oracle-xe:slim
+podman tag gvenzl/oracle-xe:21.3.0-slim-faststart gvenzl/oracle-xe:21-slim-faststart
+podman tag gvenzl/oracle-xe:21.3.0-slim-faststart gvenzl/oracle-xe:slim-faststart

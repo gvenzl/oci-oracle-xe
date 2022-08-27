@@ -351,3 +351,10 @@ The slim images aims for smallest possible image size with only the Oracle Datab
 * The rdbms/jlib directory has been removed (`$ORACLE_HOME/rdbms/jlib`)
 * The rdbms/public directory has been removed (`$ORACLE_HOME/rdbms/public`)
 * The rdbms/xml directory has been removed (`$ORACLE_HOME/rdbms/xml`)
+
+## Fast start image flavor (`*-faststart`)
+
+The `*-faststart` images contain already expanded database files inside the image. Their aim is to provide a faster container/database startup time by trading off on the image size. These images are larger on disk due to the non-compressed database files inside them. All the functionality provided by them are, however, identical to their non-faststart siblings. It is also important to understand that container images are, in general, always pulled/pushed compressed over the network. The compressed size is of these images is not substantially larger than the non-faststart images as the compression method inside the non-faststart images is fairly similar to the one used by the container runtime. Additionally, these images are based on the non-faststart images, meaning that they only add one additional layer on top of the non-faststart images with expanded database data files. This leads to two benefits:
+
+1. Only the third/additional layer needs to be pulled if the non-faststart images are already present on the system.
+2. Container runtimes are usually capable to pull multiple layers in parallel, meaning that the third layer will be pulled concurrently with the other layers. If there is enough network bandwidth available, the download time will not significantly increase compared to the non-faststart images.

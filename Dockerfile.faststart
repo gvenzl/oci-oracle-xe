@@ -1,10 +1,10 @@
-#!/bin/bash
-# Since: April, 2021
-# Author: gvenzl
-# Name: tag_image_latest.sh
-# Description: Tag the latest image
 #
-# Copyright 2021 Gerald Venzl
+# Since: August, 2022
+# Author: gvenzl
+# Name: Dockerfile.faststart
+# Description: Dockerfile to build Oracle DB XE with ready-to-go database files.
+#
+# Copyright 2022 Gerald Venzl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,11 +18,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Exit on errors
-# Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
-set -Eeuo pipefail
+ARG BASE_IMAGE
 
-# Tag latest image
-podman tag gvenzl/oracle-xe:21.3.0 gvenzl/oracle-xe:latest
+FROM ${BASE_IMAGE}
 
-podman tag gvenzl/oracle-xe:21.3.0-faststart gvenzl/oracle-xe:latest-faststart
+RUN unzip "${ORACLE_BASE}"/"${ORACLE_SID}".zip -d "${ORACLE_BASE}"/oradata/ 1> /dev/null && \
+    rm "${ORACLE_BASE}"/"${ORACLE_SID}".zip
