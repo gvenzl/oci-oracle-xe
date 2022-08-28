@@ -40,6 +40,8 @@ FROM oraclelinux:8-slim
 
 ARG BUILD_MODE
 
+LABEL org.opencontainers.image.source https://github.com/gvenzl/oci-oracle-xe
+
 ENV ORACLE_BASE=/u01/app/oracle \
     ORACLE_BASE_CONFIG=/u01/app/oracle/product/11.2.0/xe \
     ORACLE_BASE_HOME=/u01/app/oracle/product/11.2.0/xe \

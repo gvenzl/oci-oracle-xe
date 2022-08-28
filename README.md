@@ -5,15 +5,15 @@ Oracle Database Express Edition Container / Docker images.
 
 # Supported tags and respective `Dockerfile` links
 
-* [`21.3.0`, `21`, `latest`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.2130)
-* [`21.3.0-slim`, `21-slim`, `slim`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.2130)
-* [`21.3.0-full`, `21-full`, `full`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.2130)
-* [`18.4.0`, `18`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.1840)
-* [`18.4.0-slim`, `18-slim`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.1840)
-* [`18.4.0-full`, `18-full`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.1840)
-* [`11.2.0.2`, `11`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.11202)
-* [`11.2.0.2-slim`, `11-slim`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.11202)
-* [`11.2.0.2-full`, `11-full`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.11202)
+* [`latest`, `21`, `21.3.0`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.2130), [`latest-faststart`, `21-faststart`, `21.3.0-faststart`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.faststart)
+* [`slim`, `21-slim`, `21.3.0-slim`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.2130), [`slim-faststart`, `21-slim-faststart`, `21.3.0-slim-faststart`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.faststart)
+* [`full`, `21-full`, `21.3.0-full`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.2130), [`full-faststart`, `21-full-faststart`, `21.3.0-full-faststart`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.faststart)
+* [`18`, `18.4.0`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.1840), [`18-faststart`, `18.4.0-faststart`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.faststart)
+* [`18-slim`, `18.4.0-slim`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.1840), [`18-slim faststart`, `18.4.0-slim-faststart`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.faststart)
+* [`18-full`, `18.4.0-full`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.1840), [`18-full-faststart`, `18.4.0-full-faststart`, ](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.faststart)
+* [`11`, `11.2.0.2`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.11202), [`11-faststart`, `11.2.0.2-faststart`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.faststart)
+* [`11-slim`, `11.2.0.2-slim`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.11202), [`11-slim-faststart`, `11.2.0.2-slim-faststart`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.faststart)
+* [`11-full`, `11.2.0.2-full`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.11202), [`11-full-faststart`, `11.2.0.2-full-faststart`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.faststart)
 
 # Quick Start
 
@@ -163,9 +163,10 @@ If you amend the variables above, here is some more useful info:
 
 | Flavor  | Extension | Description                                                                                 | Use cases                                                                                              |
 | --------| --------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------|
-| Slim    | `-slim`   | An image focussed on smallest possible image size instead of additional functionality.      | Wherever small images sizes are important but advanced functionality of Oracle Database is not needed. |
-| Regular | [None]    | A well-balanced image between image size and functionality. Recommended for most use cases. | Recommended for most use cases.                                                                        |
-| Full    | `-full`   | An image containing all functionality as provided by the Oracle Database installation.      | Best for extensions and/or customizations.                                                             |
+| Slim      | `-slim`       | An image focussed on smallest possible image size instead of additional functionality.      | Wherever small images sizes are important but advanced functionality of Oracle Database is not needed. |
+| Regular   | [None]        | A well-balanced image between image size and functionality. Recommended for most use cases. | Recommended for most use cases.                                                                        |
+| Full      | `-full`       | An image containing all functionality as provided by the Oracle Database installation.      | Best for extensions and/or customizations.                                                             |
+| Faststart | `*-faststart` | The same image flavor as above but with an already expanded and ready to go database inside the image. This image trades image size on disk for a faster database startup time. | Best for (automated) test scenarios where the image is only pulled once but many containers started and torn down. |
 
 For a full list of changes that have been made to the Oracle Database and OS installation in each individual image flavor, please see [ImageDetails.md](https://github.com/gvenzl/oci-oracle-xe/blob/main/ImageDetails.md).
 

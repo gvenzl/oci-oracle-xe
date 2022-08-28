@@ -31,11 +31,20 @@ source ./functions.sh
 runContainerTest "11.2.0.2 FULL image" "11202-full" "gvenzl/oracle-xe:11.2.0.2-full"
 runContainerTest "11 FULL image" "11-full" "gvenzl/oracle-xe:11-full"
 
+runContainerTest "11.2.0.2 FULL FASTSTART image" "11202-full-faststart" "gvenzl/oracle-xe:11.2.0.2-full-faststart"
+runContainerTest "11 FULL FASTSTART image" "11-full-faststart" "gvenzl/oracle-xe:11-full-faststart"
+
 runContainerTest "11.2.0.2 REGULAR image" "11202" "gvenzl/oracle-xe:11.2.0.2"
 runContainerTest "11 REGULAR image" "11" "gvenzl/oracle-xe:11"
 
+runContainerTest "11.2.0.2 REGULAR FASTSTART image" "11202-faststart" "gvenzl/oracle-xe:11.2.0.2-faststart"
+runContainerTest "11 REGULAR FASTSTART image" "11-faststart" "gvenzl/oracle-xe:11-faststart"
+
 runContainerTest "11.2.0.2 SLIM image" "11202-slim" "gvenzl/oracle-xe:11.2.0.2-slim"
 runContainerTest "11 SLIM image" "11-slim" "gvenzl/oracle-xe:11-slim"
+
+runContainerTest "11.2.0.2 SLIM FASTSTART image" "11202-slim-faststart" "gvenzl/oracle-xe:11.2.0.2-slim-faststart"
+runContainerTest "11 SLIM FASTSTART image" "11-slim-faststart" "gvenzl/oracle-xe:11-slim-faststart"
 
 ################################
 ##### Oracle password test #####
@@ -54,7 +63,7 @@ TEST_NAME="11.2.0.2-full ORACLE_PASSWORD"
 EXPECTED_RESULT="OK"
 
 # Spin up container
-runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:11.2.0.2-full"
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:11.2.0.2-full-faststart"
 
 # Test password, if it works we will get "OK" back from the SQL statement
 result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s system/"${ORA_PWD}" <<EOF
@@ -102,7 +111,7 @@ TEST_NAME="11.2.0.2 ORACLE_RANDOM_PASSWORD"
 EXPECTED_RESULT="OK"
 
 # Spin up container
-runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:11.2.0.2"
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:11.2.0.2-faststart"
 
 # Let's get the password
 rand_pwd=$(podman logs ${CONTAINER_NAME} | grep "ORACLE PASSWORD FOR SYS AND SYSTEM:" | awk '{ print $7 }')
@@ -154,7 +163,7 @@ APP_USER="test_app_user"
 APP_USER_PASSWORD="MyAppUserPassword"
 
 # Spin up container
-runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:11.2.0.2-slim"
+runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:11.2.0.2-slim-faststart"
 
 # Test the random password, if it works we will get "OK" back from the SQL statement
 result=$(podman exec -i ${CONTAINER_NAME} sqlplus -s "${APP_USER}"/"${APP_USER_PASSWORD}" <<EOF
