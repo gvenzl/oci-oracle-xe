@@ -22,6 +22,8 @@ FROM oraclelinux:8-slim
 
 ARG BUILD_MODE
 
+LABEL org.opencontainers.image.source https://github.com/gvenzl/oci-oracle-xe
+
 ENV ORACLE_BASE=/opt/oracle \
     ORACLE_BASE_CONFIG=/opt/oracle \
     ORACLE_BASE_HOME=/opt/oracle/homes/OraDBHome21cXE \

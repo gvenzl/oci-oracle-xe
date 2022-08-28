@@ -22,5 +22,7 @@ ARG BASE_IMAGE
 
 FROM ${BASE_IMAGE}
 
+LABEL org.opencontainers.image.source https://github.com/gvenzl/oci-oracle-xe
+
 RUN unzip "${ORACLE_BASE}"/"${ORACLE_SID}".zip -d "${ORACLE_BASE}"/oradata/ 1> /dev/null && \
     rm "${ORACLE_BASE}"/"${ORACLE_SID}".zip
