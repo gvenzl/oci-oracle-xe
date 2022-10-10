@@ -1972,8 +1972,8 @@ rm    "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/stage/*
 rm -r "${ORACLE_BASE}"/diag/rdbms/xe/"${ORACLE_SID}"/trace/cdmp_*
 rm -r "${ORACLE_BASE}"/diag/tnslsnr/*
 
-# TODO: clean up os files
-# # /var/log/lastlog
+# Remove log4j-containing ndmserver.ear
+rm "${ORACLE_HOME}"/md/jlib/ndmserver.ear*
 
 # Remove additional files for NOMRAL and SLIM builds
 if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
