@@ -221,35 +221,45 @@ function run_custom_scripts {
     echo "";
     echo "CONTAINER: Executing user defined scripts..."
 
-    for f in "${SCRIPTS_ROOT}"/*; do
-      case "${f}" in
-        *.sh)
-          if [ -x "${f}" ]; then
-                      echo "CONTAINER: running ${f} ...";    "${f}";    echo "CONTAINER: DONE: running ${f}"
-          else
-                      echo "CONTAINER: sourcing ${f} ...";    . "${f}"    echo "CONTAINER: DONE: sourcing ${f}"
-          fi;
-          ;;
-
-        *.sql)        echo "CONTAINER: running ${f} ..."; echo "exit" | sqlplus -s / as sysdba @"${f}"; echo "CONTAINER: DONE: running ${f}"
-          ;;
-
-        *.sql.zip)    echo "CONTAINER: running ${f} ..."; echo "exit" | unzip -p "${f}" | sqlplus -s / as sysdba; echo "CONTAINER: DONE: running ${f}"
-          ;;
-
-        *.sql.gz)     echo "CONTAINER: running ${f} ..."; echo "exit" | zcat "${f}" | sqlplus -s / as sysdba; echo "CONTAINER: DONE: running ${f}"
-          ;;
-
-        *)            echo "CONTAINER: ignoring ${f}"
-          ;;
-      esac
-      echo "";
-    done
+    run_custom_scripts_recursive ${SCRIPTS_ROOT}
 
     echo "CONTAINER: DONE: Executing user defined scripts."
     echo "";
 
   fi;
+}
+
+function run_custom_scripts_recursive {
+  local f
+  for f in "${1}"/*; do
+    case "${f}" in
+      *.sh)
+        if [ -x "${f}" ]; then
+                    echo "CONTAINER: running ${f} ...";    "${f}";    echo "CONTAINER: DONE: running ${f}"
+        else
+                    echo "CONTAINER: sourcing ${f} ...";    . "${f}"    echo "CONTAINER: DONE: sourcing ${f}"
+        fi;
+        ;;
+
+      *.sql)        echo "CONTAINER: running ${f} ..."; echo "exit" | sqlplus -s / as sysdba @"${f}"; echo "CONTAINER: DONE: running ${f}"
+        ;;
+
+      *.sql.zip)    echo "CONTAINER: running ${f} ..."; echo "exit" | unzip -p "${f}" | sqlplus -s / as sysdba; echo "CONTAINER: DONE: running ${f}"
+        ;;
+
+      *.sql.gz)     echo "CONTAINER: running ${f} ..."; echo "exit" | zcat "${f}" | sqlplus -s / as sysdba; echo "CONTAINER: DONE: running ${f}"
+        ;;
+
+      *)
+        if [ -d "${f}" ]; then
+                    echo "CONTAINER: descending into ${f} ...";    run_custom_scripts_recursive ${f};    echo "CONTAINER: DONE: directory ${f}"
+        else
+                    echo "CONTAINER: ignoring ${f}"
+        fi;
+        ;;
+    esac
+    echo "";
+  done
 }
 
 # Create pluggable database
