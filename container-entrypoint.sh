@@ -203,7 +203,7 @@ function sym_link_dbconfig() {
 
 # Run custom scripts provided by the user
 # usage: run_custom_scripts PATH
-#    ie: run_custom_scripts /docker-entrypoint-initdb.d
+#    ie: run_custom_scripts /container-entrypoint-initdb.d
 # This runs *.sh, *.sql, *.sql.zip, *.sql.gz files
 function run_custom_scripts {
 
@@ -211,50 +211,52 @@ function run_custom_scripts {
 
   # Check whether parameter has been passed on
   if [ -z "${SCRIPTS_ROOT}" ]; then
-    echo "No SCRIPTS_ROOT passed on, no scripts will be run";
+    echo "No SCRIPTS_ROOT passed on, no scripts will be run.";
     return;
   fi;
 
   # Execute custom provided files (only if directory exists and has files in it)
   if [ -d "${SCRIPTS_ROOT}" ] && [ -n "$(ls -A "${SCRIPTS_ROOT}")" ]; then
 
-    echo "";
-    echo "CONTAINER: Executing user defined scripts..."
+    echo -e "\nCONTAINER: Executing user defined scripts..."
 
     run_custom_scripts_recursive ${SCRIPTS_ROOT}
 
-    echo "CONTAINER: DONE: Executing user defined scripts."
-    echo "";
+    echo -e "CONTAINER: DONE: Executing user defined scripts.\n"
 
   fi;
 }
 
+# This recursive function traverses through sub directories by calling itself with them
+# usage: run_custom_scripts_recursive PATH
+#    ie: run_custom_scripts_recursive /container-entrypoint-initdb.d/001_subdir
+# This runs *.sh, *.sql, *.sql.zip, *.sql.gz files and traveres in sub directories
 function run_custom_scripts_recursive {
   local f
   for f in "${1}"/*; do
     case "${f}" in
       *.sh)
         if [ -x "${f}" ]; then
-                    echo "CONTAINER: running ${f} ...";    "${f}";    echo "CONTAINER: DONE: running ${f}"
+                    echo -e "\nCONTAINER: running ${f} ...";     "${f}";     echo "CONTAINER: DONE: running ${f}"
         else
-                    echo "CONTAINER: sourcing ${f} ...";    . "${f}"    echo "CONTAINER: DONE: sourcing ${f}"
+                    echo -e "\nCONTAINER: sourcing ${f} ...";    . "${f}"    echo "CONTAINER: DONE: sourcing ${f}"
         fi;
         ;;
 
-      *.sql)        echo "CONTAINER: running ${f} ..."; echo "exit" | sqlplus -s / as sysdba @"${f}"; echo "CONTAINER: DONE: running ${f}"
+      *.sql)        echo -e "\nCONTAINER: running ${f} ..."; echo "exit" | sqlplus -s / as sysdba @"${f}"; echo "CONTAINER: DONE: running ${f}"
         ;;
 
-      *.sql.zip)    echo "CONTAINER: running ${f} ..."; echo "exit" | unzip -p "${f}" | sqlplus -s / as sysdba; echo "CONTAINER: DONE: running ${f}"
+      *.sql.zip)    echo -e "\nCONTAINER: running ${f} ..."; echo "exit" | unzip -p "${f}" | sqlplus -s / as sysdba; echo "CONTAINER: DONE: running ${f}"
         ;;
 
-      *.sql.gz)     echo "CONTAINER: running ${f} ..."; echo "exit" | zcat "${f}" | sqlplus -s / as sysdba; echo "CONTAINER: DONE: running ${f}"
+      *.sql.gz)     echo -e "\nCONTAINER: running ${f} ..."; echo "exit" | zcat "${f}" | sqlplus -s / as sysdba; echo "CONTAINER: DONE: running ${f}"
         ;;
 
       *)
         if [ -d "${f}" ]; then
-                    echo "CONTAINER: descending into ${f} ...";    run_custom_scripts_recursive ${f};    echo "CONTAINER: DONE: directory ${f}"
+                    echo -e "\nCONTAINER: descending into ${f} ...";    run_custom_scripts_recursive "${f}";    echo "CONTAINER: DONE: descending into ${f}"
         else
-                    echo "CONTAINER: ignoring ${f}"
+                    echo -e "\nCONTAINER: ignoring ${f}"
         fi;
         ;;
     esac

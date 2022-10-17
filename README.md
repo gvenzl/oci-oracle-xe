@@ -215,7 +215,9 @@ This mechanism is supported for:
 ## Initialization scripts
 If you would like to perform additional initialization of the database running in a container, you can add one or more `*.sql`, `*.sql.gz`, `*.sql.zip` or `*.sh` files under `/container-entrypoint-initdb.d` (creating the directory if necessary). After the database setup is completed, these files will be executed automatically in alphabetical order.
 
-The `*.sql`, `*.sql.gz` and `*.sql.zip` files will be executed in Sql*Plus as the `SYS` user connected to the Oracle instance (`XE`). Compressed files will be uncompressed on the fly, allowing for e.g. bigger data loading scripts to save space.
+The directory can include sub directories which will be traversed recursively in alphabetical order alongside the files. The container does not give any priority to files or directories, meaning that whatever comes next in alphabetical order will be processed next. If it is a file it will be executed, if it is a directory it will be traversed. To guarantee the order of execution, consider using a clear prefix in your file and directory names like numbers `001_`, `002_`. This will also make it easier for any user to understand which script is supposed to be executed in what order.
+
+The `*.sql`, `*.sql.gz` and `*.sql.zip` files will be executed in SQL*Plus as the `SYS` user connected to the Oracle instance (`XE`). Compressed files will be uncompressed on the fly, allowing for e.g. bigger data loading scripts to save space.
 
 Executable `*.sh` files will be run in a new shell process while non-executable `*.sh` files (files that do not have the Linux e`x`ecutable permission set) will be sourced into the current shell process. The main difference between these methods is that sourced shell scripts can influence the environment of the current process and should generally be avoided. However, sourcing scripts allows for execution of these scripts even if the executable flag is not set for the files containing them. This basically avoids the "why did my script not get executed" confusion.
 
