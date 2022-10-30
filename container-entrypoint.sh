@@ -303,11 +303,15 @@ EOF
 # Check minimum memory requirements
 function check_minimum_memory {
 
-  # Check for cgroup v2
-  if [ -f /sys/fs/cgroup/cgroup.controllers ]; then
+  # cgroups v2
+  if [ -f /sys/fs/cgroup/memory.max ]; then
     container_memory=$(< /sys/fs/cgroup/memory.max)
-  else
+  # cgroups v1
+  elif [ -f /sys/fs/cgroup/memory/memory.limit_in_bytes ]; then
     container_memory=$(< /sys/fs/cgroup/memory/memory.limit_in_bytes)
+  else
+    echo "CONTAINER: INFO: Cannot determine memory, assuming default of 2GB."
+    container_memory=2147483648
   fi;
 
   # Check whether memory is not set to "max", i.e. unlimited and
