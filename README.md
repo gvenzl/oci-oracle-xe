@@ -167,7 +167,7 @@ If you amend the variables above, here is some more useful info:
 | Slim      | `-slim`       | An image focussed on smallest possible image size instead of additional functionality.      | Wherever small images sizes are important but advanced functionality of Oracle Database is not needed. |
 | Regular   | [None]        | A well-balanced image between image size and functionality. Recommended for most use cases. | Recommended for most use cases.                                                                        |
 | Full      | `-full`       | An image containing all functionality as provided by the Oracle Database installation.      | Best for extensions and/or customizations.                                                             |
-| Faststart | `*-faststart` | The same image flavor as above but with an already expanded and ready to go database inside the image. This image trades image size on disk for a faster database startup time. | Best for (automated) test scenarios where the image is only pulled once but many containers started and torn down. |
+| Faststart | `*-faststart` | The same image flavor as above but with an already expanded and ready to go database inside the image. This image trades image size on disk for a faster database startup time. | Best for (automated) test scenarios where the image is pulled once and many containers started and torn down with no need of persistency (container volumes). |
 
 For a full list of changes that have been made to the Oracle Database and OS installation in each individual image flavor, please see [ImageDetails.md](https://github.com/gvenzl/oci-oracle-xe/blob/main/ImageDetails.md).
 
