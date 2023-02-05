@@ -553,7 +553,9 @@ cd "${ORACLE_BASE}"/oradata
 zip -r "${ORACLE_SID}".zip "${ORACLE_SID}"
 chown oracle:dba "${ORACLE_SID}".zip
 mv "${ORACLE_SID}".zip "${ORACLE_BASE}"/
-rm  -r "${ORACLE_SID}"
+# Delete database files but not directory structure,
+# that way external mount can mount just a sub directory
+find "${ORACLE_SID}" -type f -exec rm "{}" \;
 cd - 1> /dev/null
 
 ########################
