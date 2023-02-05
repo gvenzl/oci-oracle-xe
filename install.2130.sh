@@ -1910,6 +1910,9 @@ zip -r "${ORACLE_SID}".zip "${ORACLE_SID}"
 chown oracle:dba "${ORACLE_SID}".zip
 mv "${ORACLE_SID}".zip "${ORACLE_BASE}"/
 rm  -r "${ORACLE_SID}"
+# Recreate PDB folder for eventual external mount point!
+mkdir -p "${ORACLE_SID}"/XEPDB1
+chown -R oracle:dba "${ORACLE_SID}"
 cd - 1> /dev/null
 
 ########################
