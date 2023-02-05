@@ -310,7 +310,7 @@ function check_minimum_memory {
   elif [ -f /sys/fs/cgroup/memory/memory.limit_in_bytes ]; then
     container_memory=$(< /sys/fs/cgroup/memory/memory.limit_in_bytes)
   else
-    echo "CONTAINER: INFO: Cannot determine memory, assuming default of 2GB."
+    echo "CONTAINER: INFO: Cannot determine memory, assuming default of 2 GB."
     container_memory=2147483648
   fi;
 
@@ -324,7 +324,7 @@ function check_minimum_memory {
     if [[ ( "$ORACLE_VERSION" != "11.2."* && ${container_memory} -lt 1073741824 ) ||
           ( ${container_memory} -lt 2147483648 ) ]]; then
       echo "The container has not enough memory available to run Oracle Database XE."
-      echo "There are currently only $((container_memory/1024/1024)) MB available inside the container."
+      echo "There are currently only $((container_memory/1024/1024)) MiB available inside the container."
       echo "Please increase the amount of memory for the container."
       exit 1;
     fi;
