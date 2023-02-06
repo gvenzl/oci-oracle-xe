@@ -43,7 +43,7 @@ fi;
 echo "BUILDER: Installing OS dependencies"
 
 # Install installation dependencies
-microdnf -y install bc procps-ng util-linux net-tools
+microdnf -y install bc procps-ng util-linux net-tools findutils
 
 # Install runtime dependencies
 microdnf -y install libaio libnsl
@@ -553,7 +553,9 @@ cd "${ORACLE_BASE}"/oradata
 zip -r "${ORACLE_SID}".zip "${ORACLE_SID}"
 chown oracle:dba "${ORACLE_SID}".zip
 mv "${ORACLE_SID}".zip "${ORACLE_BASE}"/
-rm  -r "${ORACLE_SID}"
+# Delete database files but not directory structure,
+# that way external mount can mount just a sub directory
+find "${ORACLE_SID}" -type f -exec rm "{}" \;
 cd - 1> /dev/null
 
 ########################
@@ -683,7 +685,7 @@ rpm -e --nodeps acl bc cryptsetup-libs dbus dbus-common dbus-daemon dbus-libs \
                 dbus-tools device-mapper device-mapper-libs \
                 elfutils-default-yama-scope elfutils-libs kmod-libs libfdisk \
                 libseccomp libutempter net-tools procps-ng \
-                systemd systemd-pam util-linux
+                systemd systemd-pam util-linux findutils
 
 # Remove dnf cache
 microdnf clean all
