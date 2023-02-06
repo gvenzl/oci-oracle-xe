@@ -43,7 +43,7 @@ fi;
 echo "BUILDER: Installing OS dependencies"
 
 # Install installation dependencies
-microdnf -y install bc procps-ng util-linux net-tools
+microdnf -y install bc procps-ng util-linux net-tools findutils
 
 # Install runtime dependencies
 microdnf -y install libaio libnsl
@@ -685,7 +685,7 @@ rpm -e --nodeps acl bc cryptsetup-libs dbus dbus-common dbus-daemon dbus-libs \
                 dbus-tools device-mapper device-mapper-libs \
                 elfutils-default-yama-scope elfutils-libs kmod-libs libfdisk \
                 libseccomp libutempter net-tools procps-ng \
-                systemd systemd-pam util-linux
+                systemd systemd-pam util-linux findutils
 
 # Remove dnf cache
 microdnf clean all
