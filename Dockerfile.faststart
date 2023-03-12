@@ -24,23 +24,23 @@ FROM ${BASE_IMAGE} as base
 
 FROM base as cdb_pdb_seed
 
-# Extract all files except system01.dbf and sysaux01.dbf
+# Extract all files except system*.dbf and sysaux*.dbf
 
-RUN unzip "${ORACLE_BASE}"/"${ORACLE_SID}".zip -x XE/system01.dbf XE/sysaux01.dbf -d "${ORACLE_BASE}"/oradata/ 1> /dev/null
+RUN unzip "${ORACLE_BASE}"/"${ORACLE_SID}".zip -x XE/system*.dbf XE/sysaux*.dbf -d "${ORACLE_BASE}"/oradata/ 1> /dev/null
 RUN rm XE.zip
 
 FROM cdb_pdb_seed as cdb_sysaux
 
-COPY --from=base /opt/oracle/XE.zip /opt/oracle/XE.zip
+COPY --from=base "${ORACLE_BASE}"/"${ORACLE_SID}".zip "${ORACLE_BASE}"/"${ORACLE_SID}".zip
 # Extract sysaux01.dbf
-RUN unzip "${ORACLE_BASE}"/"${ORACLE_SID}".zip XE/sysaux01.dbf -d "${ORACLE_BASE}"/oradata/ 1> /dev/null
+RUN unzip "${ORACLE_BASE}"/"${ORACLE_SID}".zip XE/sysaux*.dbf -d "${ORACLE_BASE}"/oradata/ 1> /dev/null
 RUN rm XE.zip
 
 FROM cdb_sysaux as cdb_system
 
-COPY --from=base /opt/oracle/XE.zip /opt/oracle/XE.zip
+COPY --from=base "${ORACLE_BASE}"/"${ORACLE_SID}".zip "${ORACLE_BASE}"/"${ORACLE_SID}".zip
 # Extract system01.dbf
-RUN unzip "${ORACLE_BASE}"/"${ORACLE_SID}".zip XE/system01.dbf -d "${ORACLE_BASE}"/oradata/ 1> /dev/null
+RUN unzip "${ORACLE_BASE}"/"${ORACLE_SID}".zip XE/system*.dbf -d "${ORACLE_BASE}"/oradata/ 1> /dev/null
 RUN rm XE.zip
 
 LABEL org.opencontainers.image.source https://github.com/gvenzl/oci-oracle-xe
