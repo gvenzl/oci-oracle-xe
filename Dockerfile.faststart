@@ -32,14 +32,16 @@ RUN rm XE.zip
 FROM cdb_pdb_seed as cdb_sysaux
 
 COPY --from=base "${ORACLE_BASE}"/"${ORACLE_SID}".zip "${ORACLE_BASE}"/"${ORACLE_SID}".zip
-# Extract sysaux01.dbf
+
+# Extract sysaux*.dbf
 RUN unzip "${ORACLE_BASE}"/"${ORACLE_SID}".zip XE/sysaux*.dbf -d "${ORACLE_BASE}"/oradata/ 1> /dev/null
 RUN rm XE.zip
 
 FROM cdb_sysaux as cdb_system
 
 COPY --from=base "${ORACLE_BASE}"/"${ORACLE_SID}".zip "${ORACLE_BASE}"/"${ORACLE_SID}".zip
-# Extract system01.dbf
+
+# Extract system*.dbf
 RUN unzip "${ORACLE_BASE}"/"${ORACLE_SID}".zip XE/system*.dbf -d "${ORACLE_BASE}"/oradata/ 1> /dev/null
 RUN rm XE.zip
 

@@ -40,55 +40,6 @@ RUN /install/install.2130.sh "${BUILD_MODE}"
 
 FROM scratch as os_layer
 
-COPY --from=builder / /
-RUN rm -rf /opt/oracle
-
-##########################################################################################
-### Layer 2 --> Oracle Home without bin/oracle, lib, rdbms, and XE.zip
-##########################################################################################
-
-FROM os_layer as oracle_home
-
-COPY --from=builder --chown=54321:54321 /opt/oracle /opt/oracle
-
-RUN rm    /opt/oracle/product/21c/dbhomeXE/bin/oracle
-RUN rm -r /opt/oracle/product/21c/dbhomeXE/lib
-RUN rm -r /opt/oracle/product/21c/dbhomeXE/rdbms
-RUN rm    /opt/oracle/XE.zip
-
-
-##########################################################################################
-### Layer 3 --> Oracle binary (bin/oracle)
-##########################################################################################
-
-FROM oracle_home as oracle_binary
-
-COPY --from=builder --chown=54321:54321 /opt/oracle/product/21c/dbhomeXE/bin/oracle /opt/oracle/product/21c/dbhomeXE/bin/oracle
-
-##########################################################################################
-### Layer 4 --> Oracle lib
-##########################################################################################
-
-FROM oracle_binary as oracle_lib
-
-COPY --from=builder --chown=54321:54321 /opt/oracle/product/21c/dbhomeXE/lib /opt/oracle/product/21c/dbhomeXE/lib
-
-##########################################################################################
-### Layer 5 --> Oracle lib
-##########################################################################################
-
-FROM oracle_lib as oracle_rdbms
-
-COPY --from=builder --chown=54321:54321 /opt/oracle/product/21c/dbhomeXE/rdbms /opt/oracle/product/21c/dbhomeXE/rdbms
-
-##########################################################################################
-### Layer 6 --> Oracle (compressed) db files
-##########################################################################################
-
-FROM oracle_rdbms as db_files
-
-COPY --from=builder --chown=54321:54321 /opt/oracle/XE.zip  /opt/oracle/
-
 # Redefine environment variables, etc. as we copied everything from an empty image (scratch)
 ENV ORACLE_BASE=/opt/oracle \
     ORACLE_BASE_CONFIG=/opt/oracle \
@@ -97,6 +48,55 @@ ENV ORACLE_BASE=/opt/oracle \
     ORACLE_SID=XE \
     PATH=${PATH}:/opt/oracle/product/21c/dbhomeXE/bin:/opt/oracle \
     NLS_LANG=.AL32UTF8
+
+COPY --from=builder / /
+RUN rm -rf "${ORACLE_BASE}"
+
+##########################################################################################
+### Layer 2 --> Oracle Home without bin/oracle, lib, rdbms, and XE.zip
+##########################################################################################
+
+FROM os_layer as oracle_home
+
+COPY --from=builder --chown=54321:54321 "${ORACLE_BASE}" "${ORACLE_BASE}"
+
+RUN rm    "${ORACLE_HOME}"/bin/oracle
+RUN rm -r "${ORACLE_HOME}"/lib
+RUN rm -r "${ORACLE_HOME}"/rdbms
+RUN rm    "${ORACLE_BASE}"/XE.zip
+
+
+##########################################################################################
+### Layer 3 --> Oracle binary (bin/oracle)
+##########################################################################################
+
+FROM oracle_home as oracle_binary
+
+COPY --from=builder --chown=54321:54321 "${ORACLE_HOME}"/bin/oracle "${ORACLE_HOME}"/bin/oracle
+
+##########################################################################################
+### Layer 4 --> Oracle lib
+##########################################################################################
+
+FROM oracle_binary as oracle_lib
+
+COPY --from=builder --chown=54321:54321 "${ORACLE_HOME}"/lib "${ORACLE_HOME}"/lib
+
+##########################################################################################
+### Layer 5 --> Oracle lib
+##########################################################################################
+
+FROM oracle_lib as oracle_rdbms
+
+COPY --from=builder --chown=54321:54321 "${ORACLE_HOME}"/rdbms "${ORACLE_HOME}"/rdbms
+
+##########################################################################################
+### Layer 6 --> Oracle (compressed) db files
+##########################################################################################
+
+FROM oracle_rdbms as db_files
+
+COPY --from=builder --chown=54321:54321 "${ORACLE_BASE}"/XE.zip  "${ORACLE_BASE}"/
 
 LABEL org.opencontainers.image.source https://github.com/gvenzl/oci-oracle-xe
 
