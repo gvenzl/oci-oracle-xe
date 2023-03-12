@@ -18,11 +18,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM oraclelinux:8-slim
+FROM oraclelinux:8-slim as builder
 
 ARG BUILD_MODE
-
-LABEL org.opencontainers.image.source https://github.com/gvenzl/oci-oracle-xe
 
 ENV ORACLE_BASE=/opt/oracle \
     ORACLE_BASE_CONFIG=/opt/oracle \
@@ -35,7 +33,73 @@ ENV ORACLE_BASE=/opt/oracle \
 COPY oracle-database-xe-21c-1.0-1.ol8.x86_64.rpm install.2130.sh container-entrypoint.sh resetPassword createAppUser healthcheck.sh /install/
 
 RUN /install/install.2130.sh "${BUILD_MODE}"
-    
+
+##########################################################################################
+### Layer 1 --> Core OS
+##########################################################################################
+
+FROM scratch as os_layer
+
+COPY --from=builder / /
+RUN rm -rf /opt/oracle
+
+##########################################################################################
+### Layer 2 --> Oracle Home without bin/oracle, lib, rdbms, and XE.zip
+##########################################################################################
+
+FROM os_layer as oracle_home
+
+COPY --from=builder --chown=54321:54321 /opt/oracle /opt/oracle
+
+RUN rm    /opt/oracle/product/21c/dbhomeXE/bin/oracle
+RUN rm -r /opt/oracle/product/21c/dbhomeXE/lib
+RUN rm -r /opt/oracle/product/21c/dbhomeXE/rdbms
+RUN rm    /opt/oracle/XE.zip
+
+
+##########################################################################################
+### Layer 3 --> Oracle binary (bin/oracle)
+##########################################################################################
+
+FROM oracle_home as oracle_binary
+
+COPY --from=builder --chown=54321:54321 /opt/oracle/product/21c/dbhomeXE/bin/oracle /opt/oracle/product/21c/dbhomeXE/bin/oracle
+
+##########################################################################################
+### Layer 4 --> Oracle lib
+##########################################################################################
+
+FROM oracle_binary as oracle_lib
+
+COPY --from=builder --chown=54321:54321 /opt/oracle/product/21c/dbhomeXE/lib /opt/oracle/product/21c/dbhomeXE/lib
+
+##########################################################################################
+### Layer 5 --> Oracle lib
+##########################################################################################
+
+FROM oracle_lib as oracle_rdbms
+
+COPY --from=builder --chown=54321:54321 /opt/oracle/product/21c/dbhomeXE/rdbms /opt/oracle/product/21c/dbhomeXE/rdbms
+
+##########################################################################################
+### Layer 6 --> Oracle (compressed) db files
+##########################################################################################
+
+FROM oracle_rdbms as db_files
+
+COPY --from=builder --chown=54321:54321 /opt/oracle/XE.zip  /opt/oracle/
+
+# Redefine environment variables, etc. as we copied everything from an empty image (scratch)
+ENV ORACLE_BASE=/opt/oracle \
+    ORACLE_BASE_CONFIG=/opt/oracle \
+    ORACLE_BASE_HOME=/opt/oracle/homes/OraDBHome21cXE \
+    ORACLE_HOME=/opt/oracle/product/21c/dbhomeXE \
+    ORACLE_SID=XE \
+    PATH=${PATH}:/opt/oracle/product/21c/dbhomeXE/bin:/opt/oracle \
+    NLS_LANG=.AL32UTF8
+
+LABEL org.opencontainers.image.source https://github.com/gvenzl/oci-oracle-xe
+
 USER oracle
 WORKDIR ${ORACLE_BASE}
 
