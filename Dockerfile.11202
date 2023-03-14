@@ -48,7 +48,7 @@ ENV ORACLE_BASE=/u01/app/oracle \
     PATH=${PATH}:/u01/app/oracle/product/11.2.0/xe/bin:/u01/app/oracle \
     NLS_LANG=.AL32UTF8
 
-COPY oracle-xe-11.2.0-1.0.x86_64.rpm xe.11202.rsp install.11202.sh container-entrypoint.sh resetPassword createAppUser healthcheck.sh /install/
+COPY oracle-xe-11.2.0-1.0.x86_64.rpm xe.11202.rsp install.11202.sh container-entrypoint.sh resetPassword createAppUser healthcheck.sh 7zzs 7zCon.sfx config.txt /install/
 
 RUN /install/install.11202.sh "${BUILD_MODE}"
 
@@ -71,7 +71,7 @@ COPY --from=builder / /
 RUN rm -rf "${ORACLE_BASE}"
 
 ##########################################################################################
-### Layer 2 --> Oracle Home without bin/oracle, lib, rdbms, and XE.zip
+### Layer 2 --> Oracle Home without bin/oracle, lib, rdbms, and XE.7z
 ##########################################################################################
 
 FROM os_layer as oracle_home
@@ -81,7 +81,7 @@ COPY --from=builder --chown=oracle:dba "${ORACLE_BASE}" "${ORACLE_BASE}"
 RUN rm    "${ORACLE_HOME}"/bin/oracle
 RUN rm -r "${ORACLE_HOME}"/lib
 RUN rm -r "${ORACLE_HOME}"/rdbms
-RUN rm    "${ORACLE_BASE}"/XE.zip
+RUN rm    "${ORACLE_BASE}"/XE.7z
 
 
 ##########################################################################################
@@ -114,7 +114,7 @@ COPY --from=builder --chown=oracle:dba "${ORACLE_HOME}"/rdbms "${ORACLE_HOME}"/r
 
 FROM oracle_rdbms as db_files
 
-COPY --from=builder --chown=oracle:dba "${ORACLE_BASE}"/XE.zip  "${ORACLE_BASE}"/
+COPY --from=builder --chown=oracle:dba "${ORACLE_BASE}"/XE.7z  "${ORACLE_BASE}"/
 
 LABEL org.opencontainers.image.source https://github.com/gvenzl/oci-oracle-xe
 

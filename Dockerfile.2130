@@ -30,7 +30,7 @@ ENV ORACLE_BASE=/opt/oracle \
     PATH=${PATH}:/opt/oracle/product/21c/dbhomeXE/bin:/opt/oracle \
     NLS_LANG=.AL32UTF8
 
-COPY oracle-database-xe-21c-1.0-1.ol8.x86_64.rpm install.2130.sh container-entrypoint.sh resetPassword createAppUser healthcheck.sh /install/
+COPY oracle-database-xe-21c-1.0-1.ol8.x86_64.rpm install.2130.sh container-entrypoint.sh resetPassword createAppUser healthcheck.sh 7zzs 7zCon.sfx config.txt /install/
 
 RUN /install/install.2130.sh "${BUILD_MODE}"
 
@@ -63,7 +63,7 @@ COPY --from=builder --chown=oracle:oinstall "${ORACLE_BASE}" "${ORACLE_BASE}"
 RUN rm    "${ORACLE_HOME}"/bin/oracle
 RUN rm -r "${ORACLE_HOME}"/lib
 RUN rm -r "${ORACLE_HOME}"/rdbms
-RUN rm    "${ORACLE_BASE}"/XE.zip
+RUN rm    "${ORACLE_BASE}"/XE.7z
 
 
 ##########################################################################################
@@ -96,7 +96,7 @@ COPY --from=builder --chown=oracle:oinstall "${ORACLE_HOME}"/rdbms "${ORACLE_HOM
 
 FROM oracle_rdbms as db_files
 
-COPY --from=builder --chown=oracle:oinstall "${ORACLE_BASE}"/XE.zip  "${ORACLE_BASE}"/
+COPY --from=builder --chown=oracle:oinstall "${ORACLE_BASE}"/XE.7z  "${ORACLE_BASE}"/
 
 LABEL org.opencontainers.image.source https://github.com/gvenzl/oci-oracle-xe
 
