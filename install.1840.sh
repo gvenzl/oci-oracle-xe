@@ -1049,11 +1049,19 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   rm -r "${ORACLE_HOME}"/opmn
 
   # Remove unnecessary binaries (see http://yong321.freeshell.org/computer/oraclebin.html#18c)
-  rm "${ORACLE_HOME}"/bin/afd*   # ASM Filter Drive components
-  rm "${ORACLE_HOME}"/bin/proc   # Pro*C/C++ Precompiler
-  rm "${ORACLE_HOME}"/bin/procob # Pro COBOL Precompiler
-  rm "${ORACLE_HOME}"/bin/orion  # ORacle IO Numbers benchmark tool
-  rm "${ORACLE_HOME}"/bin/drda*  # Distributed Relational Database Architecture components
+  rm "${ORACLE_HOME}"/bin/acfs*      # ACFS File system components
+  rm "${ORACLE_HOME}"/bin/adrci      # Automatic Diagnostic Repository Command Interpreter
+  rm "${ORACLE_HOME}"/bin/agtctl     # Multi-Threaded extproc agent control utility
+  rm "${ORACLE_HOME}"/bin/afd*       # ASM Filter Drive components
+  rm "${ORACLE_HOME}"/bin/amdu       # ASM Disk Utility
+  rm "${ORACLE_HOME}"/bin/dg4*       # Database Gateway
+  rm "${ORACLE_HOME}"/bin/dgmgrl     # Data Guard Manager CLI
+  rm "${ORACLE_HOME}"/bin/drda*      # Distributed Relational Database Architecture components
+  rm "${ORACLE_HOME}"/bin/orion      # ORacle IO Numbers benchmark tool
+  rm "${ORACLE_HOME}"/bin/proc       # Pro*C/C++ Precompiler
+  rm "${ORACLE_HOME}"/bin/procob     # Pro COBOL Precompiler
+  rm "${ORACLE_HOME}"/bin/renamedg   # Rename Disk Group binary
+
 
   # Replace `orabase` with static path shell script
   su -p oracle -c "echo 'echo ${ORACLE_BASE}' > ${ORACLE_HOME}/bin/orabase"
@@ -1081,6 +1089,7 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
 
     # Remove Oracle Text directory
     rm -r "${ORACLE_HOME}"/ctx
+    rm "${ORACLE_HOME}"/bin/ctx*        # Oracle Text binaries
 
     # Remove demo directory
     rm -r "${ORACLE_HOME}"/demo
@@ -1136,9 +1145,11 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
     rm -r "${ORACLE_HOME}"/perl
 
     # Remove unnecessary binaries
-    rm "${ORACLE_HOME}"/bin/ORE
-    rm "${ORACLE_HOME}"/bin/rman # Oracle Recovery Manager
-    rm "${ORACLE_HOME}"/bin/wrap # PL/SQL Wrapper
+    rm "${ORACLE_HOME}"/bin/cursize    # Cursor Size binary
+    rm "${ORACLE_HOME}"/bin/dbfs*      # DataBase File System
+    rm "${ORACLE_HOME}"/bin/ORE        # Oracle R Enterprise
+    rm "${ORACLE_HOME}"/bin/rman       # Oracle Recovery Manager
+    rm "${ORACLE_HOME}"/bin/wrap       # PL/SQL Wrapper
 
     # Remove unnecessary libraries
     rm "${ORACLE_HOME}"/lib/asm* # Oracle Automatic Storage Management
