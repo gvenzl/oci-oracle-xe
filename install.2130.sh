@@ -1942,14 +1942,14 @@ echo "BUILDER: cleanup"
 # Remove install directory
 rm -r /install
 
-# # Cleanup XE files not needed for being in a container but were installed by the rpm
+# Cleanup XE files not needed for being in a container but were installed by the rpm
 /sbin/chkconfig --del oracle-xe-21c
 rm /etc/init.d/oracle-xe-21c
 rm /etc/sysconfig/oracle-xe-21c.conf
 rm -r /var/log/oracle-database-xe-21c
 rm -r /tmp/*
 
-# # Remove SYS audit directories and files created during install
+# Remove SYS audit directories and files created during install
 rm -r "${ORACLE_BASE}"/admin/"${ORACLE_SID}"/adump/*
 rm -r "${ORACLE_BASE}"/audit/"${ORACLE_SID}"/*
 
