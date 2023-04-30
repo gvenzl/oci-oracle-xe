@@ -995,6 +995,16 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
   # Remove lib/*.jar files
   rm "${ORACLE_HOME}"/lib/*.jar
 
+  # Remove unnecessary timezone information
+  rm    "${ORACLE_HOME}"/oracore/zoneinfo/readme.txt
+  rm    "${ORACLE_HOME}"/oracore/zoneinfo/timezdif.csv
+  rm -r "${ORACLE_HOME}"/oracore/zoneinfo/big
+  rm -r "${ORACLE_HOME}"/oracore/zoneinfo/little
+  rm    "${ORACLE_HOME}"/oracore/zoneinfo/timezone*
+  mv    "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg_31.dat "${ORACLE_HOME}"/oracore/zoneinfo/current.dat
+  rm    "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg*
+  mv    "${ORACLE_HOME}"/oracore/zoneinfo/current.dat "${ORACLE_HOME}"/oracore/zoneinfo/timezlrg_31.dat
+
   # Remove Multimedia
   rm -r "${ORACLE_HOME}"/ord/im
 

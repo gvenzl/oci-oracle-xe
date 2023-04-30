@@ -49,6 +49,7 @@ The regular image strives to balance between the functionality required by most 
 * `Intel Math Kernel` libraries have been removed (`$ORACLE_HOME/lib/libmkl_*`)
 * Zip files in lib/ have been removed (`$ORACLE_HOME/lib/*.zip`)
 * Jar files in lib/ have been removed (`$ORACLE_HOME/lib/*.jar`)
+* Old timezone files have been removed (`$ORACLE_HOME/oracore/zoneinfo/*` except the current timezone file)
 * Additional Java libraries have been removed (`$ORACLE_HOME/rdbms/jlib`)
 * The `Cluster Ready Services` directory has been removed (`$ORACLE_HOME/crs`)
 * The `Cluster Verification Utility` directory has been removed (`$ORACLE_HOME/cv`)
