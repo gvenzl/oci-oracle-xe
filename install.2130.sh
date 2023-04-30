@@ -1610,7 +1610,7 @@ EOF
      WHENEVER SQLERROR EXIT SQL.SQLCODE
 
      -- Create temporary tablespace to move objects
-     CREATE TABLESPACE builder_temp DATAFILE '/opt/oracle/oradata/XE/builder_temp.dbf' SIZE 100m;
+     CREATE TABLESPACE builder_temp DATAFILE '${ORACLE_BASE}/oradata/${ORACLE_SID}/builder_temp.dbf' SIZE 100m;
 
      -- Clean up METASTYLESHEET LOBs sitting at the end of the SYSTEM tablespace
      ALTER TABLE metastylesheet MOVE LOB(stylesheet) STORE AS (TABLESPACE BUILDER_TEMP);
