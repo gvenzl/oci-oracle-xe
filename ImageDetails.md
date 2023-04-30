@@ -64,13 +64,20 @@ The regular image strives to balance between the functionality required by most 
 
 The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
 
-* `$ORACLE_HOME/bin/afd*` (ASM Filter Drive components)
-* `$ORACLE_HOME}/bin/proc` (Pro\*C/C++ Precompiler)
-* `$ORACLE_HOME/bin/procob` (Pro COBOL Precompiler)
-* `$ORACLE_HOME/bin/orion` (ORacle IO Numbers benchmark tool)
-* `$ORACLE_HOME/bin/oms_daemon` (Oracle Memory Speed (PMEM support) daemon)
-* `$ORACLE_HOME/bin/omsfscmds` (Oracle Memory Speed (PMEM support) command line utility)
-
+* `$ORACLE_HOME/bin/acfs*`       (ACFS File system components)
+* `$ORACLE_HOME/bin/adrci`       (Automatic Diagnostic Repository Command Interpreter)
+* `$ORACLE_HOME/bin/agtctl`      (Multi-Threaded extproc agent control utility)
+* `$ORACLE_HOME/bin/afd*`        (ASM Filter Drive components)
+* `$ORACLE_HOME/bin/amdu`        (ASM Disk Utility)
+* `$ORACLE_HOME/bin/dg4*`        (Database Gateway)
+* `$ORACLE_HOME/bin/dgmgrl`      (Data Guard Manager CLI)
+* `$ORACLE_HOME/bin/dbnest*`     (DataBase NEST)
+* `$ORACLE_HOME/bin/orion`       (ORacle IO Numbers benchmark tool)
+* `$ORACLE_HOME/bin/oms_daemon`  (Oracle Memory Speed (PMEM support) daemon)
+* `$ORACLE_HOME/bin/omsfscmds`   (Oracle Memory Speed command line utility)
+* `$ORACLE_HOME/bin/proc`        (Pro*C/C++ Precompiler)
+* `$ORACLE_HOME/bin/procob`      (Pro COBOL Precompiler)
+* `$ORACLE_HOME/bin/renamedg`    (Rename Disk Group binary)
 
 The following binaries have been replaced by shell scripts with static output:
 
@@ -133,9 +140,12 @@ The slim images aims for smallest possible image size with only the Oracle Datab
 
 The following binaries have been removed from the `$ORACLE_HOME/bin` directory:
 
-* `$ORACLE_HOME/bin/ORE` (Oracle R Enterprise)
-* `$ORACLE_HOME/bin/rman` (Oracle Recovery Manager)
-* `$ORACLE_HOME/bin/wrap` (PL/SQL Wrapper)
+* `$ORACLE_HOME/bin/ctx*`    (Oracle Text binaries)
+* `$ORACLE_HOME/bin/cursize` (Cursor Size binary)
+* `$ORACLE_HOME/bin/dbfs*`   (DataBase File System)
+* `$ORACLE_HOME/bin/ORE`     (Oracle R Enterprise)
+* `$ORACLE_HOME/bin/rman`    (Oracle Recovery Manager)
+* `$ORACLE_HOME/bin/wrap`    (PL/SQL Wrapper)
 
 ##### Database libraries
 
