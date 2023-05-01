@@ -32,13 +32,14 @@ BASE_IMAGE=""
 function usage() {
     cat << EOF
 
-Usage: buildContainerImage.sh [-f | -r | -s] [-v version] [-i] [-o] [container build option]
+Usage: buildContainerImage.sh [-f | -r | -s] [-x] [-v version] [-i] [-o] [container build option]
 Builds a container image for Oracle Database XE.
 
 Parameters:
    -f: creates a 'full' image
    -r: creates a regular image (default)
    -s: creates a 'slim' image
+   -x: creates a 'faststart' image
    -v: version of Oracle Database XE to build
        Choose one of: 21.3.0, 18.4.0, 11.2.0.2
    -i: ignores checksum test
