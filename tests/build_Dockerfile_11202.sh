@@ -31,7 +31,7 @@ echo "TEST: Building 11.2.0.2 FULL image"
 echo "DONE: Building 11.2.0.2 FULL image"
 
 echo "TEST: Building 11.2.0.2 FULL FASTSTART image"
-./buildContainerImage.sh -v 11.2.0.2 -f -x
+./buildContainerImage.sh -v 11.2.0.2 -f -x -i
 echo "DONE: Building 11.2.0.2 FULL FASTSTART image"
 
 echo "TEST: Building 11.2.0.2 REGULAR image"
@@ -39,7 +39,7 @@ echo "TEST: Building 11.2.0.2 REGULAR image"
 echo "DONE: Building 11.2.0.2 REGULAR image"
 
 echo "TEST: Building 11.2.0.2 REGULAR FASTSTART image"
-./buildContainerImage.sh -v 11.2.0.2 -x
+./buildContainerImage.sh -v 11.2.0.2 -x -i
 echo "DONE: Building 11.2.0.2 REGULAR FASTSTART image"
 
 echo "TEST: Building 11.2.0.2 SLIM image"
@@ -47,7 +47,7 @@ echo "TEST: Building 11.2.0.2 SLIM image"
 echo "TEST: Building 11.2.0.2 SLIM image"
 
 echo "TEST: Building 11.2.0.2 SLIM FASTSTART image"
-./buildContainerImage.sh -v 11.2.0.2 -s -x
+./buildContainerImage.sh -v 11.2.0.2 -s -x -i
 echo "TEST: Building 11.2.0.2 SLIM FASTSTART image"
 
 cd "${CURRENT_DIR}"
