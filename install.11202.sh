@@ -46,11 +46,22 @@ echo "BUILDER: Installing OS dependencies"
 microdnf -y install bc procps-ng util-linux net-tools findutils
 
 # Install runtime dependencies
-microdnf -y install libaio libnsl
+microdnf -y install libaio libnsl xz
 
 # Install container runtime specific packages
 # (used by the entrypoint script, not the database itself)
+# TODO: replace with 7zip
 microdnf -y install unzip gzip
+
+# Install 7zip
+mkdir /tmp/7z
+cd /tmp/7z
+curl -s -L -O https://www.7-zip.org/a/7z2201-linux-x64.tar.xz
+tar xf 7z*xz
+mv 7zzs /usr/bin/
+mv License.txt /usr/share/
+cd - 1> /dev/null
+rm -rf /tmp/7z
 
 # Install GCC and other packages for full installation
 if [ "${BUILD_MODE}" == "FULL" ]; then
@@ -550,9 +561,9 @@ EOF
 echo "BUILDER: compressing database data files"
 
 cd "${ORACLE_BASE}"/oradata
-zip -r "${ORACLE_SID}".zip "${ORACLE_SID}"
-chown oracle:dba "${ORACLE_SID}".zip
-mv "${ORACLE_SID}".zip "${ORACLE_BASE}"/
+7zzs a "${ORACLE_SID}".7z "${ORACLE_SID}"
+chown oracle:dba "${ORACLE_SID}".7z
+mv "${ORACLE_SID}".7z "${ORACLE_BASE}"/
 # Delete database files but not directory structure,
 # that way external mount can mount just a sub directory
 find "${ORACLE_SID}" -type f -exec rm "{}" \;
