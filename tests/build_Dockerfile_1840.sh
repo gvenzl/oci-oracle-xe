@@ -31,7 +31,7 @@ echo "TEST: Building 18.4.0 FULL image"
 echo "DONE: Building 18.4.0 FULL image"
 
 echo "TEST: Building 18.4.0 FULL FASTSTART image"
-./buildContainerImage.sh -v 18.4.0 -f -x
+./buildContainerImage.sh -v 18.4.0 -f -x -i
 echo "DONE: Building 18.4.0 FULL FASTSTART image"
 
 echo "TEST: Building 18.4.0 REGULAR image"
@@ -39,7 +39,7 @@ echo "TEST: Building 18.4.0 REGULAR image"
 echo "DONE: Building 18.4.0 REGULAR image"
 
 echo "TEST: Building 18.4.0 REGULAR FASTSTART image"
-./buildContainerImage.sh -v 18.4.0 -x
+./buildContainerImage.sh -v 18.4.0 -x -i
 echo "DONE: Building 18.4.0 REGULAR FASTSTART image"
 
 echo "TEST: Building 18.4.0 SLIM image"
@@ -47,7 +47,7 @@ echo "TEST: Building 18.4.0 SLIM image"
 echo "DONE: Building 18.4.0 SLIM image"
 
 echo "TEST: Building 18.4.0 SLIM FASTSTART image"
-./buildContainerImage.sh -v 18.4.0 -s -x
+./buildContainerImage.sh -v 18.4.0 -s -x -i
 echo "DONE: Building 18.4.0 SLIM FASTSTART image"
 
 cd "${CURRENT_DIR}"
