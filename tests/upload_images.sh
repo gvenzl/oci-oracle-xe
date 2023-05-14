@@ -25,7 +25,7 @@ set -Eeuo pipefail
 # Log into Docker Hub before anything else so that one does not have to
 # wait for the backup to be finished)
 echo "Login to Docker Hub:"
-podman login
+podman login docker.io
 
 # Ensure all tags are in place
 ./all_tag_images.sh
