@@ -55,7 +55,7 @@ We are proud of the following users of these images:
 
 * [Airbyte](https://airbyte.io/) [[`6e53a57`](https://github.com/airbytehq/airbyte/commit/6e53a574e3d7f4c4885336c4e3205c051ee74ed6)]
 * [Apache Spark](https://spark.apache.org/) [[`e03afc9`](https://github.com/apache/spark/commit/e03afc906fd87b0354783b438fa9f7e36231b778)]
-* [Benthos](https://benthos.dev/) [[`c2a8b6a`](https://github.com/benthosdev/benthos/pull/1462/commits/c2a8b6a56f8272db49a2221e215eece7ddb2bce4)]
+* ~~[Benthos](https://benthos.dev/) [[`c2a8b6a`](https://github.com/benthosdev/benthos/pull/1462/commits/c2a8b6a56f8272db49a2221e215eece7ddb2bce4)]~~ (migrated to [gvenzl/oracle-free](https://hub.docker.com/r/gvenzl/oracle-free))
 * [Ebean](https://ebean.io/) [[`ae8f1cd`](https://github.com/ebean-orm/ebean-test-containers/commit/ae8f1cd4a3895d552eeb19cee5c75c0f55399512)]
 * [Eclipse Vert.x](https://vertx.io/) [[`ffedbce`](https://github.com/eclipse-vertx/vertx-sql-client/commit/ffedbce6f91425ce603d47da6290ac30e19fd2e5)]
 * [Flowable](https://www.flowable.com/open-source/) [[`18c751f`](https://github.com/flowable/flowable-engine/commit/18c751fb369a74b71abc203f0b4ace151a96e862)]
@@ -66,7 +66,7 @@ We are proud of the following users of these images:
 * [jOOQ](https://www.jooq.org/) [[`#35`](https://github.com/gvenzl/oci-oracle-xe/issues/35)]
 * [Liquibase](https://www.liquibase.org/) [[`c6a31c0`](https://github.com/liquibase/liquibase-test-harness/commit/c6a31c0c54c1aa798839a2ef55ef6eb2363ea48f)]
 * [Micronaut Data](https://github.com/micronaut-projects/micronaut-data) [[`ddf11c1`](https://github.com/micronaut-projects/micronaut-data/commit/ddf11c1e8a7a27a1f6765cc5e1c1c3d3f74b475f)]
-* [Quarkus](https://quarkus.io/) (migrated to [gvenzl/oracle-free](https://hub.docker.com/r/gvenzl/oracle-free)) [[`9a63a58`](https://github.com/quarkusio/quarkus/commit/9a63a58a6740fa1d5e3cc7912f89522dd78cee85)]
+* ~~[Quarkus](https://quarkus.io/) [[`9a63a58`](https://github.com/quarkusio/quarkus/commit/9a63a58a6740fa1d5e3cc7912f89522dd78cee85)]~~ (migrated to [gvenzl/oracle-free](https://hub.docker.com/r/gvenzl/oracle-free))
 * [Ruby API for Oracle PL/SQL](https://github.com/rsim/ruby-plsql) [[`63baad0`](https://github.com/rsim/ruby-plsql/commit/63baad0b6f8ea0caa4b787f85ffae349dede480a)]
 * [Ruby on Rails ActiveRecord adapter](https://github.com/rsim/oracle-enhanced) [[`afd7a93`](https://github.com/rsim/oracle-enhanced/commit/afd7a93470d1444e1462d0fb4f3d965ef2698384)]
 * [Rucio by CERN](https://rucio.cern.ch/) [[`80dffbb`](https://github.com/rucio/rucio/commit/80dffbb09f58a9f30d2a9a4c3297e8ed22a78963)]
