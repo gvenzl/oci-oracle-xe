@@ -61,7 +61,7 @@ We are proud of the following users of these images:
 * [Flowable](https://www.flowable.com/open-source/) [[`18c751f`](https://github.com/flowable/flowable-engine/commit/18c751fb369a74b71abc203f0b4ace151a96e862)]
 * [GeoTools](https://geotools.org/) [[`f922f0b`](https://github.com/geotools/geotools/commit/f922f0bdd19e32b9648ad644af2a1eed75417964)]
 * [Hibernate](https://hibernate.org/orm/) [[`43d2274`](https://github.com/hibernate/hibernate-orm/commit/43d2274573ca2658d1b5bc5706f8097c090ae9c1)]
-  * [Hibernate Reactive](https://hibernate.org/reactive/) [[`7de7d79`](https://github.com/hibernate/hibernate-reactive/commit/7de7d793793fec0c06c7dad857a14274353eb639)]
+  * ~~[Hibernate Reactive](https://hibernate.org/reactive/) [[`7de7d79`](https://github.com/hibernate/hibernate-reactive/commit/7de7d793793fec0c06c7dad857a14274353eb639)]~~ (migrated to [gvenzl/oracle-free](https://hub.docker.com/r/gvenzl/oracle-free))
   * [Hibernate Search](https://hibernate.org/search/) [[`173f0b7`](https://github.com/hibernate/hibernate-search/commit/173f0b703defee81b6600c693d4d30b87a6ade41)]
 * [jOOQ](https://www.jooq.org/) [[`#35`](https://github.com/gvenzl/oci-oracle-xe/issues/35)]
 * [Liquibase](https://www.liquibase.org/) [[`c6a31c0`](https://github.com/liquibase/liquibase-test-harness/commit/c6a31c0c54c1aa798839a2ef55ef6eb2363ea48f)]
