@@ -71,7 +71,7 @@ We are proud of the following users of these images:
 * [Ruby on Rails ActiveRecord adapter](https://github.com/rsim/oracle-enhanced) [[`afd7a93`](https://github.com/rsim/oracle-enhanced/commit/afd7a93470d1444e1462d0fb4f3d965ef2698384)]
 * [Rucio by CERN](https://rucio.cern.ch/) [[`80dffbb`](https://github.com/rucio/rucio/commit/80dffbb09f58a9f30d2a9a4c3297e8ed22a78963)]
 * [SchemaCrawler](https://www.schemacrawler.com/) [[`08d9b87`](https://github.com/schemacrawler/SchemaCrawler/commit/08d9b87c280bf23e405bea6265abf01448fa71d3)]
-* [Spring Data JDBC](https://spring.io/projects/spring-data) [[`baee76a`](https://github.com/spring-projects/spring-data-relational/commit/baee76a46d22d6281c7b8d3b8f6e6cdfe23b79cc)]
+* ~~[Spring Data JDBC](https://spring.io/projects/spring-data) [[`baee76a`](https://github.com/spring-projects/spring-data-relational/commit/baee76a46d22d6281c7b8d3b8f6e6cdfe23b79cc)]~~ (migrated to [gvenzl/oracle-free](https://hub.docker.com/r/gvenzl/oracle-free))
 * [Sqitch](https://sqitch.org/) [[`8b38027`](https://github.com/sqitchers/sqitch/commit/8b38027ba2b91ef7fbe59a35a5332d17f0beadb0)]
 * [Testcontainers](https://www.testcontainers.org/) [[`99b91b8`](https://github.com/testcontainers/testcontainers-java/commit/99b91b89b6ee3f8f0e9545e86d9f0744b301db30)]
 * [Upscheme](https://upscheme.org/) [[`954650a`](https://github.com/aimeos/upscheme/commit/954650afc92273f73bc1276aa0bd2f4253987c4f)]
