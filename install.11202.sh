@@ -189,7 +189,9 @@ chown -R oracle:dba "${ORACLE_HOME}"/network/admin
 echo "BUILDER: creating .bash_profile"
 echo \
 "export ORACLE_BASE=${ORACLE_BASE}
-export ORACLE_HOME=\${ORACLE_BASE}/product/11.2.0/xe
+export ORACLE_BASE_CONFIG=${ORACLE_BASE_CONFIG}
+export ORACLE_BASE_HOME=${ORACLE_BASE_HOME}
+export ORACLE_HOME=${ORACLE_HOME}
 export ORACLE_SID=XE
 export PATH=\${PATH}:\${ORACLE_HOME}/bin:\${ORACLE_BASE}
 
