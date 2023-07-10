@@ -3,6 +3,7 @@
 # Author: gvenzl
 # Name: healthcheck.sh
 # Description: Checks the health of the database
+#              Parameter 1: the PDB name to check for (18c and onwards only)
 #
 # Copyright 2021 Gerald Venzl
 #
@@ -22,17 +23,45 @@
 # Great explanation on https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuo pipefail
 
-ORACLE_CDB=${1:-}
+# Check DB version
+ORACLE_VERSION=$(sqlplus -version | grep "Release" | awk '{ print $3 }')
 
-db_status=$(sqlplus -s / << EOF
-   set heading off;
-   set pagesize 0;
-   SELECT status FROM v\$instance;
-   exit;
+# 11g doesn't have PDBs yet, so just check v\$instance
+if [[ "${ORACLE_VERSION}" = "11.2"* ]]; then
+
+  db_status=$(sqlplus -s / << EOF
+     set heading off;
+     set pagesize 0;
+     SELECT 'READY'
+       FROM v\$instance
+         WHERE status = 'OPEN';
+     exit;
 EOF
-)
+  )
 
-if [ "${db_status}" == "OPEN" ]; then
+# 18c onwards
+else
+  #  Either the PDB passed on as \$ORACLE_DATABASE or the default "FREEPDB1"
+  DATABASE=${1:-${ORACLE_DATABASE:-FREEPDB1}}
+
+  db_status=$(sqlplus -s / << EOF
+     set heading off;
+     set pagesize 0;
+     SELECT 'READY'
+      FROM (
+        SELECT name, open_mode
+         FROM v\$pdbs
+        UNION ALL
+        SELECT name, open_mode
+         FROM v\$database) dbs
+       WHERE dbs.name = UPPER('${DATABASE}')
+        AND dbs.open_mode = 'READ WRITE';
+     exit;
+EOF
+  )
+fi;
+
+if [ "${db_status}" == "READY" ]; then
    exit 0;
 else
    exit 1;

@@ -204,8 +204,8 @@ CONTAINER_NAME="18-oracle-db"
 TEST_NAME="18.4.0 ORACLE_DATABASE"
 # This is what we want to have back from the SQL statement
 EXPECTED_RESULT="Hi from your Oracle PDB"
-# Oracle PDB
-ORACLE_DATABASE="GERALD_PDB"
+# Oracle PDB (use mixed case deliberately)
+ORACLE_DATABASE="gErAld_pDb"
 # Oracle password
 ORA_PWD="MyTestPassword"
 ORA_PWD_CMD="-e ORACLE_PASSWORD=${ORA_PWD}"
@@ -261,7 +261,7 @@ APP_USER="other_app_user"
 # App user password
 APP_USER_PASSWORD="ThatAppUserPassword1"
 # Oracle PDB
-ORACLE_DATABASE="REGRESSION_TESTS"
+ORACLE_DATABASE="regression_tests"
 
 # Spin up container
 runContainerTest "${TEST_NAME}" "${CONTAINER_NAME}" "gvenzl/oracle-xe:18.4.0-full-faststart"
