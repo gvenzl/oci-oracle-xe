@@ -24,10 +24,10 @@
 set -Eeuo pipefail
 
 # Check DB version
-db_version=$(sqlplus -version | awk '{ print substr($3,1,4) }')
+ORACLE_VERSION=$(sqlplus -version | grep "Release" | awk '{ print $3 }')
 
-# 11g doesn't have PDBs yet, so just check v$instance
-if [ "$db_version" == "11.2" ]; then
+# 11g doesn't have PDBs yet, so just check v\$instance
+if [[ "${ORACLE_VERSION}" = "11.2"* ]]; then
 
   db_status=$(sqlplus -s / << EOF
      set heading off;
@@ -41,7 +41,7 @@ EOF
 
 # 18c onwards
 else
-  #  Either the PDB passed on as $ORACLE_DATABASE or the default "FREEPDB1"
+  #  Either the PDB passed on as \$ORACLE_DATABASE or the default "FREEPDB1"
   DATABASE=${1:-${ORACLE_DATABASE:-FREEPDB1}}
 
   db_status=$(sqlplus -s / << EOF
