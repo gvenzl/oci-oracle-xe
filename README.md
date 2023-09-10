@@ -63,7 +63,7 @@ We are proud of the following users of these images:
 * [Hibernate](https://hibernate.org/orm/) [[`43d2274`](https://github.com/hibernate/hibernate-orm/commit/43d2274573ca2658d1b5bc5706f8097c090ae9c1)]
   * ~~[Hibernate Reactive](https://hibernate.org/reactive/) [[`7de7d79`](https://github.com/hibernate/hibernate-reactive/commit/7de7d793793fec0c06c7dad857a14274353eb639)]~~ (migrated to [gvenzl/oracle-free](https://hub.docker.com/r/gvenzl/oracle-free))
   * [Hibernate Search](https://hibernate.org/search/) [[`173f0b7`](https://github.com/hibernate/hibernate-search/commit/173f0b703defee81b6600c693d4d30b87a6ade41)]
-* [jOOQ](https://www.jooq.org/) [[`#35`](https://github.com/gvenzl/oci-oracle-xe/issues/35)]
+* ~~[jOOQ](https://www.jooq.org/) [[`#35`](https://github.com/gvenzl/oci-oracle-xe/issues/35)]~~ (migrated to [gvenzl/oracle-free](https://hub.docker.com/r/gvenzl/oracle-free))
 * [Liquibase](https://www.liquibase.org/) [[`c6a31c0`](https://github.com/liquibase/liquibase-test-harness/commit/c6a31c0c54c1aa798839a2ef55ef6eb2363ea48f)]
 * [Micronaut Data](https://github.com/micronaut-projects/micronaut-data) [[`ddf11c1`](https://github.com/micronaut-projects/micronaut-data/commit/ddf11c1e8a7a27a1f6765cc5e1c1c3d3f74b475f)]
 * ~~[Quarkus](https://quarkus.io/) [[`9a63a58`](https://github.com/quarkusio/quarkus/commit/9a63a58a6740fa1d5e3cc7912f89522dd78cee85)]~~ (migrated to [gvenzl/oracle-free](https://hub.docker.com/r/gvenzl/oracle-free))
@@ -324,7 +324,7 @@ DATABASE IS READY TO USE!
 As a result, one can then connect to the new schema directly:
 
 ```shell
-[gvenzl@localhost init_scripts]$  sql test/test@//localhost/XEPDB1
+[gvenzl@localhost init_scripts]$ sqlplus test/test@//localhost/XEPDB1
 
 SQLcl: Release 20.3 Production on Sun Mar 07 12:05:06 2021
 
