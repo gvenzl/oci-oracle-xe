@@ -447,6 +447,13 @@ if healthcheck.sh "${ORACLE_SID}"; then
   echo "DATABASE IS READY TO USE!"
   echo "#########################"
 
+  # Provide a user warning that these images are old
+  echo ""
+  echo "################################################"
+  echo "NOTICE: YOU ARE USING AN OLD IMAGE VERSION!"
+  echo "PLEASE CONSIDER UPGRADING TO gvenzl/oracle-free!"
+  echo "################################################"
+
 else
   echo "############################################"
   echo "DATABASE STARTUP FAILED!"
