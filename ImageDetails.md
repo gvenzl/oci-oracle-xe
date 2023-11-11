@@ -19,6 +19,8 @@ A couple of modifications have been performed to make the installation more suit
 * `LOCAL_LISTENER=''`
 * `CPU_COUNT=2` (see https://github.com/gvenzl/oci-oracle-xe/issues/64 and https://github.com/gvenzl/oci-oracle-xe/pull/107)
 * An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
+* `ALTER SYSTEM SET SERVICE_NAMES=XE,FREE;` (Service `FREE` for instance `XE` to provide upward compatibility with `gvenzl/oracle-free`)
+* A service `FREEPDB1` has been created for `XEPDB1` to provide upward compatibility with `gvenzl/oracle-free`
 * `DISABLE_OOB=ON` in `sqlnet.ora` (see https://github.com/gvenzl/oci-oracle-xe/issues/43)
 * `BREAK_POLL_SKIP=1000` in `sqlnet.ora` (see https://github.com/gvenzl/oci-oracle-xe/issues/43)
 * `NLS_LANG=.AL32UTF8` set for `oracle` user to run client sessions on DB server in UTF-8 (see https://github.com/gvenzl/oci-oracle-xe/issues/109)
@@ -173,6 +175,8 @@ A couple of modifications have been performed to make the installation more suit
 * `LOCAL_LISTENER=''`
 * `CPU_COUNT=2` (see https://github.com/gvenzl/oci-oracle-xe/issues/64 and https://github.com/gvenzl/oci-oracle-xe/pull/107)
 * An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
+* `ALTER SYSTEM SET SERVICE_NAMES=XE,FREE;` (Service `FREE` for instance `XE` to provide upward compatibility with `gvenzl/oracle-free`)
+* A service `FREEPDB1` has been created for `XEPDB1` to provide upward compatibility with `gvenzl/oracle-free`
 * `NLS_LANG=.AL32UTF8` set for `oracle` user to run client sessions on DB server in UTF-8 (see https://github.com/gvenzl/oci-oracle-xe/issues/109)
 
 #### Operating system
@@ -322,6 +326,7 @@ A couple of modifications have been performed to make the installation more suit
 * An `OPS$ORACLE` externally identified user has been created and granted `CONNECT` and `SELECT_CATALOG_ROLE` (this is used for health check and other operations)
 * The `REDO` logs have been located into `$ORACLE_BASE/oradata/$ORACLE_SID/`
 * The fast recovery area has been removed (`DB_RECOVERY_FILE_DEST=''`)
+* `ALTER SYSTEM SET SERVICE_NAMES=XE,FREE;` (Service `FREE` for instance `XE` to provide upward compatibility with `gvenzl/oracle-free`)
 * `NLS_LANG=.AL32UTF8` set for `oracle` user to run client sessions on DB server in UTF-8 (see https://github.com/gvenzl/oci-oracle-xe/issues/109)
 
 #### Operating system

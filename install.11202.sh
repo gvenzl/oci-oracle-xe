@@ -164,6 +164,15 @@ echo \
     )
   )
 
+FREE =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = FREE)
+    )
+  )
+
 EXTPROC_CONNECTION_DATA =
   (DESCRIPTION =
     (ADDRESS_LIST =
@@ -252,7 +261,10 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    HOST rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo03.log
    HOST rm "${ORACLE_BASE}"/oradata/"${ORACLE_SID}"/redo04.log
 
-     exit;
+   -- Enable new service name FREE for upwards compatibility with FREE.
+   ALTER SYSTEM SET SERVICE_NAMES=XE,FREE;
+
+   exit;
 EOF
 
 ###################################
@@ -291,7 +303,6 @@ if [ "${BUILD_MODE}" == "REGULAR" ] || [ "${BUILD_MODE}" == "SLIM" ]; then
      exit;
 EOF
 
-  #TODO
   # Uninstall components
   if [ "${BUILD_MODE}" == "SLIM" ]; then
     su -p oracle -c "sqlplus -s / as sysdba" << EOF

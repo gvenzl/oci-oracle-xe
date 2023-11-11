@@ -147,7 +147,7 @@ After your service is created, you can connect to it via the following propertie
   * `oracle` (from within another container)
   * `localhost` or `127.0.0.1` (from the host directly)
 * Port: `1521`
-* Service name: `XEPDB1`
+* Service name: `FREEPDB1`
 * Database App User: `my_user`
 * Database App Password: `my_password_which_I_really_should_change`
 
