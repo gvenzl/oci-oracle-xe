@@ -147,6 +147,24 @@ ${ORACLE_SID}PDB1 =
     )
   )
 
+FREE =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = FREE)
+    )
+  )
+
+FREEPDB1 =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = 0.0.0.0)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = FREEPDB1)
+    )
+  )
+
 EXTPROC_CONNECTION_DATA =
   (DESCRIPTION =
     (ADDRESS_LIST =
@@ -234,6 +252,18 @@ su -p oracle -c "sqlplus -s / as sysdba" << EOF
    -- On hosts with many CPUs, this could lead to estimate SGA requirements
    -- beyond 2GB RAM, which cannot be set on XE.
    ALTER SYSTEM SET CPU_COUNT=2 SCOPE=SPFILE;
+
+   -- Enable new service name FREE for upwards compatibility with FREE.
+   ALTER SESSION SET CONTAINER=XEPDB1;
+   exec DBMS_SERVICE.CREATE_SERVICE('freepdb1','freepdb1');
+   exec DBMS_SERVICE.START_SERVICE('freepdb1');
+   ALTER PLUGGABLE DATABASE XEPDB1 SAVE STATE;
+
+   -- Enable new service name FREE for upwards compatibility with FREE.
+   -- DBMS_SERVICE.CREATE_SERVICE will not restart the service after reboot
+   -- Hence setting the CDB service the old-fashioned (deprecated) way.
+   ALTER SESSION SET CONTAINER=CDB\$ROOT;
+   ALTER SYSTEM SET SERVICE_NAMES=XE,FREE;
 
    -- Reboot of DB
    SHUTDOWN IMMEDIATE;
