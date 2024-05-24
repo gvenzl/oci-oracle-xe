@@ -29,7 +29,7 @@ ORACLE_VERSION=$(sqlplus -version | grep "Release" | awk '{ print $3 }')
 # 11g doesn't have PDBs yet, so just check v\$instance
 if [[ "${ORACLE_VERSION}" = "11.2"* ]]; then
 
-  db_status=$(sqlplus -s / << EOF
+  db_status=$(sqlplus -s / as sysdba << EOF
      set heading off;
      set pagesize 0;
      SELECT 'READY'
@@ -44,7 +44,7 @@ else
   #  Either the PDB passed on as \$ORACLE_DATABASE or the default "XEPDB1"
   DATABASE=${1:-${ORACLE_DATABASE:-XEPDB1}}
 
-  db_status=$(sqlplus -s / << EOF
+  db_status=$(sqlplus -s / as sysdba << EOF
      set heading off;
      set pagesize 0;
      SELECT 'READY'
