@@ -98,7 +98,12 @@ FROM oracle_rdbms as db_files
 
 COPY --from=builder --chown=oracle:oinstall "${ORACLE_BASE}"/"${ORACLE_SID}".7z  "${ORACLE_BASE}"/
 
-LABEL org.opencontainers.image.source https://github.com/gvenzl/oci-oracle-xe
+LABEL org.opencontainers.image.title="Oracle Database Express Edition (XE) Container images"
+LABEL org.opencontainers.image.description="Oracle Database XE (21c, 18c, 11g) for everyone. Superseded by gvenzl/oracle-free."
+LABEL org.opencontainers.image.authors="Gerald Venzl"
+LABEL org.opencontainers.image.source=https://github.com/gvenzl/oci-oracle-xe
+LABEL org.opencontainers.image.licenses=Apache-2.0
+LABEL org.opencontainers.image.documentation=https://github.com/gvenzl/oci-oracle-xe/blob/main/README.md
 
 USER oracle
 WORKDIR ${ORACLE_BASE}
