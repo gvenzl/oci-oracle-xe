@@ -3,6 +3,9 @@ Oracle Database Express Edition Container / Docker images.
 
 **The images are compatible with `podman` and `docker`. You can use `podman` or `docker` interchangeably.**
 
+> [!TIP]
+> Looking for images supporting **23ai** and greater, including Intel and ARM chips? Please browse to [gvenzl/oci-oracle-free](https://github.com/gvenzl/oci-oracle-free).
+
 # New version of Oracle Database and these images
 
 In April 2023, [Oracle released Oracle Database 23c Free](https://blogs.oracle.com/database/post/oracle-database-23c-free), the new version of Oracle Database and the successor to Oracle Database Express Edition (XE).

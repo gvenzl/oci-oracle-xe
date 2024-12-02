@@ -46,6 +46,8 @@ $CMG_COMMAND run --name $DKR_CNT_NAME \
   -d $DKR_IMAGE
 
 echo "Waiting for container '$DKR_CNT_NAME' to start ... " 
-sleep 10
+
+DKR_CNT_ID=$(docker inspect --format="{{.Id}}" "$DKR_CNT_NAME")
+timeout 60s grep -q 'DATABASE IS READY TO USE!' <(docker logs -f $DKR_CNT_ID) || exit 1
 
 echo "Docker Container '$DKR_CNT_NAME' has been started on port '$DKR_HOST_PORT'"
