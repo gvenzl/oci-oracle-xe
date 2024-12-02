@@ -3,6 +3,9 @@ Oracle Database Express Edition Container / Docker images.
 
 **The images are compatible with `podman` and `docker`. You can use `podman` or `docker` interchangeably.**
 
+> [!TIP]
+> Looking for images supporting **23ai** and greater, including Intel and ARM chips? Please browse to [gvenzl/oci-oracle-free](https://github.com/gvenzl/oci-oracle-free).
+
 # Supported tags and respective `Dockerfile` links
 
 * [`latest`, `21`, `21.3.0`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.2130), [`latest-faststart`, `21-faststart`, `21.3.0-faststart`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.faststart)
