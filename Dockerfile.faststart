@@ -45,4 +45,9 @@ COPY --from=base "${ORACLE_BASE}"/"${ORACLE_SID}".7z "${ORACLE_BASE}"/"${ORACLE_
 RUN 7zzs x "${ORACLE_BASE}"/"${ORACLE_SID}".7z "${ORACLE_SID}/system*.dbf" -o"${ORACLE_BASE}"/oradata/ > /dev/null
 RUN rm "${ORACLE_SID}".7z
 
-LABEL org.opencontainers.image.source https://github.com/gvenzl/oci-oracle-xe
+LABEL org.opencontainers.image.title="Oracle Database Express Edition (XE) Container images"
+LABEL org.opencontainers.image.description="Oracle Database XE (21c, 18c, 11g) for everyone. Superseded by gvenzl/oracle-free."
+LABEL org.opencontainers.image.authors="Gerald Venzl"
+LABEL org.opencontainers.image.source=https://github.com/gvenzl/oci-oracle-xe
+LABEL org.opencontainers.image.licenses=Apache-2.0
+LABEL org.opencontainers.image.documentation=https://github.com/gvenzl/oci-oracle-xe/blob/main/README.md

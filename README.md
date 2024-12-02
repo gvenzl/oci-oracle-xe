@@ -6,6 +6,18 @@ Oracle Database Express Edition Container / Docker images.
 > [!TIP]
 > Looking for images supporting **23ai** and greater, including Intel and ARM chips? Please browse to [gvenzl/oci-oracle-free](https://github.com/gvenzl/oci-oracle-free).
 
+# New version of Oracle Database and these images
+
+In April 2023, [Oracle released Oracle Database 23c Free](https://blogs.oracle.com/database/post/oracle-database-23c-free), the new version of Oracle Database and the successor to Oracle Database Express Edition (XE).
+
+To reflect the name change, the following images and repository have been made available:
+
+* [`docker.io/gvenzl/oracle-free`](https://hub.docker.com/r/gvenzl/oracle-free)
+* [`ghcr.io/gvenzl/oracle-free`](https://ghcr.io/gvenzl/oracle-free) 
+* [`github.com/gvenzl/oci-oracle-free`](https://github.com/gvenzl/oci-oracle-free)
+
+**It is strongly encouraged to upgrade to `gvenzl/oracle-free`**. The images in this repository will be further maintained but only for a limited time.
+
 # Supported tags and respective `Dockerfile` links
 
 * [`latest`, `21`, `21.3.0`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.2130), [`latest-faststart`, `21-faststart`, `21.3.0-faststart`](https://github.com/gvenzl/oci-oracle-xe/blob/main/Dockerfile.faststart)
@@ -45,8 +57,12 @@ docker exec <container name|id> resetPassword <your password>
 ```
 
 ## Oracle XE on Apple M chips
-Currently, there is no Oracle Database port for ARM chips, hence Oracle XE images cannot run on the new Apple M chips via Docker Desktop.  
-Fortunately, there are other technologies that can spin up `x86_64` software on Apple M chips, such as [colima](https://github.com/abiosoft/colima). To run these Oracle XE images on Apple M hardware, follow these simple steps:
+
+Starting with Oracle Database 23.5 Free, Oracle provides ARM ports for Oracle Database Free. Multi-platform (multi-arch) images for Oracle Database Free are provided at [`docker.io/gvenzl/oracle-free`](https://hub.docker.com/r/gvenzl/oracle-free) and [`ghcr.io/gvenzl/oracle-free`](https://ghcr.io/gvenzl/oracle-free) 
+.
+
+There are no plans by Oracle to port Oracle XE to ARM, hence Oracle XE images cannot run on the new Apple M chips via Docker Desktop.  
+As a workaround, there are technologies that can spin up `x86_64` software on Apple M chips, such as [colima](https://github.com/abiosoft/colima). To run these Oracle XE images on Apple M hardware, follow these simple steps:
 
 * Install colima ([instructions](https://github.com/abiosoft/colima#installation))
 * Run `colima start --arch x86_64 --memory 4`

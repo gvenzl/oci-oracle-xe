@@ -67,7 +67,7 @@ microdnf -y install unzip gzip
 # Install 7zip
 mkdir /tmp/7z
 cd /tmp/7z
-curl -s -L -O https://www.7-zip.org/a/7z2201-linux-x64.tar.xz
+curl -s -L -k -O "https://7zip.org/a/7z2408-linux-x64.tar.xz"
 tar xf 7z*xz
 mv 7zzs /usr/bin/
 mv License.txt /usr/share/
